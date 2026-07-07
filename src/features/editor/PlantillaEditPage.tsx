@@ -18,6 +18,9 @@ import { useToast } from '../../components/Toast';
 import { generateId } from '../../lib/store';
 import type { VersionTab, Campo, Plantilla, Ejemplo } from '../../types';
 
+// Archivo de referencia del prototipo — con backend, cada ejemplo tendrá su propio archivo
+const FORMATO_6A_URL = '/docs/formato6a_directiva001_2019EF6301.xlsm';
+
 const MIN_LEFT = 180;
 const MIN_RIGHT = 300;
 const MIN_EXAMPLES = 220;
@@ -255,6 +258,15 @@ export default function PlantillaEditPage() {
     toast(`Ejemplo "${nombre}" creado — completa los valores`);
   }, [plantillaId, addEjemplo, pushActividad, toast]);
 
+  const handleDownloadExcel = useCallback(() => {
+    const a = document.createElement('a');
+    a.href = FORMATO_6A_URL;
+    a.download = '';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }, []);
+
   const handleDeleteEjemplo = useCallback(() => {
     if (!deleteTarget) return;
     deleteEjemplo(deleteTarget.id);
@@ -309,6 +321,7 @@ export default function PlantillaEditPage() {
                 onSelect={setActiveEjemplo}
                 onNewExample={() => setShowNuevoEjemplo(true)}
                 onPreview={() => setShowPreview(true)}
+                onDownload={handleDownloadExcel}
                 onDelete={setDeleteTarget}
               />
             </div>
@@ -427,7 +440,7 @@ export default function PlantillaEditPage() {
       <ExcelPreviewModal
         isOpen={showPreview}
         onClose={() => setShowPreview(false)}
-        fileUrl="/docs/formato6a_directiva001_2019EF6301.xlsm"
+        fileUrl={FORMATO_6A_URL}
         title="Formato 6A — Directiva 001-2019-EF/63.01"
       />
     </div>

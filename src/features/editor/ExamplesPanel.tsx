@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faPlus, faCheck, faCircle, faInfoCircle, faEye, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faPlus, faCheck, faCircle, faInfoCircle, faEye, faTrash, faDownload } from '@fortawesome/free-solid-svg-icons';
 import type { Ejemplo } from '../../types';
 
 interface Props {
@@ -9,10 +9,11 @@ interface Props {
   onSelect: (ejemplo: Ejemplo) => void;
   onNewExample: () => void;
   onPreview: (ejemplo: Ejemplo) => void;
+  onDownload: (ejemplo: Ejemplo) => void;
   onDelete: (ejemplo: Ejemplo) => void;
 }
 
-export default function ExamplesPanel({ ejemplos, activeEjemplo, onSelect, onNewExample, onPreview, onDelete }: Props) {
+export default function ExamplesPanel({ ejemplos, activeEjemplo, onSelect, onNewExample, onPreview, onDownload, onDelete }: Props) {
   const [search, setSearch] = useState('');
 
   const filtered = ejemplos.filter(
@@ -86,6 +87,13 @@ export default function ExamplesPanel({ ejemplos, activeEjemplo, onSelect, onNew
                   title="Previsualizar"
                 >
                   <FontAwesomeIcon icon={faEye} className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onDownload(ej); }}
+                  className="flex w-7 h-7 rounded-md items-center justify-center text-gray-400 hover:bg-brand-100 hover:text-brand-600 transition-colors duration-75"
+                  title="Descargar Excel"
+                >
+                  <FontAwesomeIcon icon={faDownload} className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); onDelete(ej); }}

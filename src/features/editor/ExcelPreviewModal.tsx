@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faXmark, faFileExcel, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faXmark, faFileExcel, faSpinner, faDownload } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
   isOpen: boolean;
@@ -142,13 +142,23 @@ export default function ExcelPreviewModal({ isOpen, onClose, fileUrl, title }: P
                   <p className="text-xs text-muted">Previsualización — solo lectura</p>
                 </div>
               </div>
-              <button
-                onClick={onClose}
-                className="w-9 h-9 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors duration-100 shrink-0"
-                title="Cerrar"
-              >
-                <FontAwesomeIcon icon={faXmark} className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href={fileUrl}
+                  download
+                  className="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 transition-colors duration-75 flex items-center gap-2"
+                >
+                  <FontAwesomeIcon icon={faDownload} className="w-3.5 h-3.5" />
+                  Descargar
+                </a>
+                <button
+                  onClick={onClose}
+                  className="w-9 h-9 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors duration-100"
+                  title="Cerrar"
+                >
+                  <FontAwesomeIcon icon={faXmark} className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
             {/* Visor */}

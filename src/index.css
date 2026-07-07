@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colores de marca */
+  --color-brand-50: #f0fdf4;
+  --color-brand-100: #dcfce7;
+  --color-brand-200: #bbf7d0;
+  --color-brand-300: #86efac;
+  --color-brand-400: #4ade80;
+  --color-brand-500: #22c55e;
+  --color-brand-600: #16a34a;
+  --color-brand-700: #15803d;
+  --color-brand-800: #166534;
+  --color-brand-900: #14532d;
+
+  --color-sidebar: #1e3a4f;
+  --color-sidebar-hover: #264d66;
+  --color-sidebar-active: #2d5f7a;
+
+  --color-surface: #f8fafc;
+  --color-surface-card: #ffffff;
+
+  --color-heading: #1e3a4f;
+  --color-muted: #94a3b8;
+
+  /* Colores de acento para sectores */
+  --color-accent-teal: #0d9488;
+  --color-accent-blue: #2563eb;
+  --color-accent-amber: #d97706;
+  --color-accent-emerald: #059669;
+  --color-accent-orange: #ea580c;
+  --color-accent-red: #dc2626;
+  --color-accent-cyan: #0891b2;
+  --color-accent-purple: #7c3aed;
+
+  /* Tipografía */
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+
+  /* Sombras */
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --shadow-modal: 0 20px 60px -12px rgb(0 0 0 / 0.25);
+}
+
+/* Scrollbar sutil */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-surface);
+}

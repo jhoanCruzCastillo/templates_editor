@@ -1,0 +1,108 @@
+import type { Ejemplo } from '../types';
+
+export const ejemplos: Ejemplo[] = [
+  {
+    id: 'ej-1',
+    nombre: 'I.E. N° 50123 — Wanchaq, Cusco',
+    subtitulo: 'Educación inicial',
+    detalle: '365 alumnos',
+    plantillaId: 'plt-1',
+    activo: true,
+    valores: {
+      '1.01.1': 'Gobierno Regional',
+      '1.01.2': 'Gobierno Regional de Cusco',
+      '1.01.3': 'UF — Gerencia Regional de Educación Cusco',
+      '1.01.4': 'Ing. María Quispe Huamán',
+      '1.02': '22 Educación → 047 Educación básica → 0104 Educación inicial → Educación → Mejoramiento de servicios',
+      '2.01.3': '{"lat":-13.5318,"lng":-71.9675}',
+    },
+  },
+  {
+    id: 'ej-2',
+    nombre: 'I.E. San Martín de Porres — Lima',
+    subtitulo: 'Educación primaria',
+    detalle: '540 alumnos',
+    plantillaId: 'plt-1',
+    activo: false,
+    valores: {
+      '1.01.1': 'Gobierno Local',
+      '1.01.2': 'Municipalidad Metropolitana de Lima',
+      '1.01.3': 'UF — Gerencia de Educación MML',
+      '1.01.4': 'Ing. Carlos Mendoza',
+    },
+  },
+  {
+    id: 'ej-3',
+    nombre: 'I.E. Túpac Amaru — Arequipa',
+    subtitulo: 'Educación inicial',
+    detalle: '210 alumnos',
+    plantillaId: 'plt-1',
+    activo: false,
+    valores: {
+      '1.01.1': 'Gobierno Regional',
+      '1.01.2': 'Gobierno Regional de Arequipa',
+      '1.01.3': 'UF — Gerencia Regional de Educación Arequipa',
+      '1.01.4': 'Arq. Paola Fernández',
+    },
+  },
+  {
+    id: 'ej-4',
+    nombre: 'I.E. José Olaya — Trujillo, La Libertad',
+    subtitulo: 'Educación secundaria',
+    detalle: '480 alumnos',
+    plantillaId: 'plt-1',
+    activo: false,
+    valores: {},
+  },
+  {
+    id: 'ej-5',
+    nombre: 'I.E. N° 1284 — Juliaca, Puno',
+    subtitulo: 'Educación primaria',
+    detalle: '320 alumnos',
+    plantillaId: 'plt-1',
+    activo: false,
+    valores: {},
+  },
+  // ── Ejemplos para PERFIL-SAL (plt-perfil-sal-1) ──────────────────────────
+  {
+    id: 'ej-perfil-sal-1',
+    nombre: 'C.S. San Martín — Huamanga, Ayacucho',
+    subtitulo: 'Mejoramiento del servicio de salud de primer nivel',
+    detalle: '18 500 beneficiarios directos',
+    plantillaId: 'plt-perfil-sal-1',
+    activo: true,
+    valores: {
+      '1': 'El presente Estudio de Preinversión a Nivel de Perfil corresponde al Proyecto de Inversión "Mejoramiento del Servicio de Salud del Centro de Salud San Martín", ubicado en el distrito de Huamanga, provincia de Huamanga, departamento de Ayacucho. La Unidad Formuladora es la Gerencia Regional de Salud Ayacucho (DIRESA Ayacucho).\n\n(A) Información general: La inversión total estimada es S/ 12 450 000.00 (a precios de mercado). Horizonte de evaluación: 10 años. Período de ejecución: 24 meses. Fecha estimada de inicio: enero 2027. La brecha identificada corresponde al servicio de salud del primer nivel de atención (categoría I-3) con un déficit de cobertura del 35% en la población objetivo.\n\n(B) Planteamiento: Objetivo central — "Adecuada prestación del servicio de salud del primer nivel de atención en el C.S. San Martín". Medios fundamentales: (1) infraestructura adecuada y funcional, (2) equipamiento médico suficiente y en buen estado, (3) personal de salud con capacidades fortalecidas. Dos alternativas evaluadas: Alternativa 1 — Construcción de nueva infraestructura; Alternativa 2 — Rehabilitación y ampliación progresiva.\n\n(G) Evaluación social: La alternativa seleccionada (Alternativa 1) presenta un VAN Social de S/ 3 245 780 y un Ratio C/E de S/ 498.5 por atención, inferior a la línea de corte sectorial de S/ 650. El proyecto es declarado VIABLE.',
+
+      '2.1.1': 'La población afectada comprende 18 500 habitantes del ámbito de influencia del C.S. San Martín, distribuidos en los asentamientos humanos de Yuraq Yuraq (5 200 hab.), Villa Los Ángeles (7 800 hab.) y Asociación La Victoria (5 500 hab.), todos del distrito de Huamanga, provincia de Huamanga, Ayacucho.\n\nCaracterísticas demográficas: el 52.3% son mujeres; el 38% corresponde a menores de 15 años; el 7.2% a adultos mayores de 65 años. Tasa de crecimiento intercensal: 1.8% anual (CPV 2017). Densidad poblacional: 38 hab/km².\n\nCondiciones socioeconómicas: el 68% de la población presenta ingresos por debajo del umbral de pobreza monetaria (< S/ 400 mensuales per cápita). El 42% son mujeres en edad fértil (15 a 49 años). Acceso a agua potable: 74%. Tasa de analfabetismo: 8.3% (adultos mayores de 15 años). Condición de pobreza extrema: 22% según MIDIS (2023).\n\nAfectación: la inadecuada prestación del servicio de salud genera altas tasas de morbimortalidad. Tasa de mortalidad infantil: 28 por 1 000 nacidos vivos, frente al promedio regional de 18 (INEI, 2023). Principales causas de morbilidad: IRA (35% de atenciones), EDA (22%) y desnutrición crónica infantil (24.1%). Tasa de embarazo adolescente: 14.2%, superior al promedio nacional de 11.4%.\n\nGénero e interculturalidad: el 38% de la población pertenece a comunidades originarias quechuahablantes. Las mujeres reportan barreras culturales y lingüísticas para acceder al servicio (55% de encuestadas, Nov. 2025).\n\nPercepción: el 88% de jefes de hogar (encuesta, n=350, noviembre 2025) considera urgente la mejora del servicio. El 76% reporta dificultades de acceso por infraestructura inadecuada y limitado equipamiento.',
+
+      '2.2': 'Problema central identificado: "Inadecuada prestación del servicio de salud del primer nivel de atención en el ámbito de influencia del C.S. San Martín, distrito de Huamanga, Ayacucho."\n\nCAUSAS DIRECTAS:\n1. Infraestructura de salud deteriorada e insuficiente: el 70% de los ambientes del C.S. San Martín presenta estado malo o muy malo (Ficha de Evaluación MINSA, enero 2026). El edificio, con 38 años de antigüedad, es estructuralmente vulnerable ante sismos de magnitud ≥ 5.0 (estudio de microzonificación, 2025). Déficit de 420 m² de área construida respecto al Programa Médico Funcional MINSA para establecimientos I-3.\n\n2. Equipamiento médico insuficiente y obsoleto: el 68% del equipamiento supera su vida útil. Carece de ecógrafo obstétrico, analizador hematológico y central de esterilización operativa. Índice de disponibilidad de equipos MINSA: 41% (valor óptimo: ≥ 80%).\n\n3. Limitadas capacidades del personal de salud: el 60% del personal no ha recibido capacitación en los últimos 3 años. Tasa de rotación: 45% anual. Ausentismo por condiciones laborales inadecuadas: 18%.\n\nCAUSAS INDIRECTAS: Insuficiente presupuesto institucional para mantenimiento (ejecutado: 30% de lo requerido). Débil sistema de gestión de RRHH de la DIRESA Ayacucho.\n\nEFECTOS DIRECTOS:\n- Alta incidencia de enfermedades prevenibles: IRA y EDA representan el 57% de las atenciones.\n- Demanda insatisfecha: 35% de la población refiere haber abandonado consultas por esperas superiores a 3 horas.\n- Riesgo de eventos adversos: 3 eventos de seguridad del paciente reportados en 2024.\n\nEFECTO INDIRECTO:\n- Incremento de la morbimortalidad evitable en la población del ámbito de influencia.',
+    },
+  },
+
+  // ── Ejemplos para Perfil PERFIL-PI (plt-perfil-1) ──
+  {
+    id: 'ej-perfil-1',
+    nombre: 'C.S. San Pedro — Huamanga, Ayacucho',
+    subtitulo: 'Mejoramiento del servicio de salud',
+    detalle: '18 500 beneficiarios directos',
+    plantillaId: 'plt-perfil-1',
+    activo: true,
+    valores: {
+      'A': 'El presente estudio corresponde al PI "Mejoramiento del Servicio de Salud del Centro de Salud San Pedro", ubicado en el distrito de Huamanga, provincia de Huamanga, departamento de Ayacucho. La Unidad Formuladora es la Gerencia Regional de Salud Ayacucho. La inversión total estimada asciende a S/ 12 450 000.00. El horizonte de evaluación es de 10 años, con un período de ejecución de 24 meses. Fecha estimada de inicio: enero 2027.',
+      'B': 'Objetivo central: adecuada prestación del servicio de salud del primer nivel de atención en el ámbito de influencia del C.S. San Pedro. Medios fundamentales: (1) Infraestructura adecuada y funcional, (2) Equipamiento médico suficiente y en buen estado, (3) Capacidades del personal de salud fortalecidas. Se evaluaron dos alternativas de solución: Alternativa 1 — construcción de nueva infraestructura con financiamiento completo; Alternativa 2 — rehabilitación y ampliación progresiva del edificio existente.',
+      '2.1.1': 'La población afectada comprende 18 500 habitantes del ámbito de influencia del C.S. San Pedro, correspondiente a los AAHH Yuraq Yuraq, Villa Los Ángeles y Asociación La Victoria. El 68% de la población tiene ingresos por debajo del umbral de pobreza. El 42% son mujeres en edad fértil. La principal afectación es la limitada accesibilidad a servicios de salud preventivo-promocionales de calidad, lo que conlleva alta morbimortalidad infantil (tasa: 28 por mil nacidos vivos, vs. promedio regional de 18). La población muestra alta valoración por la ampliación del servicio de salud (88% de acuerdo, según encuesta de hogares de noviembre 2025).',
+      '2.2': 'Problema central: "Inadecuada prestación del servicio de salud del primer nivel de atención en el C.S. San Pedro, Huamanga, Ayacucho."\n\nCausas directas: (1) Infraestructura de salud deteriorada e insuficiente — el 70% de los ambientes presenta estado malo o muy malo según ficha de evaluación. (2) Equipamiento médico obsoleto — promedio de vida útil superado en 12 años. (3) Limitadas capacidades del personal — 60% no ha recibido actualización técnica en los últimos 3 años.\n\nEfectos directos: alta incidencia de enfermedades prevenibles (IRA, EDA), incremento de la demanda insatisfecha de atenciones, riesgo de eventos adversos por equipamiento inadecuado.',
+      '5': 'Luego del proceso de formulación y evaluación, se concluye que el PI "Mejoramiento del Servicio de Salud del Centro de Salud San Pedro" es VIABLE.\n\nLa alternativa seleccionada (Alternativa 1 — Construcción de nueva infraestructura) presenta:\n• VAN Social: S/ 3 245 780\n• Ratio C/E: S/ 498.5 por atención, inferior a la línea de corte sectorial de S/ 650\n\nEl proyecto cumple los tres atributos de viabilidad: (i) técnico — la solución tecnológica responde a los estándares MINSA; (ii) económico-social — el indicador C/E evidencia eficiencia en el uso de recursos públicos; (iii) sostenibilidad — la DIRESA Ayacucho cuenta con presupuesto institucional para cubrir el 100% de los costos de O&M proyectados.',
+    },
+  },
+  {
+    id: 'ej-perfil-2',
+    nombre: 'Sistema de Agua Potable — Anta, Cusco',
+    subtitulo: 'Ampliación del servicio de agua y saneamiento',
+    detalle: '4 200 beneficiarios directos',
+    plantillaId: 'plt-perfil-1',
+    activo: false,
+    valores: {},
+  },
+];

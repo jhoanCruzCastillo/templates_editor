@@ -62,7 +62,7 @@ export default function ExamplesPanel({ ejemplos, activeEjemplo, onSelect, onNew
             <div
               key={ej.id}
               onClick={() => onSelect(ej)}
-              className={`group w-full flex items-start gap-2.5 px-3 py-2.5 mb-1 rounded-lg text-left cursor-pointer transition-colors duration-75 ${
+              className={`w-full flex items-start gap-2.5 px-3 py-2.5 mb-1 rounded-lg text-left cursor-pointer transition-colors duration-75 ${
                 isActive ? 'bg-brand-50 border border-brand-200' : 'border border-transparent hover:bg-gray-50'
               }`}
             >
@@ -78,18 +78,18 @@ export default function ExamplesPanel({ ejemplos, activeEjemplo, onSelect, onNew
               </div>
               <div className="flex items-center gap-0.5 shrink-0">
                 {isActive && (
-                  <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-brand-600 mr-1 group-hover:hidden" />
+                  <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-brand-600 mr-1" />
                 )}
                 <button
                   onClick={(e) => { e.stopPropagation(); onPreview(ej); }}
-                  className="hidden group-hover:flex w-7 h-7 rounded-md items-center justify-center text-gray-400 hover:bg-brand-100 hover:text-brand-600 transition-colors duration-75"
+                  className="flex w-7 h-7 rounded-md items-center justify-center text-gray-400 hover:bg-brand-100 hover:text-brand-600 transition-colors duration-75"
                   title="Previsualizar"
                 >
                   <FontAwesomeIcon icon={faEye} className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); onDelete(ej); }}
-                  className="hidden group-hover:flex w-7 h-7 rounded-md items-center justify-center text-gray-400 hover:bg-red-100 hover:text-red-600 transition-colors duration-75"
+                  className="flex w-7 h-7 rounded-md items-center justify-center text-gray-400 hover:bg-red-100 hover:text-red-600 transition-colors duration-75"
                   title="Eliminar"
                 >
                   <FontAwesomeIcon icon={faTrash} className="w-3.5 h-3.5" />

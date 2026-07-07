@@ -148,7 +148,7 @@ export default function FieldCard({
             </div>
           )}
           {showExampleValue && (
-            <div className="mt-2 p-2.5 rounded-lg bg-brand-50/60 border border-brand-100">
+            <div className="mt-2 p-2.5 rounded-lg bg-brand-100/70 border border-brand-200">
               <span className="text-[10px] font-bold uppercase tracking-wider text-brand-600">
                 Valor de ejemplo
               </span>

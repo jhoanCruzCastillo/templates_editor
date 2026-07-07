@@ -3,6 +3,8 @@ export type TipoCampo =
   | 'texto_largo'
   | 'numero'
   | 'fecha'
+  | 'decimal'
+  | 'booleano'
   | 'catalogo_simple'
   | 'catalogo_encadenado'
   | 'seleccion'

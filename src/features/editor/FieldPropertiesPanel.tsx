@@ -13,7 +13,18 @@ interface Props {
   onFieldUpdate?: (campoId: string, updates: Partial<Campo>) => void;
 }
 
-const allFieldTypes = Object.entries(fieldTypeLabels) as [TipoCampo, string][];
+// Tipos finales disponibles para seleccionar en el editor (valores que caen en la celda)
+const allowedFieldTypes: TipoCampo[] = [
+  'texto_corto',
+  'texto_largo',
+  'numero',
+  'decimal',
+  'fecha',
+  'booleano',
+  'mapa_coordenadas',
+];
+
+const allFieldTypes = allowedFieldTypes.map((k) => [k, fieldTypeLabels[k]] as [TipoCampo, string]);
 
 const defaultTableConfig: ConfigTabla = {
   subtipo: 'filas_dinamicas',
@@ -108,6 +119,8 @@ export default function FieldPropertiesPanel({ campo, autoFocusEtiqueta, ejemplo
             {allFieldTypes.map(([key, label]) => (
               <option key={key} value={key}>{label}</option>
             ))}
+            {/* Mostrar tabla como opción inactiva */}
+            <option value="tabla" disabled>{fieldTypeLabels.tabla} (trabajando)</option>
           </select>
           <FontAwesomeIcon
             icon={icon}

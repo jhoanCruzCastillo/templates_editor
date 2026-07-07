@@ -79,7 +79,8 @@ src/
         ├── TableColumnsEditor.tsx    ← Editor de config de tabla (subtipo + columnas)
         ├── TablePreview.tsx          ← Tabla interactiva para configurar columnas
         ├── ColumnDetailEditor.tsx    ← Detalle de una columna (tipo, catálogo, nivel)
-        ├── ExampleSelector.tsx       ← Dropdown de ejemplo activo + búsqueda
+        ├── ExampleSelector.tsx       ← Dropdown de ejemplo activo (solo editor de Perfil)
+        ├── ExamplesPanel.tsx         ← Panel izquierdo resizable de ejemplos (editor de fichas)
         ├── NuevoEjemploModal.tsx     ← Modal para crear ejemplo nuevo
         ├── ExampleTableEditor.tsx    ← Editor de tabla para valores de ejemplo
         └── useScrollSpy.ts           ← Hook de IntersectionObserver bidireccional
@@ -115,7 +116,8 @@ src/
 
 ### Editor de ejemplos (tab Ejemplos)
 - Crear ejemplo (NuevoEjemploModal): nombre, subtítulo, detalle
-- Seleccionar ejemplo activo (ExampleSelector con búsqueda)
+- Seleccionar ejemplo activo: panel izquierdo resizable con búsqueda (ExamplesPanel); en el editor de Perfil sigue siendo dropdown (ExampleSelector)
+- En el tab Ejemplos NO se muestra el panel derecho de propiedades (solo existe en Estructura)
 - Editar valores de ejemplo inline en cada campo
 - **Campos tipo tabla**: editor de tabla completo inline (ExampleTableEditor)
   - Filas dinámicas: agregar/eliminar filas, inputs editables por celda
@@ -184,7 +186,7 @@ src/
 
 - Las secciones se renderizan en UNA sola página vertical scrolleable.
 - **Scroll-spy bidireccional** (`useScrollSpy.ts`): clic en índice = scroll suave; scroll manual = resalta sección visible (IntersectionObserver).
-- Los 3 paneles del editor (índice, campos, propiedades) son **resizables** con `ResizeHandle`. Mínimos: izquierdo 180px, derecho 300px. Default derecho: 420px.
+- Los paneles del editor son **resizables** con `ResizeHandle`. En Estructura: índice, campos, propiedades (mínimos: izquierdo 180px, derecho 300px; default derecho 420px). En Ejemplos: índice, panel de ejemplos (mínimo 220px, default 300px), campos — sin panel de propiedades.
 - Cuando un campo es tipo `tabla` o `tabla_jerarquica`, el panel de propiedades muestra `TableColumnsEditor` con la tabla interactiva (`TablePreview`).
 
 ### Configuración de tablas (panel de propiedades)

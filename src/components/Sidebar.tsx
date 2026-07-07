@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHouse, faLayerGroup, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+import { faHouse, faLayerGroup, faRightFromBracket, faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../lib/auth';
 import { rolUsuarioLabels } from '../lib/icons';
 import type { RolUsuario } from '../types';
@@ -25,7 +25,12 @@ function iniciales(nombre: string): string {
     .toUpperCase();
 }
 
-export default function Sidebar() {
+interface Props {
+  hidden?: boolean;
+  onHide?: () => void;
+}
+
+export default function Sidebar({ hidden = false, onHide }: Props) {
   const { sesion, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -34,16 +39,29 @@ export default function Sidebar() {
     navigate('/login', { replace: true });
   };
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-56 bg-sidebar text-white flex flex-col z-40">
+    <aside
+      className={`fixed left-0 top-0 bottom-0 w-56 bg-sidebar text-white flex flex-col z-40 transition-transform duration-150 ease-out ${
+        hidden ? '-translate-x-full' : 'translate-x-0'
+      }`}
+    >
       {/* Logo */}
       <div className="px-5 py-5 flex items-center gap-3 border-b border-white/10">
         <div className="w-9 h-9 rounded-lg bg-brand-600 flex items-center justify-center text-white font-bold text-sm">
           P
         </div>
-        <div>
+        <div className="flex-1 min-w-0">
           <div className="font-bold text-sm leading-tight">Proyecta Fácil</div>
           <div className="text-[11px] text-white/60 leading-tight">Editor de plantillas</div>
         </div>
+        {onHide && (
+          <button
+            onClick={onHide}
+            className="w-7 h-7 rounded-md flex items-center justify-center text-white/50 hover:text-white hover:bg-sidebar-hover transition-colors duration-75 shrink-0"
+            title="Ocultar menú"
+          >
+            <FontAwesomeIcon icon={faAngleLeft} className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Navegación */}

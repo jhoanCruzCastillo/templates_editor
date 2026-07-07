@@ -1,10 +1,8 @@
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faSave, faInfoCircle, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import { motion } from 'framer-motion';
+import { faEye, faSave, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import VersionTabs from '../../components/VersionTabs';
-import ExampleSelector from './ExampleSelector';
-import type { VersionTab, Plantilla, Ejemplo } from '../../types';
+import type { VersionTab, Plantilla } from '../../types';
 
 interface Props {
   plantilla: Plantilla;
@@ -13,10 +11,6 @@ interface Props {
   activeTab: VersionTab;
   onTabChange: (tab: VersionTab) => void;
   onSave: () => void;
-  ejemplos: Ejemplo[];
-  activeEjemplo: Ejemplo | null;
-  onSelectEjemplo: (ej: Ejemplo) => void;
-  onNewExample: () => void;
 }
 
 export default function EditorTopBar({
@@ -26,13 +20,7 @@ export default function EditorTopBar({
   activeTab,
   onTabChange,
   onSave,
-  ejemplos,
-  activeEjemplo,
-  onSelectEjemplo,
-  onNewExample,
 }: Props) {
-  const showExamples = activeTab === 'ejemplos';
-
   return (
     <div className="shrink-0 border-b border-gray-100 bg-white px-6 py-3">
       <div className="flex items-center justify-between">
@@ -68,28 +56,6 @@ export default function EditorTopBar({
           </button>
         </div>
       </div>
-
-      {showExamples && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          className="mt-3 flex items-center justify-between"
-        >
-          <ExampleSelector
-            ejemplos={ejemplos}
-            activeEjemplo={activeEjemplo}
-            onSelect={onSelectEjemplo}
-            onNewExample={onNewExample}
-          />
-          <div className="flex items-center gap-2 text-xs text-muted">
-            <FontAwesomeIcon icon={faInfoCircle} className="w-3.5 h-3.5 text-brand-500" />
-            <span>
-              Estos ejemplos alimentan el contexto de la IA.{' '}
-              <strong className="text-heading">No reentrenan el modelo.</strong>
-            </span>
-          </div>
-        </motion.div>
-      )}
     </div>
   );
 }

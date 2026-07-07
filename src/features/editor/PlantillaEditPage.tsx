@@ -8,6 +8,9 @@ import SectionIndex from './SectionIndex';
 import SectionContent from './SectionContent';
 import FieldPropertiesPanel from './FieldPropertiesPanel';
 import EditorTopBar from './EditorTopBar';
+import ExamplesPanel from './ExamplesPanel';
+import ExcelPreviewModal from './ExcelPreviewModal';
+import ConfirmModal from '../../components/ConfirmModal';
 import NuevoEjemploModal from './NuevoEjemploModal';
 import { usePlantilla, useEjemplos } from '../../lib/hooks';
 import { useAppContext } from '../../lib/context';
@@ -17,14 +20,16 @@ import type { VersionTab, Campo, Plantilla, Ejemplo } from '../../types';
 
 const MIN_LEFT = 180;
 const MIN_RIGHT = 300;
+const MIN_EXAMPLES = 220;
 const DEFAULT_LEFT = 260;
 const DEFAULT_RIGHT = 420;
+const DEFAULT_EXAMPLES = 300;
 
 export default function PlantillaEditPage() {
   const { sectorId, plantillaId } = useParams<{ sectorId: string; plantillaId: string }>();
   const plantillaOriginal = usePlantilla(plantillaId!);
   const ejemplos = useEjemplos(plantillaId!);
-  const { updatePlantilla, addEjemplo, updateEjemplo, pushActividad } = useAppContext();
+  const { updatePlantilla, addEjemplo, updateEjemplo, deleteEjemplo, pushActividad } = useAppContext();
   const { toast } = useToast();
 
   const [editData, setEditData] = useState<Plantilla | null>(null);
@@ -38,12 +43,23 @@ export default function PlantillaEditPage() {
   const [activeEjemplo, setActiveEjemplo] = useState<Ejemplo | null>(ejemplos[0] ?? null);
   const [editedValores, setEditedValores] = useState<Record<string, string>>({});
   const [showNuevoEjemplo, setShowNuevoEjemplo] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Ejemplo | null>(null);
   const [isNewCampo, setIsNewCampo] = useState(false);
   const [leftWidth, setLeftWidth] = useState(DEFAULT_LEFT);
   const [rightWidth, setRightWidth] = useState(DEFAULT_RIGHT);
+  const [examplesWidth, setExamplesWidth] = useState(DEFAULT_EXAMPLES);
 
   const handleLeftResize = useCallback((d: number) => setLeftWidth((w) => Math.max(MIN_LEFT, w + d)), []);
   const handleRightResize = useCallback((d: number) => setRightWidth((w) => Math.max(MIN_RIGHT, w - d)), []);
+  const handleExamplesResize = useCallback((d: number) => setExamplesWidth((w) => Math.max(MIN_EXAMPLES, w + d)), []);
+
+  // Al cambiar de tab, limpiar la selección de campo (el panel de propiedades solo existe en Estructura)
+  const handleTabChange = useCallback((tab: VersionTab) => {
+    setActiveTab(tab);
+    setSelectedCampo(null);
+    setIsNewCampo(false);
+  }, []);
 
   const plantilla = editData;
 
@@ -239,6 +255,18 @@ export default function PlantillaEditPage() {
     toast(`Ejemplo "${nombre}" creado — completa los valores`);
   }, [plantillaId, addEjemplo, pushActividad, toast]);
 
+  const handleDeleteEjemplo = useCallback(() => {
+    if (!deleteTarget) return;
+    deleteEjemplo(deleteTarget.id);
+    if (activeEjemplo?.id === deleteTarget.id) {
+      const restantes = ejemplos.filter((e) => e.id !== deleteTarget.id);
+      setActiveEjemplo(restantes[0] ?? null);
+    }
+    pushActividad(`Se eliminó el ejemplo "${deleteTarget.nombre}"`, 'orange');
+    toast(`Ejemplo "${deleteTarget.nombre}" eliminado`);
+    setDeleteTarget(null);
+  }, [deleteTarget, deleteEjemplo, activeEjemplo, ejemplos, pushActividad, toast]);
+
   const handleSave = useCallback(() => {
     if (!editData) return;
     updatePlantilla(editData.id, { ...editData, fechaActualizacion: new Date().toLocaleDateString('es-PE') });
@@ -266,16 +294,29 @@ export default function PlantillaEditPage() {
         sectorId={sectorId!}
         plantillaId={plantillaId!}
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
         onSave={handleSave}
-        ejemplos={ejemplos}
-        activeEjemplo={activeEjemplo}
-        onSelectEjemplo={setActiveEjemplo}
-        onNewExample={() => setShowNuevoEjemplo(true)}
       />
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Panel izquierdo: índice de navegación */}
+        {/* Panel de ejemplos (extremo izquierdo) — solo en el tab Ejemplos */}
+        {showExamples && (
+          <>
+            <div className="shrink-0 bg-white overflow-hidden border-r border-gray-100" style={{ width: examplesWidth }}>
+              <ExamplesPanel
+                ejemplos={ejemplos}
+                activeEjemplo={activeEjemplo}
+                onSelect={setActiveEjemplo}
+                onNewExample={() => setShowNuevoEjemplo(true)}
+                onPreview={() => setShowPreview(true)}
+                onDelete={setDeleteTarget}
+              />
+            </div>
+            <ResizeHandle onResize={handleExamplesResize} />
+          </>
+        )}
+
+        {/* Índice de navegación de secciones */}
         <div className="shrink-0 bg-white p-4 overflow-y-auto" style={{ width: leftWidth }}>
           <SectionIndex
             secciones={secciones}
@@ -345,31 +386,49 @@ export default function PlantillaEditPage() {
           </div>
         </div>
 
-        <ResizeHandle onResize={handleRightResize} />
-
-        {/* Panel derecho: propiedades del campo */}
-        <div className="shrink-0 bg-white p-5 overflow-y-auto" style={{ width: rightWidth }}>
-          {selectedCampo ? (
-            <motion.div key={selectedCampo.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.1 }}>
-              <FieldPropertiesPanel
-                campo={selectedCampo}
-                autoFocusEtiqueta={isNewCampo}
-                ejemplosCount={ejemplos.length}
-                onFieldUpdate={handleFieldUpdate}
-              />
-            </motion.div>
-          ) : (
-            <div className="flex items-center justify-center h-full text-muted text-sm text-center px-4">
-              Selecciona un campo para ver sus propiedades
+        {/* Panel derecho: propiedades del campo — solo en el tab Estructura */}
+        {!showExamples && (
+          <>
+            <ResizeHandle onResize={handleRightResize} />
+            <div className="shrink-0 bg-white p-5 overflow-y-auto" style={{ width: rightWidth }}>
+              {selectedCampo ? (
+                <motion.div key={selectedCampo.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.1 }}>
+                  <FieldPropertiesPanel
+                    campo={selectedCampo}
+                    autoFocusEtiqueta={isNewCampo}
+                    ejemplosCount={ejemplos.length}
+                    onFieldUpdate={handleFieldUpdate}
+                  />
+                </motion.div>
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted text-sm text-center px-4">
+                  Selecciona un campo para ver sus propiedades
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       <NuevoEjemploModal
         isOpen={showNuevoEjemplo}
         onClose={() => setShowNuevoEjemplo(false)}
         onCreate={handleCreateExample}
+      />
+
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title="Eliminar ejemplo"
+        message={`¿Seguro que deseas eliminar el ejemplo "${deleteTarget?.nombre}"? Sus valores se perderán y esta acción no se puede deshacer.`}
+        onConfirm={handleDeleteEjemplo}
+        onClose={() => setDeleteTarget(null)}
+      />
+
+      <ExcelPreviewModal
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        fileUrl="/docs/formato6a_directiva001_2019EF6301.xlsm"
+        title="Formato 6A — Directiva 001-2019-EF/63.01"
       />
     </div>
   );

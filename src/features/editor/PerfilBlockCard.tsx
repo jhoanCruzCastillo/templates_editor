@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLightbulb, faTable, faImage, faAlignLeft } from '@fortawesome/free-solid-svg-icons';
 import ExampleTableEditor from './ExampleTableEditor';
-import type { Campo, ConfigTabla } from '../../types';
+import type { Campo } from '../../types';
 
 interface Props {
   campo: Campo;

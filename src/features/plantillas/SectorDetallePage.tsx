@@ -9,6 +9,7 @@ import NuevaPlantillaModal from './NuevaPlantillaModal';
 import ImportarJsonModal from './ImportarJsonModal';
 import { useSector, usePlantillasBySector } from '../../lib/hooks';
 import { useAppContext } from '../../lib/context';
+import { useAuth } from '../../lib/auth';
 import { useToast } from '../../components/Toast';
 import { generateId } from '../../lib/store';
 import { sectorIcons } from '../../lib/icons';
@@ -19,6 +20,8 @@ export default function SectorDetallePage() {
   const sector = useSector(sectorId!);
   const plantillas = usePlantillasBySector(sectorId!);
   const { addPlantilla, pushActividad } = useAppContext();
+  const { sesion } = useAuth();
+  const esSuperusuario = sesion?.rol === 'superusuario';
   const { toast } = useToast();
   const [showModal, setShowModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
@@ -111,13 +114,15 @@ export default function SectorDetallePage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowImportModal(true)}
-            className="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2"
-          >
-            <FontAwesomeIcon icon={faFileImport} className="w-3.5 h-3.5" />
-            Importar JSON
-          </button>
+          {esSuperusuario && (
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <FontAwesomeIcon icon={faFileImport} className="w-3.5 h-3.5" />
+              Importar JSON
+            </button>
+          )}
           <button
             onClick={() => setShowModal(true)}
             className="px-5 py-2.5 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 transition-colors flex items-center gap-2"

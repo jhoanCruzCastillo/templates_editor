@@ -60,8 +60,10 @@ export interface ConfigTabla {
   columnas: ColumnaTabla[];
   filasIniciales?: number;
   maxFilas?: number;
-  periodoInicio?: number;
-  periodoFin?: number;
+  /** Cantidad de columnas de período a generar (solo subtipo matriz_por_periodos) */
+  numPeriodos?: number;
+  /** Prefijo de la etiqueta de período, ej. "Año" → "Año 1", "Año 2"... (vacío = "1", "2"...) */
+  etiquetaPeriodo?: string;
   /** Filas planas agrupadas bajo un encabezado de grupo (no aplica a jerárquica) */
   agrupador?: boolean;
   /** Id de la columna cuyo valor se repite por período (solo subtipo matriz_por_periodos) */

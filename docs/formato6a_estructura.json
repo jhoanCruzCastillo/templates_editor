@@ -1,0 +1,1185 @@
+{
+  "schema_version": "1.0",
+  "formato": {
+    "codigo": "6A",
+    "nombre": "Ficha Técnica General Simplificada",
+    "fuente_archivo": "formato6a_directiva001_2019EF6301.xlsm",
+    "tipo_version": "estructura",
+    "nota_secciones": "Estructura transcrita a mano desde capturas de pantalla del Excel oficial (Directiva 001-2019-EF/63.01). Las posiciones de captura (columna/fila) confirmadas 1:1 contra el archivo real son: 1.01.1-4 (R9/R11/R13/R15), 2.02.1, 4.01.2 (causas), 6.02.1, 8.04.1 y 12.01.1 — se transcribieron literalmente de la documentación técnica del proyecto. El resto de columnas/filas son una aproximación visual a partir de las capturas y deben validarse contra el .xlsm real antes de usarse en producción. La Sección 14 (Firmas) no tenía captura de pantalla disponible y se completó como placeholder sin captura."
+  },
+  "secciones": [
+    {
+      "id": "01",
+      "nombre": "Datos generales del proyecto",
+      "tipo_nodo": "seccion",
+      "hoja": "DATOS GENERALES",
+      "campos": [
+        {
+          "id": "1.01",
+          "nombre": "Institucionalidad",
+          "tipo_nodo": "grupo",
+          "campos": [
+            { "id": "1.01.1", "nombre": "Nivel de gobierno", "tipo_nodo": "campo", "tipo": "texto_corto", "editable": true, "captura": { "hoja": "DATOS GENERALES", "columna": "R", "fila": 9, "abarca_columnas": 10, "abarca_filas": 1 }, "valor": "" },
+            { "id": "1.01.2", "nombre": "Entidad", "tipo_nodo": "campo", "tipo": "texto_corto", "editable": true, "captura": { "hoja": "DATOS GENERALES", "columna": "R", "fila": 11, "abarca_columnas": 10, "abarca_filas": 1 }, "valor": "" },
+            { "id": "1.01.3", "nombre": "Nombre de la UF", "tipo_nodo": "campo", "tipo": "texto_corto", "editable": true, "captura": { "hoja": "DATOS GENERALES", "columna": "R", "fila": 13, "abarca_columnas": 10, "abarca_filas": 1 }, "valor": "" },
+            { "id": "1.01.4", "nombre": "Responsable de la UF", "tipo_nodo": "campo", "tipo": "texto_corto", "editable": true, "captura": { "hoja": "DATOS GENERALES", "columna": "R", "fila": 15, "abarca_columnas": 10, "abarca_filas": 1 }, "valor": "" }
+          ]
+        },
+        {
+          "id": "1.02",
+          "nombre": "Responsabilidad funcional y tipología del proyecto de inversión",
+          "tipo_nodo": "grupo",
+          "campos": [
+            { "id": "1.02.1", "nombre": "Función", "tipo_nodo": "campo", "tipo": "texto_corto", "editable": true, "captura": { "hoja": "DATOS GENERALES", "columna": "G", "fila": 21, "abarca_columnas": 14, "abarca_filas": 1 }, "valor": "" },
+            { "id": "1.02.2", "nombre": "División funcional", "tipo_nodo": "campo", "tipo": "texto_corto", "editable": true, "captura": { "hoja": "DATOS GENERALES", "columna": "G", "fila": 23, "abarca_columnas": 14, "abarca_filas": 1 }, "valor": "" },
+            { "id": "1.02.3", "nombre": "Grupo funcional", "tipo_nodo": "campo", "tipo": "texto_corto", "editable": true, "captura": { "hoja": "DATOS GENERALES", "columna": "G", "fila": 25, "abarca_columnas": 14, "abarca_filas": 1 }, "valor": "" },
+            { "id": "1.02.4", "nombre": "Sector responsable", "tipo_nodo": "campo", "tipo": "texto_corto", "editable": true, "captura": { "hoja": "DATOS GENERALES", "columna": "G", "fila": 27, "abarca_columnas": 14, "abarca_filas": 1 }, "valor": "" },
+            { "id": "1.02.5", "nombre": "Tipología de proyecto", "tipo_nodo": "campo", "tipo": "texto_corto", "editable": true, "captura": { "hoja": "DATOS GENERALES", "columna": "G", "fila": 29, "abarca_columnas": 14, "abarca_filas": 2 }, "valor": "" }
+          ]
+        },
+        {
+          "id": "1.03",
+          "nombre": "Nombre del proyecto de inversión",
+          "tipo_nodo": "grupo",
+          "campos": [
+            { "id": "1.03.1", "nombre": "Naturaleza de intervención", "tipo_nodo": "campo", "tipo": "texto_corto", "editable": true, "captura": { "hoja": "DATOS GENERALES", "columna": "C", "fila": 36, "abarca_columnas": 8, "abarca_filas": 1 }, "valor": "" },
+            { "id": "1.03.2", "nombre": "Objeto de intervención", "tipo_nodo": "campo", "tipo": "texto_corto", "editable": true, "captura": { "hoja": "DATOS GENERALES", "columna": "L", "fila": 36, "abarca_columnas": 8, "abarca_filas": 1 }, "valor": "" },
+            { "id": "1.03.3", "nombre": "Localización", "tipo_nodo": "campo", "tipo": "texto_corto", "editable": true, "captura": { "hoja": "DATOS GENERALES", "columna": "U", "fila": 36, "abarca_columnas": 8, "abarca_filas": 1 }, "valor": "" }
+          ]
+        },
+        {
+          "id": "1.04",
+          "nombre": "Alineamiento y contribución al cierre de una brecha prioritaria",
+          "tipo_nodo": "grupo",
+          "campos": [
+            { "id": "1.04.1", "nombre": "Servicios públicos con brecha identificada y priorizada", "tipo_nodo": "campo", "tipo": "texto_corto", "editable": true, "captura": { "hoja": "DATOS GENERALES", "columna": "P", "fila": 42, "abarca_columnas": 12, "abarca_filas": 1 }, "valor": "" },
+            {
+              "id": "1.04.2",
+              "nombre": "Indicador de brecha de acceso a servicios",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "fijas", "agrupador": false },
+              "captura": {
+                "hoja": "DATOS GENERALES",
+                "fila_inicial": 47,
+                "filas_base": 1,
+                "columnas": [
+                  { "id": "indicador", "columna": "B", "abarca_columnas": 9 },
+                  { "id": "unidad_medida", "columna": "L", "abarca_columnas": 5 },
+                  { "id": "espacio_geografico", "columna": "S", "abarca_columnas": 5 },
+                  { "id": "anio", "columna": "Z", "abarca_columnas": 3 },
+                  { "id": "valor", "columna": "AE", "abarca_columnas": 4 }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "indicador", "nombre": "Nombre del Indicador de brecha de acceso a servicios", "tipo": "texto_corto" },
+                { "id": "unidad_medida", "nombre": "Unidad de medida", "tipo": "texto_corto" },
+                { "id": "espacio_geografico", "nombre": "Espacio geográfico", "tipo": "texto_corto" },
+                { "id": "anio", "nombre": "Año", "tipo": "numero" },
+                { "id": "valor", "nombre": "Valor", "tipo": "decimal" }
+              ],
+              "valor": []
+            },
+            { "id": "1.04.3", "nombre": "Contribución del Cierre de Brecha (Valor)", "tipo_nodo": "campo", "tipo": "decimal", "editable": true, "captura": { "hoja": "DATOS GENERALES", "columna": "P", "fila": 50, "abarca_columnas": 12, "abarca_filas": 1 }, "valor": null }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "nombre": "Diagnóstico del área de estudio",
+      "tipo_nodo": "seccion",
+      "hoja": "AREA DE ESTUDIO",
+      "campos": [
+        {
+          "id": "2.01",
+          "nombre": "Localización del área de estudio del proyecto",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "2.01.1",
+              "nombre": "Localización del área de estudio del proyecto",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "fijas", "agrupador": false },
+              "captura": {
+                "hoja": "AREA DE ESTUDIO",
+                "fila_inicial": 10,
+                "filas_base": 3,
+                "columnas": [
+                  { "id": "n", "columna": "B", "abarca_columnas": 1 },
+                  { "id": "depto", "columna": "C", "abarca_columnas": 4 },
+                  { "id": "prov", "columna": "G", "abarca_columnas": 4 },
+                  { "id": "dist", "columna": "K", "abarca_columnas": 4 },
+                  { "id": "loc", "columna": "O", "abarca_columnas": 4 },
+                  { "id": "ubigeo", "columna": "S", "abarca_columnas": 4 }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "n", "nombre": "N°", "tipo": "numero" },
+                { "id": "depto", "nombre": "Departamento", "tipo": "texto_corto" },
+                { "id": "prov", "nombre": "Provincia", "tipo": "texto_corto" },
+                { "id": "dist", "nombre": "Distrito", "tipo": "texto_corto" },
+                { "id": "loc", "nombre": "Localidad/Centro poblado", "tipo": "texto_corto" },
+                { "id": "ubigeo", "nombre": "Ubigeo", "tipo": "texto_corto" }
+              ],
+              "valor": []
+            }
+          ]
+        },
+        {
+          "id": "2.02",
+          "nombre": "Localización del área de influencia del proyecto",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "2.02.1",
+              "nombre": "Localización del área de influencia del proyecto",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "fijas", "agrupador": false },
+              "captura": {
+                "hoja": "AREA DE ESTUDIO",
+                "fila_inicial": 18,
+                "filas_base": 3,
+                "columnas": [
+                  { "id": "n", "columna": "B", "abarca_columnas": 1 },
+                  { "id": "depto", "columna": "C", "abarca_columnas": 4 },
+                  { "id": "prov", "columna": "G", "abarca_columnas": 4 },
+                  { "id": "dist", "columna": "K", "abarca_columnas": 4 },
+                  { "id": "loc", "columna": "O", "abarca_columnas": 4 },
+                  { "id": "ubigeo", "columna": "S", "abarca_columnas": 4 }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "n", "nombre": "N°", "tipo": "numero" },
+                { "id": "depto", "nombre": "Departamento", "tipo": "texto_corto" },
+                { "id": "prov", "nombre": "Provincia", "tipo": "texto_corto" },
+                { "id": "dist", "nombre": "Distrito", "tipo": "texto_corto" },
+                { "id": "loc", "nombre": "Localidad/Centro poblado", "tipo": "texto_corto" },
+                { "id": "ubigeo", "nombre": "Ubigeo", "tipo": "texto_corto" }
+              ],
+              "valor": []
+            }
+          ]
+        },
+        {
+          "id": "2.03",
+          "nombre": "Croquis con la ubicación de los beneficiarios o los demandantes actuales y futuros y la localización de los elementos de la UP",
+          "tipo_nodo": "grupo",
+          "campos": [
+            { "id": "2.03.1", "nombre": "Croquis", "tipo_nodo": "campo", "tipo": "imagen", "editable": true, "captura": { "hoja": "AREA DE ESTUDIO", "columna": "B", "fila": 26, "abarca_columnas": 19, "abarca_filas": 2 }, "valor": "" },
+            { "id": "2.03.2", "nombre": "Leyenda del croquis", "tipo_nodo": "campo", "tipo": "texto_largo", "editable": true, "captura": { "hoja": "AREA DE ESTUDIO", "columna": "U", "fila": 26, "abarca_columnas": 7, "abarca_filas": 2 }, "valor": "" },
+            { "id": "2.03.3", "nombre": "Fuente de información", "tipo_nodo": "campo", "tipo": "texto_corto", "editable": true, "captura": { "hoja": "AREA DE ESTUDIO", "columna": "E", "fila": 28, "abarca_columnas": 14, "abarca_filas": 1 }, "valor": "" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "nombre": "Diagnóstico de la unidad productora",
+      "tipo_nodo": "seccion",
+      "hoja": "UNIDAD PRODUCTORA",
+      "campos": [
+        {
+          "id": "3.01",
+          "nombre": "Nombre de la Unidad Productora",
+          "tipo_nodo": "grupo",
+          "campos": [
+            { "id": "3.01.1", "nombre": "Nombre de la Unidad Productora", "tipo_nodo": "campo", "tipo": "texto_corto", "editable": true, "captura": { "hoja": "UNIDAD PRODUCTORA", "columna": "H", "fila": 5, "abarca_columnas": 12, "abarca_filas": 1 }, "valor": "" }
+          ]
+        },
+        {
+          "id": "3.02",
+          "nombre": "Código de la unidad productora",
+          "tipo_nodo": "grupo",
+          "campos": [
+            { "id": "3.02.1", "nombre": "Código de la unidad productora (en caso el Sector lo haya definido)", "tipo_nodo": "campo", "tipo": "texto_corto", "editable": true, "captura": { "hoja": "UNIDAD PRODUCTORA", "columna": "H", "fila": 7, "abarca_columnas": 12, "abarca_filas": 1 }, "valor": "" }
+          ]
+        },
+        {
+          "id": "3.03",
+          "nombre": "Localización geográfica de la Unidad Productora",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "3.03.1",
+              "nombre": "Localización geográfica de la Unidad Productora",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "fijas", "agrupador": false },
+              "captura": {
+                "hoja": "UNIDAD PRODUCTORA",
+                "fila_inicial": 14,
+                "filas_base": 3,
+                "columnas": [
+                  { "id": "n", "columna": "B", "abarca_columnas": 1 },
+                  { "id": "depto", "columna": "C", "abarca_columnas": 4 },
+                  { "id": "prov", "columna": "G", "abarca_columnas": 4 },
+                  { "id": "dist", "columna": "K", "abarca_columnas": 4 },
+                  { "id": "loc", "columna": "O", "abarca_columnas": 4 },
+                  { "id": "coordenadas", "columna": "S", "abarca_columnas": 6 }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "n", "nombre": "N°", "tipo": "numero" },
+                { "id": "depto", "nombre": "Departamento", "tipo": "texto_corto" },
+                { "id": "prov", "nombre": "Provincia", "tipo": "texto_corto" },
+                { "id": "dist", "nombre": "Distrito", "tipo": "texto_corto" },
+                { "id": "loc", "nombre": "Localidad/Centro poblado", "tipo": "texto_corto" },
+                { "id": "coordenadas", "nombre": "Coordenadas geográficas", "tipo": "texto_corto" }
+              ],
+              "valor": []
+            }
+          ]
+        },
+        {
+          "id": "3.04",
+          "nombre": "Diagnóstico de la Unidad Productora",
+          "tipo_nodo": "grupo",
+          "campos": [
+            { "id": "3.04.1", "nombre": "Diagnóstico de la Unidad Productora", "tipo_nodo": "campo", "tipo": "texto_largo", "editable": true, "captura": { "hoja": "UNIDAD PRODUCTORA", "columna": "B", "fila": 21, "abarca_columnas": 19, "abarca_filas": 2 }, "valor": "" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "04",
+      "nombre": "Problema y objetivo",
+      "tipo_nodo": "seccion",
+      "hoja": "PROBLEMA-OBJETIVO",
+      "campos": [
+        {
+          "id": "4.01",
+          "nombre": "Definición del problema, sus causas y efectos",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "4.01.1",
+              "nombre": "Problema central",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "fijas", "agrupador": false },
+              "captura": {
+                "hoja": "PROBLEMA-OBJETIVO",
+                "fila_inicial": 7,
+                "filas_base": 1,
+                "columnas": [
+                  { "id": "problema", "columna": "B", "abarca_columnas": 4 },
+                  { "id": "indicador", "columna": "F", "abarca_columnas": 4 },
+                  { "id": "desc_indicador", "columna": "J", "abarca_columnas": 4 },
+                  { "id": "um", "columna": "N", "abarca_columnas": 1 },
+                  { "id": "valor", "columna": "O", "abarca_columnas": 1 }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "problema", "nombre": "Descripción del problema central", "tipo": "texto_corto" },
+                { "id": "indicador", "nombre": "Indicador", "tipo": "texto_corto" },
+                { "id": "desc_indicador", "nombre": "Descripción del indicador", "tipo": "texto_corto" },
+                { "id": "um", "nombre": "UM", "tipo": "texto_corto" },
+                { "id": "valor", "nombre": "Valor", "tipo": "decimal" }
+              ],
+              "valor": []
+            },
+            {
+              "id": "4.01.2",
+              "nombre": "Causas Directas, sustento y Causas Indirectas",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "jerarquicas", "columnas": "fijas", "agrupador": false },
+              "captura": {
+                "hoja": "PROBLEMA-OBJETIVO",
+                "fila_inicial": 11,
+                "filas_base": 9,
+                "columnas": [
+                  { "id": "causa_directa", "columna": "B", "abarca_columnas": 4 },
+                  { "id": "sustento", "columna": "F", "abarca_columnas": 4 },
+                  { "id": "causa_indirecta", "columna": "J", "abarca_columnas": 4 }
+                ]
+              },
+              "cabecera": [],
+              "niveles": [
+                { "id": "causa_directa", "nombre": "Causa Directa (CD)", "tipo": "texto_largo", "combina_vertical": true },
+                { "id": "sustento", "nombre": "Sustento (evidencias)", "tipo": "texto_largo", "combina_vertical": true },
+                { "id": "causa_indirecta", "nombre": "Causa Indirecta (CI)", "tipo": "texto_largo" }
+              ],
+              "valor": []
+            },
+            {
+              "id": "4.01.3",
+              "nombre": "Efectos Directos, sustento y Efectos Indirectos",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "jerarquicas", "columnas": "fijas", "agrupador": false },
+              "captura": {
+                "hoja": "PROBLEMA-OBJETIVO",
+                "fila_inicial": 23,
+                "filas_base": 10,
+                "columnas": [
+                  { "id": "efecto_directo", "columna": "B", "abarca_columnas": 4 },
+                  { "id": "sustento", "columna": "F", "abarca_columnas": 4 },
+                  { "id": "efecto_indirecto", "columna": "J", "abarca_columnas": 4 }
+                ]
+              },
+              "cabecera": [],
+              "niveles": [
+                { "id": "efecto_directo", "nombre": "Efecto Directo (ED)", "tipo": "texto_largo", "combina_vertical": true },
+                { "id": "sustento", "nombre": "Sustento (evidencias)", "tipo": "texto_largo", "combina_vertical": true },
+                { "id": "efecto_indirecto", "nombre": "Efecto Indirecto (EI)", "tipo": "texto_largo" }
+              ],
+              "valor": []
+            }
+          ]
+        },
+        {
+          "id": "4.02",
+          "nombre": "Definición de los objetivos del proyecto",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "4.02.1",
+              "nombre": "Objetivo central",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "fijas", "agrupador": false },
+              "captura": {
+                "hoja": "PROBLEMA-OBJETIVO",
+                "fila_inicial": 39,
+                "filas_base": 1,
+                "columnas": [
+                  { "id": "objetivo", "columna": "B", "abarca_columnas": 4 },
+                  { "id": "indicador", "columna": "F", "abarca_columnas": 4 },
+                  { "id": "desc_indicador", "columna": "J", "abarca_columnas": 4 },
+                  { "id": "um", "columna": "N", "abarca_columnas": 1 },
+                  { "id": "valor", "columna": "O", "abarca_columnas": 1 }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "objetivo", "nombre": "Descripción del objetivo central", "tipo": "texto_corto" },
+                { "id": "indicador", "nombre": "Indicador", "tipo": "texto_corto" },
+                { "id": "desc_indicador", "nombre": "Descripción del indicador", "tipo": "texto_corto" },
+                { "id": "um", "nombre": "UM", "tipo": "texto_corto" },
+                { "id": "valor", "nombre": "Valor", "tipo": "decimal" }
+              ],
+              "valor": []
+            },
+            {
+              "id": "4.02.2",
+              "nombre": "Medios fundamentales (componentes) y Acciones",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "jerarquicas", "columnas": "fijas", "agrupador": false },
+              "captura": {
+                "hoja": "PROBLEMA-OBJETIVO",
+                "fila_inicial": 46,
+                "filas_base": 11,
+                "columnas": [
+                  { "id": "n", "columna": "B", "abarca_columnas": 1 },
+                  { "id": "medio_fundamental", "columna": "C", "abarca_columnas": 6 },
+                  { "id": "accion", "columna": "I", "abarca_columnas": 6 }
+                ]
+              },
+              "cabecera": [],
+              "niveles": [
+                { "id": "n", "nombre": "N°", "tipo": "numero", "combina_vertical": true },
+                { "id": "medio_fundamental", "nombre": "Medios fundamentales (componentes)", "tipo": "texto_corto", "combina_vertical": true },
+                { "id": "accion", "nombre": "Acciones", "tipo": "texto_corto" }
+              ],
+              "valor": []
+            }
+          ]
+        },
+        {
+          "id": "4.03",
+          "nombre": "Descripción de las alternativas de solución al problema",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "4.03.1",
+              "nombre": "Descripción de Alternativas de Solución",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "fijas", "agrupador": false },
+              "captura": {
+                "hoja": "PROBLEMA-OBJETIVO",
+                "fila_inicial": 74,
+                "filas_base": 3,
+                "columnas": [
+                  { "id": "alternativa", "columna": "B", "abarca_columnas": 13 }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "alternativa", "nombre": "Descripción de Alternativas de Solución", "tipo": "texto_largo" }
+              ],
+              "valor": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "05",
+      "nombre": "Horizonte de evaluación",
+      "tipo_nodo": "seccion",
+      "hoja": "HORIZONTE DE EVALUACIÓN",
+      "campos": [
+        {
+          "id": "5.01",
+          "nombre": "Horizonte de evaluación",
+          "tipo_nodo": "grupo",
+          "campos": [
+            { "id": "5.01.1", "nombre": "Periodo en años de la ejecución del proyecto (Alternativa 1)", "tipo_nodo": "campo", "tipo": "numero", "editable": true, "captura": { "hoja": "HORIZONTE DE EVALUACIÓN", "columna": "H", "fila": 7, "abarca_columnas": 2, "abarca_filas": 1 }, "valor": null },
+            { "id": "5.01.2", "nombre": "Periodo en años del funcionamiento del proyecto (Alternativa 1)", "tipo_nodo": "campo", "tipo": "numero", "editable": true, "captura": { "hoja": "HORIZONTE DE EVALUACIÓN", "columna": "H", "fila": 10, "abarca_columnas": 2, "abarca_filas": 1 }, "valor": null },
+            { "id": "5.01.3", "nombre": "Número de años del horizonte de evaluación (Alternativa 1)", "tipo_nodo": "campo", "tipo": "calculado", "editable": false, "captura": { "hoja": "HORIZONTE DE EVALUACIÓN", "columna": "H", "fila": 12, "abarca_columnas": 2, "abarca_filas": 1 }, "valor": null }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "06",
+      "nombre": "Brecha de servicio",
+      "tipo_nodo": "seccion",
+      "hoja": "BRECHA DE SERVICIO",
+      "campos": [
+        {
+          "id": "6.01",
+          "nombre": "Definición y caracterización del servicio o de la cartera de servicios",
+          "tipo_nodo": "grupo",
+          "campos": [
+            { "id": "6.01.1", "nombre": "Definición y caracterización del servicio o de la cartera de servicios", "tipo_nodo": "campo", "tipo": "texto_largo", "editable": true, "captura": { "hoja": "BRECHA DE SERVICIO", "columna": "B", "fila": 9, "abarca_columnas": 11, "abarca_filas": 1 }, "valor": "" }
+          ]
+        },
+        {
+          "id": "6.02",
+          "nombre": "Análisis de la demanda del servicio",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "6.02.1",
+              "nombre": "Análisis de la demanda del servicio",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "dinamicas", "agrupador": false },
+              "captura": {
+                "hoja": "BRECHA DE SERVICIO",
+                "fila_inicial": 15,
+                "filas_base": 4,
+                "columnas": [
+                  { "id": "servicio", "columna": "B", "abarca_columnas": 1 },
+                  { "id": "descripcion", "columna": "C", "abarca_columnas": 2 },
+                  { "id": "u_medida", "columna": "E", "abarca_columnas": 1 },
+                  { "id": "columnas_dinamicas", "columna": "F", "abarca_columnas": 1, "columnas_base": ["Año 1", "Año 2", "Año 3", "....", "....", "....", "....", "Año n"] }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "servicio", "nombre": "Servicio", "tipo": "texto_corto" },
+                { "id": "descripcion", "nombre": "Descripción", "tipo": "texto_corto" },
+                { "id": "u_medida", "nombre": "Unidad de Medida", "tipo": "texto_corto" },
+                { "id": "columnas_dinamicas", "nombre": "irrelevante", "tipo": "numero" }
+              ],
+              "valor": []
+            }
+          ]
+        },
+        {
+          "id": "6.03",
+          "nombre": "Análisis de la oferta del servicio",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "6.03.1",
+              "nombre": "Análisis de la oferta del servicio",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "dinamicas", "agrupador": false },
+              "captura": {
+                "hoja": "BRECHA DE SERVICIO",
+                "fila_inicial": 27,
+                "filas_base": 4,
+                "columnas": [
+                  { "id": "servicio", "columna": "B", "abarca_columnas": 1 },
+                  { "id": "descripcion", "columna": "C", "abarca_columnas": 2 },
+                  { "id": "u_medida", "columna": "E", "abarca_columnas": 1 },
+                  { "id": "columnas_dinamicas", "columna": "F", "abarca_columnas": 1, "columnas_base": ["Año 1", "Año 2", "Año 3", "....", "....", "....", "....", "Año n"] }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "servicio", "nombre": "Servicio", "tipo": "texto_corto" },
+                { "id": "descripcion", "nombre": "Descripción", "tipo": "texto_corto" },
+                { "id": "u_medida", "nombre": "Unidad de Medida", "tipo": "texto_corto" },
+                { "id": "columnas_dinamicas", "nombre": "irrelevante", "tipo": "numero" }
+              ],
+              "valor": []
+            }
+          ]
+        },
+        {
+          "id": "6.04",
+          "nombre": "Brecha del servicio (balance oferta optimizada sin proyecto-demanda con proyecto)",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "6.04.1",
+              "nombre": "Brecha del servicio",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "dinamicas", "agrupador": false },
+              "captura": {
+                "hoja": "BRECHA DE SERVICIO",
+                "fila_inicial": 39,
+                "filas_base": 4,
+                "columnas": [
+                  { "id": "servicio", "columna": "B", "abarca_columnas": 1 },
+                  { "id": "descripcion", "columna": "C", "abarca_columnas": 2 },
+                  { "id": "u_medida", "columna": "E", "abarca_columnas": 1 },
+                  { "id": "columnas_dinamicas", "columna": "F", "abarca_columnas": 1, "columnas_base": ["Año 1", "Año 2", "Año 3", "....", "....", "....", "....", "Año 10"] }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "servicio", "nombre": "Servicios con brecha", "tipo": "texto_corto" },
+                { "id": "descripcion", "nombre": "Descripción", "tipo": "texto_corto" },
+                { "id": "u_medida", "nombre": "Unidad de Medida", "tipo": "texto_corto" },
+                { "id": "columnas_dinamicas", "nombre": "irrelevante", "tipo": "numero" }
+              ],
+              "valor": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "07",
+      "nombre": "Análisis técnico",
+      "tipo_nodo": "seccion",
+      "hoja": "ANALISIS TÉCNICO",
+      "campos": [
+        {
+          "id": "7.01",
+          "nombre": "Análisis de tamaño (¿Cuánto producir?)",
+          "tipo_nodo": "grupo",
+          "campos": [
+            { "id": "7.01.1", "nombre": "Descripción de la alternativa técnica seleccionada", "tipo_nodo": "campo", "tipo": "texto_largo", "editable": true, "captura": { "hoja": "ANALISIS TÉCNICO", "columna": "B", "fila": 10, "abarca_columnas": 19, "abarca_filas": 2 }, "valor": "" }
+          ]
+        },
+        {
+          "id": "7.02",
+          "nombre": "Análisis de localización (¿Dónde producir?)",
+          "tipo_nodo": "grupo",
+          "campos": [
+            { "id": "7.02.1", "nombre": "Descripción de la alternativa técnica seleccionada", "tipo_nodo": "campo", "tipo": "texto_largo", "editable": true, "captura": { "hoja": "ANALISIS TÉCNICO", "columna": "B", "fila": 15, "abarca_columnas": 19, "abarca_filas": 2 }, "valor": "" }
+          ]
+        },
+        {
+          "id": "7.03",
+          "nombre": "Análisis de tecnología (¿Cómo producir?)",
+          "tipo_nodo": "grupo",
+          "campos": [
+            { "id": "7.03.1", "nombre": "Descripción de la alternativa técnica seleccionada", "tipo_nodo": "campo", "tipo": "texto_largo", "editable": true, "captura": { "hoja": "ANALISIS TÉCNICO", "columna": "B", "fila": 21, "abarca_columnas": 19, "abarca_filas": 2 }, "valor": "" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "08",
+      "nombre": "Costos del proyecto",
+      "tipo_nodo": "seccion",
+      "hoja": "COSTO TOTAL",
+      "campos": [
+        {
+          "id": "8.01",
+          "nombre": "Costo de ejecución física de las acciones",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "8.01.1",
+              "nombre": "Costo de ejecución física de las acciones",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "fijas", "agrupador": false },
+              "captura": {
+                "hoja": "COSTO TOTAL",
+                "fila_inicial": 10,
+                "filas_base": 13,
+                "columnas": [
+                  { "id": "componente_accion", "columna": "B", "abarca_columnas": 4 },
+                  { "id": "activos", "columna": "F", "abarca_columnas": 2 },
+                  { "id": "tipo_factor_productivo", "columna": "H", "abarca_columnas": 4 },
+                  { "id": "uf_unidad_medida", "columna": "L", "abarca_columnas": 1 },
+                  { "id": "uf_cantidad", "columna": "M", "abarca_columnas": 1 },
+                  { "id": "df_unidad_medida", "columna": "N", "abarca_columnas": 1 },
+                  { "id": "df_cantidad", "columna": "O", "abarca_columnas": 1 },
+                  { "id": "costo_unitario", "columna": "P", "abarca_columnas": 1 },
+                  { "id": "costo_total", "columna": "Q", "abarca_columnas": 1 }
+                ]
+              },
+              "cabecera": [
+                { "titulo": "Acción sobre los activos", "hijos": ["componente_accion", "activos"] },
+                { "titulo": "Unidad Física", "hijos": ["uf_unidad_medida", "uf_cantidad"] },
+                { "titulo": "Dimensión física", "hijos": ["df_unidad_medida", "df_cantidad"] }
+              ],
+              "columnas": [
+                { "id": "componente_accion", "nombre": "Componente/acción", "tipo": "texto_corto" },
+                { "id": "activos", "nombre": "Activos", "tipo": "texto_corto" },
+                { "id": "tipo_factor_productivo", "nombre": "Tipo de factor productivo", "tipo": "texto_corto" },
+                { "id": "uf_unidad_medida", "nombre": "Unidad de medida", "tipo": "texto_corto" },
+                { "id": "uf_cantidad", "nombre": "Cantidad", "tipo": "numero" },
+                { "id": "df_unidad_medida", "nombre": "Unidad de medida", "tipo": "texto_corto" },
+                { "id": "df_cantidad", "nombre": "Cantidad", "tipo": "numero" },
+                { "id": "costo_unitario", "nombre": "Costo unitario", "tipo": "decimal" },
+                { "id": "costo_total", "nombre": "Costo total", "tipo": "decimal" }
+              ],
+              "valor": []
+            },
+            {
+              "id": "8.01.2",
+              "nombre": "Otros costos de inversión",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "fijas", "agrupador": false },
+              "captura": {
+                "hoja": "COSTO TOTAL",
+                "fila_inicial": 33,
+                "filas_base": 5,
+                "columnas": [
+                  { "id": "item", "columna": "B", "abarca_columnas": 4 },
+                  { "id": "costo", "columna": "F", "abarca_columnas": 1 }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "item", "nombre": "Otros costos", "tipo": "texto_corto" },
+                { "id": "costo", "nombre": "Costos a precios de mercado", "tipo": "decimal" }
+              ],
+              "valor": []
+            }
+          ]
+        },
+        {
+          "id": "8.02",
+          "nombre": "Costos de reinversiones",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "8.02.1",
+              "nombre": "Costos de reinversiones",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "dinamicas", "agrupador": true },
+              "captura": {
+                "hoja": "COSTO TOTAL",
+                "fila_inicial": 48,
+                "filas_base": 9,
+                "columnas": [
+                  { "id": "activos", "columna": "D", "abarca_columnas": 2 },
+                  { "id": "tipo_factor_productivo", "columna": "F", "abarca_columnas": 2 },
+                  { "id": "columnas_dinamicas", "columna": "H", "abarca_columnas": 1, "columnas_base": ["1", "2", "3", "4", "5", "....", "....", "....", "n"] }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "activos", "nombre": "Activos", "tipo": "texto_corto" },
+                { "id": "tipo_factor_productivo", "nombre": "Tipo de factor productivo", "tipo": "texto_corto" },
+                { "id": "columnas_dinamicas", "nombre": "irrelevante", "tipo": "decimal" }
+              ],
+              "valor": []
+            }
+          ]
+        },
+        {
+          "id": "8.03",
+          "nombre": "Costos de operación y mantenimiento con y sin proyecto",
+          "tipo_nodo": "grupo",
+          "campos": [
+            { "id": "8.03.1", "nombre": "Fecha prevista de inicio de operaciones", "tipo_nodo": "campo", "tipo": "fecha", "editable": true, "captura": { "hoja": "COSTO TOTAL", "columna": "F", "fila": 59, "abarca_columnas": 2, "abarca_filas": 1 }, "valor": "" },
+            { "id": "8.03.2", "nombre": "Horizonte de funcionamiento (años)", "tipo_nodo": "campo", "tipo": "numero", "editable": true, "captura": { "hoja": "COSTO TOTAL", "columna": "F", "fila": 60, "abarca_columnas": 2, "abarca_filas": 1 }, "valor": null },
+            {
+              "id": "8.03.3",
+              "nombre": "Costos de operación y mantenimiento con y sin proyecto",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "dinamicas", "agrupador": true },
+              "captura": {
+                "hoja": "COSTO TOTAL",
+                "fila_inicial": 66,
+                "filas_base": 6,
+                "columnas": [
+                  { "id": "item", "columna": "D", "abarca_columnas": 2 },
+                  { "id": "columnas_dinamicas", "columna": "H", "abarca_columnas": 1, "columnas_base": ["1", "2", "3", "4", "5", "....", "....", "....", "n"] }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "item", "nombre": "Ítem", "tipo": "texto_corto" },
+                { "id": "columnas_dinamicas", "nombre": "irrelevante", "tipo": "decimal" }
+              ],
+              "valor": []
+            }
+          ]
+        },
+        {
+          "id": "8.04",
+          "nombre": "Cronograma de inversión de metas financieras",
+          "tipo_nodo": "grupo",
+          "campos": [
+            { "id": "8.04.1", "nombre": "Fecha prevista de inicio de ejecución", "tipo_nodo": "campo", "tipo": "fecha", "editable": true, "captura": { "hoja": "COSTO TOTAL", "columna": "F", "fila": 77, "abarca_columnas": 4, "abarca_filas": 1 }, "valor": "" },
+            { "id": "8.04.2", "nombre": "Tipo de periodo", "tipo_nodo": "campo", "tipo": "texto_corto", "editable": true, "captura": { "hoja": "COSTO TOTAL", "columna": "F", "fila": 78, "abarca_columnas": 4, "abarca_filas": 1 }, "valor": "" },
+            { "id": "8.04.3", "nombre": "Número de periodos", "tipo_nodo": "campo", "tipo": "numero", "editable": true, "captura": { "hoja": "COSTO TOTAL", "columna": "F", "fila": 79, "abarca_columnas": 4, "abarca_filas": 1 }, "valor": null },
+            {
+              "id": "8.04.4",
+              "nombre": "Cronograma de inversión de metas financieras",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "dinamicas", "agrupador": true },
+              "captura": {
+                "hoja": "COSTO TOTAL",
+                "fila_inicial": 85,
+                "filas_base": 13,
+                "columnas": [
+                  { "id": "accion", "columna": "B", "abarca_columnas": 3 },
+                  { "id": "activos", "columna": "E", "abarca_columnas": 2 },
+                  { "id": "tipo_factor_productivo", "columna": "G", "abarca_columnas": 2 },
+                  { "id": "columnas_dinamicas", "columna": "I", "abarca_columnas": 1, "columnas_base": ["1", "2", "3", "....", "....", "....", "....", "n"] },
+                  { "id": "costo_estimado_inversion", "columna": "Q", "abarca_columnas": 2 }
+                ]
+              },
+              "cabecera": [
+                { "titulo": "Acción sobre los activos", "hijos": ["accion", "activos"] },
+                { "titulo": "Cronograma de Inversión", "hijos": ["columnas_dinamicas"] }
+              ],
+              "columnas": [
+                { "id": "accion", "nombre": "Componente/acción", "tipo": "texto_corto" },
+                { "id": "activos", "nombre": "Activos", "tipo": "texto_corto" },
+                { "id": "tipo_factor_productivo", "nombre": "Tipo de factor productivo", "tipo": "texto_corto" },
+                { "id": "columnas_dinamicas", "nombre": "irrelevante", "tipo": "decimal" },
+                { "id": "costo_estimado_inversion", "nombre": "Costo estimado de inversión a precios de mercado (Soles)", "tipo": "decimal" }
+              ],
+              "valor": []
+            },
+            {
+              "id": "8.04.5",
+              "nombre": "Otros costos (cronograma)",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "dinamicas", "agrupador": false },
+              "captura": {
+                "hoja": "COSTO TOTAL",
+                "fila_inicial": 102,
+                "filas_base": 5,
+                "columnas": [
+                  { "id": "item", "columna": "B", "abarca_columnas": 4 },
+                  { "id": "columnas_dinamicas", "columna": "D", "abarca_columnas": 1, "columnas_base": ["1", "2", "3", "....", "....", "....", "....", "n"] },
+                  { "id": "costo_mercado", "columna": "K", "abarca_columnas": 3 }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "item", "nombre": "Otros costos", "tipo": "texto_corto" },
+                { "id": "columnas_dinamicas", "nombre": "irrelevante", "tipo": "decimal" },
+                { "id": "costo_mercado", "nombre": "Costos a precio de mercado", "tipo": "decimal" }
+              ],
+              "valor": []
+            },
+            { "id": "8.04.6", "nombre": "¿El proyecto tiene aporte de los beneficiarios?", "tipo_nodo": "campo", "tipo": "booleano", "editable": true, "captura": { "hoja": "COSTO TOTAL", "columna": "C", "fila": 115, "abarca_columnas": 1, "abarca_filas": 1 }, "valor": false },
+            { "id": "8.04.7", "nombre": "Aporte de los beneficiarios (S/)", "tipo_nodo": "campo", "tipo": "decimal", "editable": true, "captura": { "hoja": "COSTO TOTAL", "columna": "G", "fila": 115, "abarca_columnas": 2, "abarca_filas": 1 }, "valor": null },
+            { "id": "8.04.8", "nombre": "Financiado con fondos públicos (S/)", "tipo_nodo": "campo", "tipo": "decimal", "editable": true, "captura": { "hoja": "COSTO TOTAL", "columna": "G", "fila": 117, "abarca_columnas": 2, "abarca_filas": 1 }, "valor": null }
+          ]
+        },
+        {
+          "id": "8.05",
+          "nombre": "Cronograma de metas físicas",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "8.05.1",
+              "nombre": "Cronograma de metas físicas",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "dinamicas", "agrupador": false },
+              "captura": {
+                "hoja": "COSTO TOTAL",
+                "fila_inicial": 126,
+                "filas_base": 8,
+                "columnas": [
+                  { "id": "accion", "columna": "B", "abarca_columnas": 2 },
+                  { "id": "activos", "columna": "D", "abarca_columnas": 2 },
+                  { "id": "tipo_factor_productivo", "columna": "F", "abarca_columnas": 2 },
+                  { "id": "unidad_medida", "columna": "H", "abarca_columnas": 2 },
+                  { "id": "columnas_dinamicas", "columna": "J", "abarca_columnas": 1, "columnas_base": ["Periodo 1", "Periodo 2", "....", "....", "....", "....", "Periodo n"] },
+                  { "id": "total_meta_fisica", "columna": "Q", "abarca_columnas": 1 }
+                ]
+              },
+              "cabecera": [
+                { "titulo": "Acción sobre los activos", "hijos": ["accion", "activos"] },
+                { "titulo": "Periodo", "hijos": ["columnas_dinamicas"] }
+              ],
+              "columnas": [
+                { "id": "accion", "nombre": "Acción", "tipo": "texto_corto" },
+                { "id": "activos", "nombre": "Activos", "tipo": "texto_corto" },
+                { "id": "tipo_factor_productivo", "nombre": "Tipo de factor productivo", "tipo": "texto_corto" },
+                { "id": "unidad_medida", "nombre": "Unidad de medida representativa", "tipo": "texto_corto" },
+                { "id": "columnas_dinamicas", "nombre": "Meta física", "tipo": "numero" },
+                { "id": "total_meta_fisica", "nombre": "Total Meta Física", "tipo": "numero" }
+              ],
+              "valor": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "09",
+      "nombre": "Evaluación social",
+      "tipo_nodo": "seccion",
+      "hoja": "EVALUACION SOCIAL",
+      "campos": [
+        {
+          "id": "9.01",
+          "nombre": "Indicadores de rentabilidad social",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "9.01.1",
+              "nombre": "Indicadores de rentabilidad social",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "dinamicas", "agrupador": true },
+              "captura": {
+                "hoja": "EVALUACION SOCIAL",
+                "fila_inicial": 9,
+                "filas_base": 7,
+                "columnas": [
+                  { "id": "criterio", "columna": "C", "abarca_columnas": 4 },
+                  { "id": "columnas_dinamicas", "columna": "H", "abarca_columnas": 1, "columnas_base": ["Alternativa 1", "Alternativa 2", "Alternativa n"] }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "criterio", "nombre": "Criterio de elección", "tipo": "texto_corto" },
+                { "id": "columnas_dinamicas", "nombre": "irrelevante", "tipo": "decimal" }
+              ],
+              "valor": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "10",
+      "nombre": "Sostenibilidad",
+      "tipo_nodo": "seccion",
+      "hoja": "SOSTENIBILIDAD",
+      "campos": [
+        {
+          "id": "10.01",
+          "nombre": "Descripción de la capacidad institucional en la sostenibilidad del proyecto",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "10.01.1",
+              "nombre": "Descripción de la capacidad institucional en la sostenibilidad del proyecto",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "fijas", "agrupador": false },
+              "captura": {
+                "hoja": "SOSTENIBILIDAD",
+                "fila_inicial": 7,
+                "filas_base": 4,
+                "columnas": [
+                  { "id": "item", "columna": "B", "abarca_columnas": 4 },
+                  { "id": "descripcion", "columna": "F", "abarca_columnas": 4 },
+                  { "id": "fuente", "columna": "L", "abarca_columnas": 4 }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "item", "nombre": "Ítem", "tipo": "texto_corto" },
+                { "id": "descripcion", "nombre": "Descripción", "tipo": "texto_corto" },
+                { "id": "fuente", "nombre": "Fuente de información", "tipo": "texto_corto" }
+              ],
+              "valor": []
+            }
+          ]
+        },
+        {
+          "id": "10.02",
+          "nombre": "Gestión integral de los riesgos",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "10.02.1",
+              "nombre": "Gestión integral de los riesgos",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "fijas", "agrupador": false },
+              "captura": {
+                "hoja": "SOSTENIBILIDAD",
+                "fila_inicial": 18,
+                "filas_base": 4,
+                "columnas": [
+                  { "id": "tipo_riesgo", "columna": "B", "abarca_columnas": 4 },
+                  { "id": "descripcion_riesgo", "columna": "F", "abarca_columnas": 4 },
+                  { "id": "probabilidad", "columna": "J", "abarca_columnas": 2 },
+                  { "id": "impacto", "columna": "L", "abarca_columnas": 2 },
+                  { "id": "medidas_mitigacion", "columna": "N", "abarca_columnas": 4 }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "tipo_riesgo", "nombre": "Tipo de riesgo (operacional, contexto de cambio climático, mercado, financiero, legal, …)", "tipo": "texto_corto" },
+                { "id": "descripcion_riesgo", "nombre": "Descripción del riesgo", "tipo": "texto_corto" },
+                { "id": "probabilidad", "nombre": "Probabilidad de ocurrencia (baja, media, alta)", "tipo": "texto_corto" },
+                { "id": "impacto", "nombre": "Impacto (bajo, moderado, mayor)", "tipo": "texto_corto" },
+                { "id": "medidas_mitigacion", "nombre": "Medidas de mitigación", "tipo": "texto_corto" }
+              ],
+              "valor": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "11",
+      "nombre": "Gestión del proyecto",
+      "tipo_nodo": "seccion",
+      "hoja": "GESTIÓN",
+      "campos": [
+        {
+          "id": "11.01",
+          "nombre": "Plan de implementación",
+          "tipo_nodo": "grupo",
+          "campos": [
+            { "id": "11.01.1", "nombre": "Años (plan de implementación)", "tipo_nodo": "campo", "tipo": "numero", "editable": true, "captura": { "hoja": "GESTIÓN", "columna": "F", "fila": 4, "abarca_columnas": 1, "abarca_filas": 1 }, "valor": null },
+            { "id": "11.01.2", "nombre": "Meses (plan de implementación)", "tipo_nodo": "campo", "tipo": "numero", "editable": true, "captura": { "hoja": "GESTIÓN", "columna": "G", "fila": 4, "abarca_columnas": 1, "abarca_filas": 1 }, "valor": null },
+            {
+              "id": "11.01.3",
+              "nombre": "Actividades del Plan de Implementación",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "dinamicas", "agrupador": true },
+              "captura": {
+                "hoja": "GESTIÓN",
+                "fila_inicial": 10,
+                "filas_base": 24,
+                "columnas": [
+                  { "id": "actividad", "columna": "B", "abarca_columnas": 4 },
+                  { "id": "fecha_inicio", "columna": "F", "abarca_columnas": 1 },
+                  { "id": "fecha_fin", "columna": "G", "abarca_columnas": 1 },
+                  { "id": "organo_responsable", "columna": "H", "abarca_columnas": 3 },
+                  { "id": "columnas_dinamicas", "columna": "J", "abarca_columnas": 1, "columnas_base": ["1", "2", "3", "....", "n"] }
+                ]
+              },
+              "cabecera": [
+                { "titulo": "Fecha", "hijos": ["fecha_inicio", "fecha_fin"] },
+                { "titulo": "Periodo", "hijos": ["columnas_dinamicas"] }
+              ],
+              "columnas": [
+                { "id": "actividad", "nombre": "Actividades del Plan de Implementación", "tipo": "texto_corto" },
+                { "id": "fecha_inicio", "nombre": "Inicio", "tipo": "fecha" },
+                { "id": "fecha_fin", "nombre": "Fin", "tipo": "fecha" },
+                { "id": "organo_responsable", "nombre": "Órgano Responsable", "tipo": "texto_corto" },
+                { "id": "columnas_dinamicas", "nombre": "irrelevante", "tipo": "numero" }
+              ],
+              "valor": []
+            }
+          ]
+        },
+        {
+          "id": "11.02",
+          "nombre": "Modalidad de ejecución de proyecto",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "11.02.1",
+              "nombre": "Modalidad de ejecución de proyecto",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "fijas", "agrupador": false },
+              "captura": {
+                "hoja": "GESTIÓN",
+                "fila_inicial": 41,
+                "filas_base": 5,
+                "columnas": [
+                  { "id": "tipo", "columna": "B", "abarca_columnas": 5 },
+                  { "id": "marcar", "columna": "G", "abarca_columnas": 1 }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "tipo", "nombre": "Tipo de ejecución", "tipo": "texto_corto" },
+                { "id": "marcar", "nombre": "Marcar", "tipo": "booleano", "etiquetas": { "true": "Sí", "false": "No" } }
+              ],
+              "valor": [
+                { "tipo": "Administración directa", "marcar": false },
+                { "tipo": "Administración indirecta – por contrata", "marcar": false },
+                { "tipo": "Administración indirecta – Asociación Público Privado (APP)", "marcar": false },
+                { "tipo": "Administración indirecta – Núcleo Ejecutor", "marcar": false },
+                { "tipo": "Administración indirecta – Ley 29230 (Obras por Impuestos)", "marcar": false }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "11.03",
+          "nombre": "Fuente de financiamiento",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "11.03.1",
+              "nombre": "Fuente de financiamiento",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "fijas", "agrupador": false },
+              "captura": {
+                "hoja": "GESTIÓN",
+                "fila_inicial": 51,
+                "filas_base": 5,
+                "columnas": [
+                  { "id": "fuente", "columna": "B", "abarca_columnas": 5 },
+                  { "id": "marcar", "columna": "G", "abarca_columnas": 1 }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "fuente", "nombre": "Fuente de Financiamiento", "tipo": "texto_corto" },
+                { "id": "marcar", "nombre": "Marcar", "tipo": "booleano", "etiquetas": { "true": "Sí", "false": "No" } }
+              ],
+              "valor": [
+                { "fuente": "Recursos ordinarios", "marcar": false },
+                { "fuente": "Recursos directamente recaudados", "marcar": false },
+                { "fuente": "Recursos por operaciones oficiales de crédito", "marcar": false },
+                { "fuente": "Donaciones y transferencias", "marcar": false },
+                { "fuente": "Recursos determinados", "marcar": false }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "11.04",
+          "nombre": "Requerimientos institucionales y/o normativos",
+          "tipo_nodo": "grupo",
+          "campos": [
+            { "id": "11.04.1", "nombre": "Requerimientos institucionales y/o normativos", "tipo_nodo": "campo", "tipo": "texto_largo", "editable": true, "captura": { "hoja": "GESTIÓN", "columna": "B", "fila": 60, "abarca_columnas": 19, "abarca_filas": 3 }, "valor": "" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "12",
+      "nombre": "Impacto ambiental",
+      "tipo_nodo": "seccion",
+      "hoja": "IMPACTO AMBIENTAL",
+      "campos": [
+        {
+          "id": "12.01",
+          "nombre": "Matriz de impacto ambiental",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "12.01.1",
+              "nombre": "Matriz de impacto ambiental",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": { "filas": "planas", "columnas": "fijas", "agrupador": true },
+              "captura": {
+                "hoja": "IMPACTO AMBIENTAL",
+                "fila_inicial": 8,
+                "filas_base": 6,
+                "columnas": [
+                  { "id": "imp_negativo", "columna": "B", "abarca_columnas": 4 },
+                  { "id": "medidas_mitig", "columna": "F", "abarca_columnas": 3 },
+                  { "id": "costo", "columna": "I", "abarca_columnas": 1 }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                { "id": "imp_negativo", "nombre": "IMPACTOS NEGATIVOS", "tipo": "texto_corto" },
+                { "id": "medidas_mitig", "nombre": "MEDIDAS DE MITIGACIÓN", "tipo": "texto_corto" },
+                { "id": "costo", "nombre": "COSTO (S/)", "tipo": "decimal" }
+              ],
+              "valor": [
+                {
+                  "agrupador": { "inicia": "imp_negativo", "abarca_columnas": 4, "nombre": "Durante la Ejecución", "valores": {} },
+                  "valores": []
+                },
+                {
+                  "agrupador": { "inicia": "imp_negativo", "abarca_columnas": 4, "nombre": "Durante el Funcionamiento", "valores": {} },
+                  "valores": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "13",
+      "nombre": "Conclusiones y recomendaciones",
+      "tipo_nodo": "seccion",
+      "hoja": "CONCLUSIONES",
+      "campos": [
+        {
+          "id": "13.01",
+          "nombre": "Conclusiones y recomendaciones",
+          "tipo_nodo": "grupo",
+          "campos": [
+            { "id": "13.01.1", "nombre": "Conclusiones y recomendaciones", "tipo_nodo": "campo", "tipo": "texto_largo", "editable": true, "captura": { "hoja": "CONCLUSIONES", "columna": "B", "fila": 6, "abarca_columnas": 13, "abarca_filas": 4 }, "valor": "" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "14",
+      "nombre": "Firmas",
+      "tipo_nodo": "seccion",
+      "hoja": "FIRMAS",
+      "campos": [
+        {
+          "id": "14.01",
+          "nombre": "Firmas",
+          "tipo_nodo": "grupo",
+          "campos": [
+            { "id": "14.01.1", "nombre": "Firma del formulador", "tipo_nodo": "campo", "tipo": "firma", "editable": true, "valor": "" },
+            { "id": "14.01.2", "nombre": "Firma del responsable de la UF", "tipo_nodo": "campo", "tipo": "firma", "editable": true, "valor": "" }
+          ]
+        }
+      ]
+    }
+  ]
+}

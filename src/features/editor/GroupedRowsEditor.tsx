@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import TableRow from './TableRow';
+import TableHeaderRow from './TableHeaderRow';
 import { parseGroupedRows, newEmptyRow, getPeriodos, type GrupoFilas } from '../../lib/tableRowHelpers';
 import type { ConfigTabla } from '../../types';
 
@@ -65,17 +66,7 @@ export default function GroupedRowsEditor({ config, value, onChange }: Props) {
           </div>
           <table className="w-full text-xs">
             <thead>
-              <tr className="bg-brand-50/20">
-                {cols.map((col) => (
-                  <th key={col.id} className="px-2 py-1 text-left font-medium text-heading border-b border-brand-100 whitespace-nowrap text-[11px]">
-                    {col.nombre}
-                    {col.id === config.columnaDinamicaId && periodos.length > 0 && (
-                      <span className="text-muted font-normal"> · ×{periodos.length} períodos</span>
-                    )}
-                  </th>
-                ))}
-                <th className="w-8 border-b border-brand-100" />
-              </tr>
+              <TableHeaderRow cols={cols} periodos={periodos} columnaDinamicaId={config.columnaDinamicaId} />
             </thead>
             <tbody>
               {grupo.filas.map((row, ri) => (

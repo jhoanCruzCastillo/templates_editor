@@ -23,23 +23,6 @@ import type { VersionTab, Campo, Plantilla, Ejemplo } from '../../types';
 // Archivo de referencia del prototipo — con backend, cada ejemplo tendrá su propio archivo
 const FORMATO_6A_URL = '/docs/formato6a_directiva001_2019EF6301.xlsm';
 
-function slugify(text: string): string {
-  const sinDiacriticos = text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-  return sinDiacriticos.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-}
-
-function downloadJson(doc: unknown, filename: string): void {
-  const blob = new Blob([JSON.stringify(doc, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
-
 const MIN_LEFT = 180;
 const MIN_RIGHT = 300;
 const MIN_EXAMPLES = 220;
@@ -322,9 +305,6 @@ export default function PlantillaEditPage() {
       setActiveEjemplo((prev) => prev ? { ...prev, valores } : prev);
       const ejemploDoc = buildDocumento(editData, 'ejemplo', { ...activeEjemplo, valores });
       saveDocumentoJSON(`${editData.id}__ejemplo__${activeEjemplo.id}`, ejemploDoc);
-      downloadJson(ejemploDoc, `${editData.codigo}_ejemplo_${slugify(activeEjemplo.nombre)}.json`);
-    } else {
-      downloadJson(estructuraDoc, `${editData.codigo}_estructura.json`);
     }
 
     pushActividad(`Se guardó la plantilla ${editData.codigo} — ${editData.nombre}`, 'blue');

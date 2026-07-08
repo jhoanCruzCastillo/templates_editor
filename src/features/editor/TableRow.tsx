@@ -14,7 +14,8 @@ interface Props {
   onDelete: () => void;
 }
 
-// Fila compartida entre DynamicEditor (sin agrupador) y GroupedRowsEditor (con agrupador)
+// Fila compartida entre DynamicEditor (sin agrupador) y GroupedRowsEditor (con agrupador).
+// La columna dinámica se expande en una celda por período, alineada con TableHeaderRow.
 export default function TableRow({ cols, row, rowIndex, periodos, columnaDinamicaId, onCellChange, onPeriodoChange, onDelete }: Props) {
   return (
     <tr className="border-b border-brand-50 last:border-0 group">
@@ -24,24 +25,19 @@ export default function TableRow({ cols, row, rowIndex, periodos, columnaDinamic
         }
         if (col.id === columnaDinamicaId && periodos.length > 0) {
           const arr = Array.isArray(row[col.id]) ? (row[col.id] as string[]) : [];
-          return (
-            <td key={col.id} className="px-1 py-0.5">
-              <div className="flex gap-1">
-                {periodos.map((p, pi) => (
-                  <input
-                    key={pi}
-                    type="text"
-                    value={arr[pi] || ''}
-                    title={p}
-                    placeholder={p}
-                    onChange={(e) => onPeriodoChange(col.id, pi, e.target.value)}
-                    onClick={(e) => e.stopPropagation()}
-                    className="w-14 px-1 py-1 rounded border border-transparent hover:border-gray-200 focus:border-brand-300 text-xs text-heading focus:outline-none focus:ring-1 focus:ring-brand-500/30 bg-transparent"
-                  />
-                ))}
-              </div>
+          return periodos.map((p, pi) => (
+            <td key={`${col.id}-${pi}`} className="px-1 py-0.5 bg-amber-50/30">
+              <input
+                type="text"
+                value={arr[pi] || ''}
+                title={p}
+                placeholder="—"
+                onChange={(e) => onPeriodoChange(col.id, pi, e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+                className="w-16 px-1 py-1 rounded border border-transparent hover:border-amber-200 focus:border-amber-400 text-xs text-heading focus:outline-none focus:ring-1 focus:ring-amber-500/30 bg-transparent"
+              />
             </td>
-          );
+          ));
         }
         return (
           <td key={col.id} className="px-1 py-0.5">

@@ -84,14 +84,15 @@ function buildColumnas(rawCols: unknown, rawCapturaCols: unknown, esJerarquica: 
   return { columnas, columnaDinamicaId };
 }
 
-function periodosDesdeColumnasBase(rawCapturaCols: unknown): { periodoInicio?: number; periodoFin?: number } {
+function periodosDesdeColumnasBase(rawCapturaCols: unknown): { numPeriodos?: number; etiquetaPeriodo?: string } {
   const capturaCols = Array.isArray(rawCapturaCols) ? rawCapturaCols : [];
   const dinCol = capturaCols.find((c) => (c as Record<string, unknown>).id === ID_COLUMNA_DINAMICA) as Record<string, unknown> | undefined;
   const base = dinCol?.columnas_base;
   if (!Array.isArray(base) || base.length === 0) return {};
-  const nums = base.map((p) => Number(p)).filter((n) => !Number.isNaN(n));
-  if (nums.length === 0) return {};
-  return { periodoInicio: Math.min(...nums), periodoFin: Math.max(...nums) };
+  const primero = String(base[0] ?? '').trim();
+  const match = primero.match(/^(.*?)\s*\d+$/);
+  const etiqueta = match ? match[1].trim() : undefined;
+  return { numPeriodos: base.length, etiquetaPeriodo: etiqueta || undefined };
 }
 
 // --- Valor de tabla ---
@@ -162,15 +163,15 @@ function campoFromDoc(rawCampo: unknown): Campo {
     const rawCaptura = (raw.captura as Record<string, unknown>) ?? {};
     const rawCols = raw[esJerarquica ? 'niveles' : 'columnas'];
     const { columnas, columnaDinamicaId } = buildColumnas(rawCols, rawCaptura.columnas, esJerarquica);
-    const { periodoInicio, periodoFin } = periodosDesdeColumnasBase(rawCaptura.columnas);
+    const { numPeriodos, etiquetaPeriodo } = periodosDesdeColumnasBase(rawCaptura.columnas);
 
     const config: ConfigTabla = {
       subtipo,
       columnas,
       agrupador: Boolean(rawConfig.agrupador),
       columnaDinamicaId,
-      periodoInicio,
-      periodoFin,
+      numPeriodos,
+      etiquetaPeriodo,
       filasIniciales: 3,
       captura: {
         filaInicial: typeof rawCaptura.fila_inicial === 'number' ? rawCaptura.fila_inicial : undefined,

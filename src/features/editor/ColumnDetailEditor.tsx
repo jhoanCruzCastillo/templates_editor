@@ -1,5 +1,4 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { columnTypeIcons, columnTypeLabels } from '../../lib/icons';
 import type { ColumnaTabla, TipoColumna, NivelColumna } from '../../types';
 
@@ -10,35 +9,32 @@ interface Props {
   isMatrizPeriodos?: boolean;
   esColumnaDinamica?: boolean;
   onSetColumnaDinamica?: (esDinamica: boolean) => void;
+  numPeriodos?: number;
+  etiquetaPeriodo?: string;
+  onPeriodosChange?: (updates: { numPeriodos?: number; etiquetaPeriodo?: string }) => void;
   onChange: (updates: Partial<ColumnaTabla>) => void;
-  onBack: () => void;
 }
 
 const allColumnTypes = Object.entries(columnTypeLabels) as [TipoColumna, string][];
 
+// Contenido del formulario de detalle de columna — se monta dentro de ColumnDetailModal
 export default function ColumnDetailEditor({
   columna,
   allColumnas,
   onChange,
-  onBack,
   isJerarquica,
   isMatrizPeriodos,
   esColumnaDinamica,
   onSetColumnaDinamica,
+  numPeriodos,
+  etiquetaPeriodo,
+  onPeriodosChange,
 }: Props) {
   const icon = columnTypeIcons[columna.tipo];
   const otherCols = allColumnas.filter((c) => c.id !== columna.id);
 
   return (
     <div className="space-y-4">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-1.5 text-xs font-medium text-brand-600 hover:text-brand-700 transition-colors"
-      >
-        <FontAwesomeIcon icon={faChevronLeft} className="w-2.5 h-2.5" />
-        Volver a columnas
-      </button>
-
       <div className="flex items-center gap-2 pb-3 border-b border-gray-100">
         <div className="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
           <FontAwesomeIcon icon={icon} className="w-3.5 h-3.5" />
@@ -103,14 +99,41 @@ export default function ColumnDetailEditor({
 
       {/* Columna dinámica (solo matriz por períodos) */}
       {isMatrizPeriodos && (
-        <div className="flex items-center justify-between">
-          <label className="text-xs font-medium text-heading">Columna dinámica (se repite por período)</label>
-          <button
-            onClick={() => onSetColumnaDinamica?.(!esColumnaDinamica)}
-            className={`relative w-10 h-6 rounded-full transition-colors duration-100 ${esColumnaDinamica ? 'bg-brand-500' : 'bg-gray-300'}`}
-          >
-            <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-100 ${esColumnaDinamica ? 'left-4.5' : 'left-0.5'}`} />
-          </button>
+        <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-medium text-heading">Columna dinámica (se repite por período)</label>
+            <button
+              onClick={() => onSetColumnaDinamica?.(!esColumnaDinamica)}
+              className={`relative w-10 h-6 rounded-full transition-colors duration-100 shrink-0 ml-3 ${esColumnaDinamica ? 'bg-amber-500' : 'bg-gray-300'}`}
+            >
+              <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-100 ${esColumnaDinamica ? 'left-4.5' : 'left-0.5'}`} />
+            </button>
+          </div>
+          {esColumnaDinamica && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] font-medium text-muted mb-1">Cantidad de períodos</label>
+                <input
+                  type="number"
+                  value={numPeriodos ?? ''}
+                  onChange={(e) => onPeriodosChange?.({ numPeriodos: e.target.value ? Number(e.target.value) : undefined })}
+                  placeholder="Ej. 10"
+                  min={1}
+                  className="w-full px-3 py-2 rounded-lg border border-amber-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-medium text-muted mb-1">Etiqueta</label>
+                <input
+                  type="text"
+                  value={etiquetaPeriodo ?? ''}
+                  onChange={(e) => onPeriodosChange?.({ etiquetaPeriodo: e.target.value })}
+                  placeholder="Ej. Año (vacío = 1, 2, 3...)"
+                  className="w-full px-3 py-2 rounded-lg border border-amber-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+                />
+              </div>
+            </div>
+          )}
         </div>
       )}
 

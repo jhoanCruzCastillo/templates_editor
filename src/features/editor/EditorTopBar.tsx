@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faSave, faArrowLeft, faFileCode } from '@fortawesome/free-solid-svg-icons';
 import VersionTabs from '../../components/VersionTabs';
+import { useAuth } from '../../lib/auth';
 import type { VersionTab, Plantilla } from '../../types';
 
 interface Props {
@@ -26,6 +27,8 @@ export default function EditorTopBar({
   onPreviewExcel,
   onViewJson,
 }: Props) {
+  const { sesion } = useAuth();
+  const esSuperusuario = sesion?.rol === 'superusuario';
   const previewAsModal = Boolean(onPreviewExcel);
   return (
     <div className="shrink-0 border-b border-gray-100 bg-white px-6 py-3">
@@ -46,7 +49,7 @@ export default function EditorTopBar({
         </div>
         <div className="flex items-center gap-3">
           <VersionTabs activeTab={activeTab} onChange={onTabChange} disableProyecto />
-          {onViewJson && (
+          {onViewJson && esSuperusuario && (
             <button
               onClick={onViewJson}
               className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2"

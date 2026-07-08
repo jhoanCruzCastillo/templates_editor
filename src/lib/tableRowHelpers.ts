@@ -8,13 +8,12 @@ export interface TreeNode {
   children: TreeNode[];
 }
 
-/** Lista de etiquetas de período (años) generada desde periodoInicio..periodoFin */
+/** Lista de etiquetas de período generada desde numPeriodos + etiquetaPeriodo (ej. "Año 1", "Año 2"...) */
 export function getPeriodos(config: ConfigTabla): string[] {
-  const { periodoInicio: inicio, periodoFin: fin } = config;
-  if (inicio == null || fin == null || fin < inicio) return [];
-  const periodos: string[] = [];
-  for (let y = inicio; y <= fin; y++) periodos.push(String(y));
-  return periodos;
+  const n = config.numPeriodos;
+  if (!n || n < 1) return [];
+  const etiqueta = config.etiquetaPeriodo?.trim();
+  return Array.from({ length: n }, (_, i) => (etiqueta ? `${etiqueta} ${i + 1}` : String(i + 1)));
 }
 
 function emptyRow(config: ConfigTabla): FilaDinamica {

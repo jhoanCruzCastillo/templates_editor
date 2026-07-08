@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { subtipoTablaLabels } from '../../lib/icons';
-import ColumnDetailEditor from './ColumnDetailEditor';
+import ColumnDetailModal from './ColumnDetailModal';
 import TablePreview from './TablePreview';
 import type { ConfigTabla, ColumnaTabla, SubtipoTabla } from '../../types';
 
@@ -21,22 +21,7 @@ export default function TableColumnsEditor({ config, onChange }: Props) {
     });
   }, [config, onChange]);
 
-  const editingCol = editingColId ? config.columnas.find((c) => c.id === editingColId) : null;
-
-  if (editingCol) {
-    return (
-      <ColumnDetailEditor
-        columna={editingCol}
-        allColumnas={config.columnas}
-        isJerarquica={config.subtipo === 'jerarquica'}
-        isMatrizPeriodos={config.subtipo === 'matriz_por_periodos'}
-        esColumnaDinamica={config.columnaDinamicaId === editingCol.id}
-        onSetColumnaDinamica={(esDinamica) => onChange({ ...config, columnaDinamicaId: esDinamica ? editingCol.id : undefined })}
-        onChange={(updates) => updateColumn(editingCol.id, updates)}
-        onBack={() => setEditingColId(null)}
-      />
-    );
-  }
+  const editingCol = editingColId ? config.columnas.find((c) => c.id === editingColId) ?? null : null;
 
   return (
     <div className="space-y-4">
@@ -93,20 +78,6 @@ export default function TableColumnsEditor({ config, onChange }: Props) {
         </div>
       )}
 
-      {/* Config de período (matriz) */}
-      {config.subtipo === 'matriz_por_periodos' && (
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-medium text-heading mb-1">Año inicio</label>
-            <input type="number" value={config.periodoInicio ?? ''} onChange={(e) => onChange({ ...config, periodoInicio: Number(e.target.value) })} placeholder="2024" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30" />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-heading mb-1">Año fin</label>
-            <input type="number" value={config.periodoFin ?? ''} onChange={(e) => onChange({ ...config, periodoFin: Number(e.target.value) })} placeholder="2034" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30" />
-          </div>
-        </div>
-      )}
-
       {/* Config filas (dinámicas) */}
       {config.subtipo === 'filas_dinamicas' && (
         <div className="grid grid-cols-2 gap-3">
@@ -126,6 +97,21 @@ export default function TableColumnsEditor({ config, onChange }: Props) {
         config={config}
         onChange={onChange}
         onEditColumn={setEditingColId}
+      />
+
+      <ColumnDetailModal
+        isOpen={!!editingCol}
+        onClose={() => setEditingColId(null)}
+        columna={editingCol}
+        allColumnas={config.columnas}
+        isJerarquica={config.subtipo === 'jerarquica'}
+        isMatrizPeriodos={config.subtipo === 'matriz_por_periodos'}
+        esColumnaDinamica={!!editingCol && config.columnaDinamicaId === editingCol.id}
+        onSetColumnaDinamica={(esDinamica) => editingCol && onChange({ ...config, columnaDinamicaId: esDinamica ? editingCol.id : undefined })}
+        numPeriodos={config.numPeriodos}
+        etiquetaPeriodo={config.etiquetaPeriodo}
+        onPeriodosChange={(updates) => onChange({ ...config, ...updates })}
+        onChange={(updates) => editingCol && updateColumn(editingCol.id, updates)}
       />
     </div>
   );

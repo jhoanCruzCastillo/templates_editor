@@ -79,13 +79,16 @@ export default function TablePreview({ config, onChange, onEditColumn }: Props) 
               {config.columnas.map((col, i) => {
                 const colIcon = columnTypeIcons[col.tipo];
                 const isTypeOpen = typeDropdownColId === col.id;
+                const esDinamica = col.id === config.columnaDinamicaId;
                 return (
                   <th
                     key={col.id}
-                    className="relative px-2 py-1.5 text-left font-medium text-heading border-b border-gray-200 whitespace-nowrap group"
+                    className={`relative px-2 py-1.5 text-left font-medium text-heading border-b whitespace-nowrap group ${
+                      esDinamica ? 'bg-amber-50 border-amber-300' : 'border-gray-200'
+                    }`}
                   >
                     <div className="flex items-center gap-1">
-                      <FontAwesomeIcon icon={colIcon} className="w-2.5 h-2.5 text-gray-400 shrink-0" />
+                      <FontAwesomeIcon icon={colIcon} className={`w-2.5 h-2.5 shrink-0 ${esDinamica ? 'text-amber-500' : 'text-gray-400'}`} />
                       <span className="truncate text-[11px]">{col.nombre}</span>
                     </div>
                     {/* Botones al hover */}
@@ -119,8 +122,8 @@ export default function TablePreview({ config, onChange, onEditColumn }: Props) 
                             {' '}· {col.nivel === 'padre' ? '↕ Padre' : '↔ Hijo'}
                           </span>
                         )}
-                        {col.id === config.columnaDinamicaId && periodos.length > 0 && (
-                          <span className="text-brand-500"> · ×{periodos.length} períodos</span>
+                        {esDinamica && (
+                          <span className="text-amber-600 font-medium"> · {periodos.length > 0 ? `×${periodos.length} períodos` : 'dinámica'}</span>
                         )}
                         {' ▾'}
                       </button>
@@ -196,7 +199,10 @@ export default function TablePreview({ config, onChange, onEditColumn }: Props) 
               [1, 2, 3].map((row) => (
                 <tr key={row} className="border-b border-gray-100 last:border-0">
                   {config.columnas.map((col) => (
-                    <td key={col.id} className="px-2 py-1.5 text-muted whitespace-nowrap">
+                    <td
+                      key={col.id}
+                      className={`px-2 py-1.5 text-muted whitespace-nowrap ${col.id === config.columnaDinamicaId ? 'bg-amber-50/40' : ''}`}
+                    >
                       {col.tipo === 'auto_numerico' ? row : '—'}
                     </td>
                   ))}

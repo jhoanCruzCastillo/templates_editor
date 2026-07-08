@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faSave, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faSave, faArrowLeft, faFileCode } from '@fortawesome/free-solid-svg-icons';
 import VersionTabs from '../../components/VersionTabs';
 import type { VersionTab, Plantilla } from '../../types';
 
@@ -11,6 +11,9 @@ interface Props {
   activeTab: VersionTab;
   onTabChange: (tab: VersionTab) => void;
   onSave: () => void;
+  /** Si se define, "Vista previa" abre el modal de Excel en vez de navegar */
+  onPreviewExcel?: () => void;
+  onViewJson?: () => void;
 }
 
 export default function EditorTopBar({
@@ -20,7 +23,10 @@ export default function EditorTopBar({
   activeTab,
   onTabChange,
   onSave,
+  onPreviewExcel,
+  onViewJson,
 }: Props) {
+  const previewAsModal = Boolean(onPreviewExcel);
   return (
     <div className="shrink-0 border-b border-gray-100 bg-white px-6 py-3">
       <div className="flex items-center justify-between">
@@ -40,13 +46,32 @@ export default function EditorTopBar({
         </div>
         <div className="flex items-center gap-3">
           <VersionTabs activeTab={activeTab} onChange={onTabChange} disableProyecto />
-          <Link
-            to={`/sectores/${sectorId}/plantilla/${plantillaId}`}
-            className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2"
-          >
-            <FontAwesomeIcon icon={faEye} className="w-3.5 h-3.5" />
-            Vista previa
-          </Link>
+          {onViewJson && (
+            <button
+              onClick={onViewJson}
+              className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <FontAwesomeIcon icon={faFileCode} className="w-3.5 h-3.5" />
+              Ver JSON
+            </button>
+          )}
+          {previewAsModal ? (
+            <button
+              onClick={onPreviewExcel}
+              className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <FontAwesomeIcon icon={faEye} className="w-3.5 h-3.5" />
+              Vista previa
+            </button>
+          ) : (
+            <Link
+              to={`/sectores/${sectorId}/plantilla/${plantillaId}`}
+              className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <FontAwesomeIcon icon={faEye} className="w-3.5 h-3.5" />
+              Vista previa
+            </Link>
+          )}
           <button
             onClick={onSave}
             className="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 transition-colors flex items-center gap-2"

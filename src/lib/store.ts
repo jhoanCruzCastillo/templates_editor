@@ -4,6 +4,7 @@ import { ejemplos as ejemplosSeed } from '../data/ejemplos';
 import { actividadReciente as actividadSeed } from '../data/actividad';
 import { usuarios } from '../data/usuarios';
 import type { Sector, Plantilla, Ejemplo, ActividadReciente, Usuario, Sesion } from '../types';
+import type { DocumentoJSON } from './schemaExport';
 
 const KEYS = {
   sectores: 'pf_sectores',
@@ -12,6 +13,7 @@ const KEYS = {
   actividad: 'pf_actividad',
   sesion: 'pf_sesion',
   initialized: 'pf_initialized',
+  documentos: 'pf_documentos',
 } as const;
 
 function read<T>(key: string, fallback: T): T {
@@ -28,14 +30,14 @@ function write<T>(key: string, data: T): void {
 }
 
 export function initStore() {
-  // v7: categorías de instrumento (formato, ioarr, ficha_tecnica, perfil) + tipologías IOARR
+  // v8: captura Excel (hoja/columna/fila) + tabla completa (agrupador, columnas dinámicas)
   const ver = localStorage.getItem(KEYS.initialized);
-  if (!ver || ver < '7') {
+  if (!ver || ver < '8') {
     write(KEYS.sectores, sectoresSeed);
     write(KEYS.plantillas, plantillasSeed);
     write(KEYS.ejemplos, ejemplosSeed);
     write(KEYS.actividad, actividadSeed);
-    localStorage.setItem(KEYS.initialized, '7');
+    localStorage.setItem(KEYS.initialized, '8');
   }
 }
 
@@ -77,6 +79,18 @@ export function loadActividad(): ActividadReciente[] {
 
 export function saveActividad(data: ActividadReciente[]): void {
   write(KEYS.actividad, data);
+}
+
+// --- Documentos JSON exportados (esquema oficial) ---
+
+export function loadDocumentos(): Record<string, DocumentoJSON> {
+  return read<Record<string, DocumentoJSON>>(KEYS.documentos, {});
+}
+
+export function saveDocumentoJSON(clave: string, doc: DocumentoJSON): void {
+  const all = loadDocumentos();
+  all[clave] = doc;
+  write(KEYS.documentos, all);
 }
 
 // --- Autenticación ---

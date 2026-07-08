@@ -140,7 +140,6 @@ export const plantillas: Plantilla[] = [
                 tipo: 'tabla',
                 editable: true,
                 descripcion: 'Si el área de influencia abarca más de una localización, se podrán añadir más localizaciones.',
-                valorEjemplo: '1 | Cusco | Cusco | Wanchaq | Comunidad Wanchaq | 080108',
                 configTabla: {
                   subtipo: 'filas_dinamicas',
                   filasIniciales: 3,

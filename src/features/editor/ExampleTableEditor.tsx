@@ -1,16 +1,10 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import DynamicEditor from './DynamicEditor';
+import GroupedRowsEditor from './GroupedRowsEditor';
+import { createNodeChain, parseTree, type TreeNode } from '../../lib/tableRowHelpers';
 import type { ConfigTabla } from '../../types';
-
-// --- Tipos internos ---
-
-interface FilaDinamica { [colId: string]: string }
-
-interface TreeNode {
-  value: string;
-  children: TreeNode[];
-}
 
 interface Props {
   config: ConfigTabla;
@@ -18,22 +12,7 @@ interface Props {
   onChange: (value: string) => void;
 }
 
-// --- Helpers ---
-
-function parseDynamic(value: string, initial: number): FilaDinamica[] {
-  try { const p = JSON.parse(value); if (Array.isArray(p) && (p.length === 0 || !('value' in p[0]))) return p; } catch {}
-  return Array.from({ length: initial }, () => ({}));
-}
-
-function createNodeChain(remainingLevels: number): TreeNode {
-  if (remainingLevels <= 1) return { value: '', children: [] };
-  return { value: '', children: [createNodeChain(remainingLevels - 1)] };
-}
-
-function parseTree(value: string, numCols: number): TreeNode[] {
-  try { const p = JSON.parse(value); if (Array.isArray(p) && p.length > 0 && 'value' in p[0]) return p; } catch {}
-  return [createNodeChain(numCols)];
-}
+// --- Helpers (jerárquica) ---
 
 function cloneTree(roots: TreeNode[]): TreeNode[] { return JSON.parse(JSON.stringify(roots)); }
 
@@ -47,58 +26,8 @@ function getNode(roots: TreeNode[], path: number[]): TreeNode | null {
 
 export default function ExampleTableEditor({ config, value, onChange }: Props) {
   if (config.subtipo === 'jerarquica') return <HierarchicalEditor columns={config.columnas} value={value} onChange={onChange} />;
+  if (config.agrupador) return <GroupedRowsEditor config={config} value={value} onChange={onChange} />;
   return <DynamicEditor config={config} value={value} onChange={onChange} />;
-}
-
-// ==================== FILAS DINÁMICAS ====================
-
-function DynamicEditor({ config, value, onChange }: Props) {
-  const cols = config.columnas;
-  const [rows, setRows] = useState<FilaDinamica[]>(() => parseDynamic(value, config.filasIniciales ?? 3));
-  const persist = useCallback((next: FilaDinamica[]) => { setRows(next); onChange(JSON.stringify(next)); }, [onChange]);
-  const updateCell = (ri: number, colId: string, val: string) => persist(rows.map((r, i) => (i === ri ? { ...r, [colId]: val } : r)));
-  const addRow = () => persist([...rows, {}]);
-  const removeRow = (ri: number) => { if (rows.length > 1) persist(rows.filter((_, i) => i !== ri)); };
-
-  return (
-    <div className="mt-2">
-      <div className="overflow-x-auto rounded-lg border border-brand-200">
-        <table className="w-full text-xs">
-          <thead>
-            <tr className="bg-brand-50/40">
-              {cols.map((col) => (
-                <th key={col.id} className="px-2 py-1.5 text-left font-medium text-heading border-b border-brand-100 whitespace-nowrap text-[11px]">{col.nombre}</th>
-              ))}
-              <th className="w-8 border-b border-brand-100" />
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, ri) => (
-              <tr key={ri} className="border-b border-brand-50 last:border-0 group">
-                {cols.map((col) => (
-                  <td key={col.id} className="px-1 py-0.5">
-                    {col.tipo === 'auto_numerico' ? <span className="text-muted px-1">{ri + 1}</span> : (
-                      <input type="text" value={row[col.id] || ''} onChange={(e) => updateCell(ri, col.id, e.target.value)} onClick={(e) => e.stopPropagation()} placeholder="—"
-                        className="w-full px-1.5 py-1 rounded border border-transparent hover:border-gray-200 focus:border-brand-300 text-xs text-heading focus:outline-none focus:ring-1 focus:ring-brand-500/30 bg-transparent" />
-                    )}
-                  </td>
-                ))}
-                <td className="px-1 py-0.5">
-                  <button onClick={(e) => { e.stopPropagation(); removeRow(ri); }} className="w-5 h-5 rounded flex items-center justify-center text-gray-300 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-opacity">
-                    <FontAwesomeIcon icon={faTrash} className="w-2.5 h-2.5" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <button onClick={(e) => { e.stopPropagation(); addRow(); }}
-        className="mt-1.5 w-full py-1.5 rounded-lg border border-dashed border-brand-200 text-[11px] font-medium text-brand-600 hover:bg-brand-50 transition-colors flex items-center justify-center gap-1">
-        <FontAwesomeIcon icon={faPlus} className="w-2.5 h-2.5" /> Agregar fila
-      </button>
-    </div>
-  );
 }
 
 // ==================== JERÁRQUICA ====================

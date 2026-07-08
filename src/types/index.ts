@@ -42,6 +42,17 @@ export interface ColumnaTabla {
   fuenteCatalogo?: string;
   encadenaA?: string;
   formula?: string;
+  /** Letra de columna Excel donde inicia esta columna (captura) */
+  columnaExcel?: string;
+  /** Cantidad de columnas Excel que abarca esta columna (captura) */
+  abarcaColumnasExcel?: number;
+}
+
+export interface CapturaTabla {
+  /** Primera fila de Excel donde empieza el primer registro de datos (no la cabecera) */
+  filaInicial?: number;
+  /** Cantidad de filas que ocupa la tabla en su estado base/ejemplo */
+  filasBase?: number;
 }
 
 export interface ConfigTabla {
@@ -51,6 +62,12 @@ export interface ConfigTabla {
   maxFilas?: number;
   periodoInicio?: number;
   periodoFin?: number;
+  /** Filas planas agrupadas bajo un encabezado de grupo (no aplica a jerárquica) */
+  agrupador?: boolean;
+  /** Id de la columna cuyo valor se repite por período (solo subtipo matriz_por_periodos) */
+  columnaDinamicaId?: string;
+  /** Posición de arranque de la tabla en el Excel */
+  captura?: CapturaTabla;
 }
 
 export interface Sector {
@@ -100,6 +117,8 @@ export interface Seccion {
   nombre: string;
   cantidadCampos: number;
   subsecciones: Subseccion[];
+  /** Pestaña de Excel donde se ubican todos los campos de esta sección (captura) */
+  hoja?: string;
 }
 
 export interface Subseccion {
@@ -107,6 +126,13 @@ export interface Subseccion {
   codigo: string;
   nombre: string;
   campos: Campo[];
+}
+
+export interface CapturaCampo {
+  columna: string;
+  fila: number;
+  abarcaColumnas?: number;
+  abarcaFilas?: number;
 }
 
 export interface Campo {
@@ -121,6 +147,8 @@ export interface Campo {
   valorEjemplo?: string;
   configTabla?: ConfigTabla;
   config?: Record<string, unknown>;
+  /** Ubicación de este campo en el Excel (captura) — no aplica a campos tipo tabla */
+  captura?: CapturaCampo;
 }
 
 export interface Ejemplo {

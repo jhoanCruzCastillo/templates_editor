@@ -13,6 +13,7 @@ interface Props {
   onAddCampo?: (subseccionId: string, subseccionCodigo: string, camposCount: number) => void;
   onDeleteCampo?: (campoId: string, subseccionId: string) => void;
   onSectionNameChange?: (seccionId: string, nombre: string) => void;
+  onSectionHojaChange?: (seccionId: string, hoja: string) => void;
   onSubsectionNameChange?: (subseccionId: string, nombre: string) => void;
   onAddSubsection?: (seccionId: string) => void;
   onDeleteSubsection?: (subseccionId: string, seccionId: string) => void;
@@ -30,6 +31,7 @@ export default function SectionContent({
   onAddCampo,
   onDeleteCampo,
   onSectionNameChange,
+  onSectionHojaChange,
   onSubsectionNameChange,
   onAddSubsection,
   onDeleteSubsection,
@@ -47,11 +49,24 @@ export default function SectionContent({
           type="text"
           value={seccion.nombre}
           onChange={(e) => onSectionNameChange(seccion.id, e.target.value)}
-          className="text-xl font-bold text-heading mb-6 w-full bg-transparent border-b-2 border-transparent hover:border-gray-200 focus:border-brand-500 focus:outline-none px-1 py-0.5 -ml-1 rounded"
+          className="text-xl font-bold text-heading w-full bg-transparent border-b-2 border-transparent hover:border-gray-200 focus:border-brand-500 focus:outline-none px-1 py-0.5 -ml-1 rounded"
           placeholder="Nombre de la sección..."
         />
       ) : (
         <h2 className="text-xl font-bold text-heading mb-6">{seccion.nombre}</h2>
+      )}
+
+      {onSectionHojaChange && (
+        <div className="flex items-center gap-1.5 mb-6 mt-1 -ml-1">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">Hoja de Excel</span>
+          <input
+            type="text"
+            value={seccion.hoja || ''}
+            onChange={(e) => onSectionHojaChange(seccion.id, e.target.value)}
+            placeholder="Ej. DATOS GENERALES"
+            className="text-xs font-mono text-heading bg-transparent border-b border-transparent hover:border-gray-200 focus:border-brand-500 focus:outline-none px-1 py-0.5 rounded"
+          />
+        </div>
       )}
 
       {seccion.subsecciones.map((sub) => (

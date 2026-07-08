@@ -9,6 +9,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { columnTypeIcons, columnTypeLabels } from '../../lib/icons';
 import { generateId } from '../../lib/store';
+import { getPeriodos } from '../../lib/tableRowHelpers';
 import type { ConfigTabla, ColumnaTabla, TipoColumna } from '../../types';
 
 interface Props {
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export default function TablePreview({ config, onChange, onEditColumn }: Props) {
+  const periodos = getPeriodos(config);
   const [typeDropdownColId, setTypeDropdownColId] = useState<string | null>(null);
   const [newColName, setNewColName] = useState('');
   const [isAddingCol, setIsAddingCol] = useState(false);
@@ -116,6 +118,9 @@ export default function TablePreview({ config, onChange, onEditColumn }: Props) 
                           <span className={col.nivel === 'padre' ? ' text-amber-500' : ' text-blue-500'}>
                             {' '}· {col.nivel === 'padre' ? '↕ Padre' : '↔ Hijo'}
                           </span>
+                        )}
+                        {col.id === config.columnaDinamicaId && periodos.length > 0 && (
+                          <span className="text-brand-500"> · ×{periodos.length} períodos</span>
                         )}
                         {' ▾'}
                       </button>

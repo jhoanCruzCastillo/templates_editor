@@ -10,16 +10,35 @@ import FieldPropertiesPanel from './FieldPropertiesPanel';
 import EditorTopBar from './EditorTopBar';
 import ExamplesPanel from './ExamplesPanel';
 import ExcelPreviewModal from './ExcelPreviewModal';
+import JsonPreviewModal from './JsonPreviewModal';
 import ConfirmModal from '../../components/ConfirmModal';
 import NuevoEjemploModal from './NuevoEjemploModal';
 import { usePlantilla, useEjemplos } from '../../lib/hooks';
 import { useAppContext } from '../../lib/context';
 import { useToast } from '../../components/Toast';
-import { generateId } from '../../lib/store';
+import { generateId, saveDocumentoJSON } from '../../lib/store';
+import { buildDocumento } from '../../lib/schemaExport';
 import type { VersionTab, Campo, Plantilla, Ejemplo } from '../../types';
 
 // Archivo de referencia del prototipo — con backend, cada ejemplo tendrá su propio archivo
 const FORMATO_6A_URL = '/docs/formato6a_directiva001_2019EF6301.xlsm';
+
+function slugify(text: string): string {
+  const sinDiacriticos = text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  return sinDiacriticos.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
+function downloadJson(doc: unknown, filename: string): void {
+  const blob = new Blob([JSON.stringify(doc, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
 
 const MIN_LEFT = 180;
 const MIN_RIGHT = 300;
@@ -47,6 +66,7 @@ export default function PlantillaEditPage() {
   const [editedValores, setEditedValores] = useState<Record<string, string>>({});
   const [showNuevoEjemplo, setShowNuevoEjemplo] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [jsonPreview, setJsonPreview] = useState<{ title: string; json: string } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Ejemplo | null>(null);
   const [isNewCampo, setIsNewCampo] = useState(false);
   const [leftWidth, setLeftWidth] = useState(DEFAULT_LEFT);
@@ -156,6 +176,16 @@ export default function PlantillaEditPage() {
       const next = structuredClone(prev);
       const sec = next.secciones.find((s) => s.id === seccionId);
       if (sec) sec.nombre = nombre;
+      return next;
+    });
+  }, []);
+
+  const handleSectionHojaChange = useCallback((seccionId: string, hoja: string) => {
+    setEditData((prev) => {
+      if (!prev) return prev;
+      const next = structuredClone(prev);
+      const sec = next.secciones.find((s) => s.id === seccionId);
+      if (sec) sec.hoja = hoja;
       return next;
     });
   }, []);
@@ -282,13 +312,35 @@ export default function PlantillaEditPage() {
   const handleSave = useCallback(() => {
     if (!editData) return;
     updatePlantilla(editData.id, { ...editData, fechaActualizacion: new Date().toLocaleDateString('es-PE') });
+
+    const estructuraDoc = buildDocumento(editData, 'estructura');
+    saveDocumentoJSON(`${editData.id}__estructura`, estructuraDoc);
+
     if (activeTab === 'ejemplos' && activeEjemplo) {
-      updateEjemplo(activeEjemplo.id, { valores: { ...editedValores } });
-      setActiveEjemplo((prev) => prev ? { ...prev, valores: { ...editedValores } } : prev);
+      const valores = { ...editedValores };
+      updateEjemplo(activeEjemplo.id, { valores });
+      setActiveEjemplo((prev) => prev ? { ...prev, valores } : prev);
+      const ejemploDoc = buildDocumento(editData, 'ejemplo', { ...activeEjemplo, valores });
+      saveDocumentoJSON(`${editData.id}__ejemplo__${activeEjemplo.id}`, ejemploDoc);
+      downloadJson(ejemploDoc, `${editData.codigo}_ejemplo_${slugify(activeEjemplo.nombre)}.json`);
+    } else {
+      downloadJson(estructuraDoc, `${editData.codigo}_estructura.json`);
     }
+
     pushActividad(`Se guardó la plantilla ${editData.codigo} — ${editData.nombre}`, 'blue');
     toast(`Plantilla "${editData.codigo}" guardada`);
   }, [editData, activeTab, activeEjemplo, editedValores, updatePlantilla, updateEjemplo, pushActividad, toast]);
+
+  const handleViewJson = useCallback(() => {
+    if (!editData) return;
+    if (activeTab === 'ejemplos' && activeEjemplo) {
+      const doc = buildDocumento(editData, 'ejemplo', { ...activeEjemplo, valores: editedValores });
+      setJsonPreview({ title: `${editData.codigo} — Ejemplo: ${activeEjemplo.nombre}`, json: JSON.stringify(doc, null, 2) });
+    } else {
+      const doc = buildDocumento(editData, 'estructura');
+      setJsonPreview({ title: `${editData.codigo} — Estructura`, json: JSON.stringify(doc, null, 2) });
+    }
+  }, [editData, activeTab, activeEjemplo, editedValores]);
 
   if (!plantilla) return <div className="p-8 text-muted">Plantilla no encontrada</div>;
 
@@ -308,6 +360,8 @@ export default function PlantillaEditPage() {
         activeTab={activeTab}
         onTabChange={handleTabChange}
         onSave={handleSave}
+        onPreviewExcel={() => setShowPreview(true)}
+        onViewJson={handleViewJson}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -364,6 +418,7 @@ export default function PlantillaEditPage() {
                     onAddCampo={handleAddCampo}
                     onDeleteCampo={handleDeleteCampo}
                     onSectionNameChange={handleSectionNameChange}
+                    onSectionHojaChange={handleSectionHojaChange}
                     onSubsectionNameChange={handleSubsectionNameChange}
                     onAddSubsection={handleAddSubsection}
                     onDeleteSubsection={handleDeleteSubsection}
@@ -442,6 +497,13 @@ export default function PlantillaEditPage() {
         onClose={() => setShowPreview(false)}
         fileUrl={FORMATO_6A_URL}
         title="Formato 6A — Directiva 001-2019-EF/63.01"
+      />
+
+      <JsonPreviewModal
+        isOpen={!!jsonPreview}
+        onClose={() => setJsonPreview(null)}
+        title={jsonPreview?.title ?? ''}
+        json={jsonPreview?.json ?? ''}
       />
     </div>
   );

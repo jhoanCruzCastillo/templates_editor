@@ -22,6 +22,7 @@ const allowedFieldTypes: TipoCampo[] = [
   'fecha',
   'booleano',
   'mapa_coordenadas',
+  'tabla',
 ];
 
 const allFieldTypes = allowedFieldTypes.map((k) => [k, fieldTypeLabels[k]] as [TipoCampo, string]);
@@ -119,8 +120,6 @@ export default function FieldPropertiesPanel({ campo, autoFocusEtiqueta, ejemplo
             {allFieldTypes.map(([key, label]) => (
               <option key={key} value={key}>{label}</option>
             ))}
-            {/* Mostrar tabla como opción inactiva */}
-            <option value="tabla" disabled>{fieldTypeLabels.tabla} (trabajando)</option>
           </select>
           <FontAwesomeIcon
             icon={icon}
@@ -178,6 +177,60 @@ export default function FieldPropertiesPanel({ campo, autoFocusEtiqueta, ejemplo
             placeholder="Ej. UBIGEO, Niveles de gobierno..."
             className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
           />
+        </div>
+      )}
+
+      {/* === UBICACIÓN EN EXCEL (captura) — solo campos no-tabla === */}
+      {!isTable && (
+        <div className="pt-3 border-t border-gray-100">
+          <label className="block text-xs font-semibold uppercase tracking-widest text-muted mb-2">
+            Ubicación en Excel
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-medium text-muted mb-1">Columna</label>
+              <input
+                type="text"
+                value={campo.captura?.columna || ''}
+                onChange={(e) => update({ captura: { columna: e.target.value, fila: campo.captura?.fila ?? 0, abarcaColumnas: campo.captura?.abarcaColumnas, abarcaFilas: campo.captura?.abarcaFilas } })}
+                placeholder="Ej. R"
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-medium text-muted mb-1">Fila</label>
+              <input
+                type="number"
+                value={campo.captura?.fila ?? ''}
+                onChange={(e) => update({ captura: { columna: campo.captura?.columna ?? '', fila: e.target.value ? Number(e.target.value) : 0, abarcaColumnas: campo.captura?.abarcaColumnas, abarcaFilas: campo.captura?.abarcaFilas } })}
+                placeholder="Ej. 9"
+                min={1}
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-medium text-muted mb-1">Abarca columnas</label>
+              <input
+                type="number"
+                value={campo.captura?.abarcaColumnas ?? ''}
+                onChange={(e) => update({ captura: { columna: campo.captura?.columna ?? '', fila: campo.captura?.fila ?? 0, abarcaColumnas: e.target.value ? Number(e.target.value) : undefined, abarcaFilas: campo.captura?.abarcaFilas } })}
+                placeholder="1"
+                min={1}
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-medium text-muted mb-1">Abarca filas</label>
+              <input
+                type="number"
+                value={campo.captura?.abarcaFilas ?? ''}
+                onChange={(e) => update({ captura: { columna: campo.captura?.columna ?? '', fila: campo.captura?.fila ?? 0, abarcaColumnas: campo.captura?.abarcaColumnas, abarcaFilas: e.target.value ? Number(e.target.value) : undefined } })}
+                placeholder="1"
+                min={1}
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
+              />
+            </div>
+          </div>
         </div>
       )}
 

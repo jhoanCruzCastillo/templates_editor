@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faFileImport } from '@fortawesome/free-solid-svg-icons';
 import { motion } from 'framer-motion';
 import Breadcrumbs from '../../components/Breadcrumbs';
 import PlantillaTable from './PlantillaTable';
 import NuevaPlantillaModal from './NuevaPlantillaModal';
+import ImportarJsonModal from './ImportarJsonModal';
 import { useSector, usePlantillasBySector } from '../../lib/hooks';
 import { useAppContext } from '../../lib/context';
 import { useToast } from '../../components/Toast';
 import { generateId } from '../../lib/store';
 import { sectorIcons } from '../../lib/icons';
+import type { Seccion, TipoInstrumento, TipologiaIoarr } from '../../types';
 
 export default function SectorDetallePage() {
   const { sectorId } = useParams<{ sectorId: string }>();
@@ -19,6 +21,7 @@ export default function SectorDetallePage() {
   const { addPlantilla, pushActividad } = useAppContext();
   const { toast } = useToast();
   const [showModal, setShowModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   if (!sector) return <div className="p-8 text-muted">Sector no encontrado</div>;
 
@@ -46,6 +49,30 @@ export default function SectorDetallePage() {
     });
     pushActividad(`Se creó la plantilla ${codigo} — ${nombre}`, 'green');
     toast(`Plantilla "${codigo}" creada`);
+  };
+
+  const handleImport = (data: {
+    codigo: string;
+    nombre: string;
+    instrumento: TipoInstrumento;
+    tipologiaIoarr?: TipologiaIoarr;
+    secciones: Seccion[];
+  }) => {
+    addPlantilla({
+      id: generateId(),
+      codigo: data.codigo,
+      nombre: data.nombre,
+      descripcion: '',
+      sectorId: sectorId!,
+      instrumento: data.instrumento,
+      tipologiaIoarr: data.tipologiaIoarr,
+      cantidadSecciones: data.secciones.length,
+      cantidadEjemplos: 0,
+      fechaActualizacion: new Date().toLocaleDateString('es-PE'),
+      secciones: data.secciones,
+    });
+    pushActividad(`Se importó la plantilla ${data.codigo} — ${data.nombre} desde JSON`, 'green');
+    toast(`Plantilla "${data.codigo}" importada`);
   };
 
   return (
@@ -83,13 +110,22 @@ export default function SectorDetallePage() {
             </p>
           </div>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="px-5 py-2.5 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 transition-colors flex items-center gap-2"
-        >
-          <FontAwesomeIcon icon={faPlus} className="w-3.5 h-3.5" />
-          Nueva plantilla
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2"
+          >
+            <FontAwesomeIcon icon={faFileImport} className="w-3.5 h-3.5" />
+            Importar JSON
+          </button>
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-5 py-2.5 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 transition-colors flex items-center gap-2"
+          >
+            <FontAwesomeIcon icon={faPlus} className="w-3.5 h-3.5" />
+            Nueva plantilla
+          </button>
+        </div>
       </motion.div>
 
       <PlantillaTable plantillas={plantillas} sectorId={sectorId!} />
@@ -98,6 +134,12 @@ export default function SectorDetallePage() {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         onCreate={handleCreate}
+      />
+
+      <ImportarJsonModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={handleImport}
       />
     </div>
   );

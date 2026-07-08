@@ -7,13 +7,25 @@ interface Props {
   columna: ColumnaTabla;
   allColumnas: ColumnaTabla[];
   isJerarquica?: boolean;
+  isMatrizPeriodos?: boolean;
+  esColumnaDinamica?: boolean;
+  onSetColumnaDinamica?: (esDinamica: boolean) => void;
   onChange: (updates: Partial<ColumnaTabla>) => void;
   onBack: () => void;
 }
 
 const allColumnTypes = Object.entries(columnTypeLabels) as [TipoColumna, string][];
 
-export default function ColumnDetailEditor({ columna, allColumnas, onChange, onBack, isJerarquica }: Props) {
+export default function ColumnDetailEditor({
+  columna,
+  allColumnas,
+  onChange,
+  onBack,
+  isJerarquica,
+  isMatrizPeriodos,
+  esColumnaDinamica,
+  onSetColumnaDinamica,
+}: Props) {
   const icon = columnTypeIcons[columna.tipo];
   const otherCols = allColumnas.filter((c) => c.id !== columna.id);
 
@@ -86,6 +98,19 @@ export default function ColumnDetailEditor({ columna, allColumnas, onChange, onB
               ? 'La celda se fusiona verticalmente por grupo.'
               : 'Se repite por cada fila hija del grupo.'}
           </p>
+        </div>
+      )}
+
+      {/* Columna dinámica (solo matriz por períodos) */}
+      {isMatrizPeriodos && (
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-medium text-heading">Columna dinámica (se repite por período)</label>
+          <button
+            onClick={() => onSetColumnaDinamica?.(!esColumnaDinamica)}
+            className={`relative w-10 h-6 rounded-full transition-colors duration-100 ${esColumnaDinamica ? 'bg-brand-500' : 'bg-gray-300'}`}
+          >
+            <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-100 ${esColumnaDinamica ? 'left-4.5' : 'left-0.5'}`} />
+          </button>
         </div>
       )}
 
@@ -166,6 +191,36 @@ export default function ColumnDetailEditor({ columna, allColumnas, onChange, onB
           max={100}
           className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
         />
+      </div>
+
+      {/* Ubicación en Excel (captura) */}
+      <div className="pt-3 border-t border-gray-100">
+        <label className="block text-xs font-semibold uppercase tracking-widest text-muted mb-2">
+          Ubicación en Excel
+        </label>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[10px] font-medium text-muted mb-1">Columna</label>
+            <input
+              type="text"
+              value={columna.columnaExcel || ''}
+              onChange={(e) => onChange({ columnaExcel: e.target.value })}
+              placeholder="Ej. B"
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-medium text-muted mb-1">Abarca columnas</label>
+            <input
+              type="number"
+              value={columna.abarcaColumnasExcel ?? ''}
+              onChange={(e) => onChange({ abarcaColumnasExcel: e.target.value ? Number(e.target.value) : undefined })}
+              placeholder="1"
+              min={1}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

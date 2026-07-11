@@ -3,7 +3,7 @@ import { faEllipsisVertical, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { fieldTypeIcons, fieldTypeLabels, subtipoTablaLabels, columnTypeLabels } from '../../lib/icons';
 import ExampleTableEditor from './ExampleTableEditor';
 import CampoCoordenadasInput from '../../components/CampoCoordenadasInput';
-import type { Campo } from '../../types';
+import type { Campo, ConfigTabla } from '../../types';
 
 interface Props {
   campo: Campo;
@@ -15,6 +15,7 @@ interface Props {
   showMenuButton?: boolean;
   onDelete?: () => void;
   onDefaultValueChange?: (value: string) => void;
+  onConfigTablaChange?: (config: ConfigTabla) => void;
 }
 
 export default function FieldCard({
@@ -27,6 +28,7 @@ export default function FieldCard({
   showMenuButton,
   onDelete,
   onDefaultValueChange,
+  onConfigTablaChange,
 }: Props) {
   const icon = fieldTypeIcons[campo.tipo];
   const typeLabel = fieldTypeLabels[campo.tipo];
@@ -134,6 +136,7 @@ export default function FieldCard({
                   config={campo.configTabla}
                   value={campo.valorEjemplo || ''}
                   onChange={onDefaultValueChange}
+                  onConfigChange={onConfigTablaChange}
                 />
               ) : (
                 <input

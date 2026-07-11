@@ -24,11 +24,16 @@ function mapTipoCampo(tipo: TipoCampo): string {
 }
 
 const tipoColumnaMap: Partial<Record<TipoColumna, string>> = {
-  texto: 'texto_corto',
+  texto_corto: 'texto_corto',
+  texto_largo: 'texto_largo',
   numero: 'numero',
+  decimal: 'decimal',
   fecha: 'fecha',
+  booleano: 'booleano',
+  coordenadas: 'coordenadas',
   calculado: 'calculado',
   auto_numerico: 'numero',
+  // catalogo/catalogo_encadenado: sin equivalente documentado todavía — caen a texto_corto
 };
 
 function mapTipoColumna(tipo: TipoColumna): string {
@@ -72,6 +77,7 @@ function capturaTabla(seccion: Seccion, config: ConfigTabla) {
   const periodos = getPeriodos(config);
   return {
     hoja: seccion.hoja ?? '',
+    columna_inicial: config.captura?.columnaInicial ?? '',
     fila_inicial: config.captura?.filaInicial ?? 0,
     filas_base: config.captura?.filasBase ?? 0,
     columnas: config.columnas.map((col) => ({
@@ -161,7 +167,7 @@ function buildCampo(seccion: Seccion, campo: Campo, valorRaw: string | undefined
         agrupador: Boolean(config.agrupador),
       },
       captura: capturaTabla(seccion, config),
-      cabecera: [],
+      cabecera: (config.cabeceras ?? []).map((g) => ({ titulo: g.titulo, hijos: g.hijoIds })),
       [config.subtipo === 'jerarquica' ? 'niveles' : 'columnas']: columnasLogicas(config),
       valor: valorTabla(config, valorRaw),
     };

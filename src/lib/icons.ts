@@ -102,24 +102,45 @@ export const fieldTypeLabels: Record<TipoCampo, string> = {
 };
 
 export const columnTypeIcons: Record<TipoColumna, IconDefinition> = {
-  texto: faFont,
+  texto_corto: faFont,
+  texto_largo: faAlignLeft,
   numero: faHashtag,
+  decimal: faFileInvoice,
+  fecha: faCalendarDays,
+  booleano: faListCheck,
+  coordenadas: faLocationDot,
+  calculado: faLock,
   catalogo: faListCheck,
   catalogo_encadenado: faLink,
-  fecha: faCalendarDays,
-  calculado: faLock,
   auto_numerico: faArrowDown19,
 };
 
 export const columnTypeLabels: Record<TipoColumna, string> = {
-  texto: 'Texto',
+  texto_corto: 'Texto corto',
+  texto_largo: 'Texto largo',
   numero: 'Número',
+  decimal: 'Decimal',
+  fecha: 'Fecha',
+  booleano: 'Booleano',
+  coordenadas: 'Coordenadas',
+  calculado: 'Calculado',
   catalogo: 'Catálogo',
   catalogo_encadenado: 'Cat. encadenado',
-  fecha: 'Fecha',
-  calculado: 'Calculado',
   auto_numerico: 'Auto-numérico',
 };
+
+// Únicamente estos se ofrecen en el selector de tipo — catalogo/catalogo_encadenado/auto_numerico
+// se mantienen en columnTypeIcons/Labels para columnas existentes, pero no son seleccionables aquí.
+export const columnTypePrimitivos: TipoColumna[] = [
+  'texto_corto',
+  'texto_largo',
+  'numero',
+  'decimal',
+  'fecha',
+  'booleano',
+  'coordenadas',
+  'calculado',
+];
 
 export const instrumentoIcons: Record<TipoInstrumento, IconDefinition> = {
   formato: faFileInvoice,
@@ -150,7 +171,7 @@ export const rolUsuarioLabels: Record<RolUsuario, string> = {
 
 export const subtipoTablaLabels: Record<SubtipoTabla, string> = {
   filas_dinamicas: 'Filas dinámicas',
-  matriz_por_periodos: 'Matriz por períodos',
+  matriz_por_periodos: 'Columnas dinámicas',
   jerarquica: 'Jerárquica',
 };
 

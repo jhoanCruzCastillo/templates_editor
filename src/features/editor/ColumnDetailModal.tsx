@@ -9,13 +9,6 @@ interface Props {
   onClose: () => void;
   columna: ColumnaTabla | null;
   allColumnas: ColumnaTabla[];
-  isJerarquica?: boolean;
-  isMatrizPeriodos?: boolean;
-  esColumnaDinamica?: boolean;
-  onSetColumnaDinamica?: (esDinamica: boolean) => void;
-  numPeriodos?: number;
-  etiquetaPeriodo?: string;
-  onPeriodosChange?: (updates: { numPeriodos?: number; etiquetaPeriodo?: string }) => void;
   onChange: (updates: Partial<ColumnaTabla>) => void;
 }
 

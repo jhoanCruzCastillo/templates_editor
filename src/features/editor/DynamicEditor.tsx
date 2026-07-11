@@ -4,19 +4,29 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import TableRow from './TableRow';
 import TableHeaderRow from './TableHeaderRow';
 import { parseDynamicRows, newEmptyRow, getPeriodos, type FilaDinamica } from '../../lib/tableRowHelpers';
-import type { ConfigTabla } from '../../types';
+import type { ConfigTabla, CabeceraGrupo } from '../../types';
 
 interface Props {
   config: ConfigTabla;
   value: string;
   onChange: (value: string) => void;
+  /** Cuando se puede editar la estructura de la tabla desde este preview (solo tab Estructura) — permite agregar columnas dinámicas */
+  onConfigChange?: (config: ConfigTabla) => void;
 }
 
-export default function DynamicEditor({ config, value, onChange }: Props) {
+export default function DynamicEditor({ config, value, onChange, onConfigChange }: Props) {
   const cols = config.columnas;
   const periodos = getPeriodos(config);
   const [rows, setRows] = useState<FilaDinamica[]>(() => parseDynamicRows(value, config));
   const persist = useCallback((next: FilaDinamica[]) => { setRows(next); onChange(JSON.stringify(next)); }, [onChange]);
+  const addPeriodo = () => onConfigChange?.({ ...config, periodos: [...periodos, ''] });
+  const renamePeriodo = (i: number, val: string) => {
+    const next = [...periodos];
+    next[i] = val;
+    onConfigChange?.({ ...config, periodos: next });
+  };
+  const renameGrupo = (grupo: CabeceraGrupo, titulo: string) =>
+    onConfigChange?.({ ...config, cabeceras: (config.cabeceras ?? []).map((g) => (g === grupo ? { ...g, titulo } : g)) });
 
   const updateCell = (ri: number, colId: string, val: string) =>
     persist(rows.map((r, i) => (i === ri ? { ...r, [colId]: val } : r)));
@@ -37,7 +47,15 @@ export default function DynamicEditor({ config, value, onChange }: Props) {
       <div className="overflow-x-auto rounded-lg border border-brand-200">
         <table className="w-full text-xs">
           <thead>
-            <TableHeaderRow cols={cols} periodos={periodos} columnaDinamicaId={config.columnaDinamicaId} />
+            <TableHeaderRow
+              cols={cols}
+              periodos={periodos}
+              columnaDinamicaId={config.columnaDinamicaId}
+              cabeceras={config.cabeceras}
+              onRenamePeriodo={onConfigChange ? renamePeriodo : undefined}
+              onAddPeriodo={onConfigChange && config.columnaDinamicaId ? addPeriodo : undefined}
+              onRenameGrupo={onConfigChange ? renameGrupo : undefined}
+            />
           </thead>
           <tbody>
             {rows.map((row, ri) => (

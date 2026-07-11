@@ -30,14 +30,14 @@ function write<T>(key: string, data: T): void {
 }
 
 export function initStore() {
-  // v8: captura Excel (hoja/columna/fila) + tabla completa (agrupador, columnas dinámicas)
+  // v9: tipos de columna de tabla alineados a los primitivos del esquema oficial
   const ver = localStorage.getItem(KEYS.initialized);
-  if (!ver || ver < '8') {
+  if (!ver || ver < '9') {
     write(KEYS.sectores, sectoresSeed);
     write(KEYS.plantillas, plantillasSeed);
     write(KEYS.ejemplos, ejemplosSeed);
     write(KEYS.actividad, actividadSeed);
-    localStorage.setItem(KEYS.initialized, '8');
+    localStorage.setItem(KEYS.initialized, '9');
   }
 }
 

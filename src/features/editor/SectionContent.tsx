@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
-import type { Seccion, Campo } from '../../types';
+import type { Seccion, Campo, ConfigTabla } from '../../types';
 import FieldCard from './FieldCard';
 
 interface Props {
@@ -18,6 +18,7 @@ interface Props {
   onAddSubsection?: (seccionId: string) => void;
   onDeleteSubsection?: (subseccionId: string, seccionId: string) => void;
   onDefaultValueChange?: (campoId: string, value: string) => void;
+  onConfigTablaChange?: (campoId: string, config: ConfigTabla) => void;
   showMenuButton?: boolean;
 }
 
@@ -36,6 +37,7 @@ export default function SectionContent({
   onAddSubsection,
   onDeleteSubsection,
   onDefaultValueChange,
+  onConfigTablaChange,
   showMenuButton,
 }: Props) {
   return (
@@ -109,6 +111,7 @@ export default function SectionContent({
                 showMenuButton={showMenuButton}
                 onDelete={onDeleteCampo ? () => onDeleteCampo(campo.id, sub.id) : undefined}
                 onDefaultValueChange={onDefaultValueChange ? (v) => onDefaultValueChange(campo.id, v) : undefined}
+                onConfigTablaChange={onConfigTablaChange ? (c) => onConfigTablaChange(campo.id, c) : undefined}
               />
             ))}
             {onAddCampo && (

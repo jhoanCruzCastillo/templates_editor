@@ -8,12 +8,9 @@ export interface TreeNode {
   children: TreeNode[];
 }
 
-/** Lista de etiquetas de período generada desde numPeriodos + etiquetaPeriodo (ej. "Año 1", "Año 2"...) */
+/** Lista editable de nombres de las columnas dinámicas generadas (ej. años, tareas, alternativas...) */
 export function getPeriodos(config: ConfigTabla): string[] {
-  const n = config.numPeriodos;
-  if (!n || n < 1) return [];
-  const etiqueta = config.etiquetaPeriodo?.trim();
-  return Array.from({ length: n }, (_, i) => (etiqueta ? `${etiqueta} ${i + 1}` : String(i + 1)));
+  return config.periodos ?? [];
 }
 
 function emptyRow(config: ConfigTabla): FilaDinamica {

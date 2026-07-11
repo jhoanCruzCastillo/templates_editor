@@ -1,35 +1,17 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { columnTypeIcons, columnTypeLabels } from '../../lib/icons';
-import type { ColumnaTabla, TipoColumna, NivelColumna } from '../../types';
+import { columnTypeIcons, columnTypeLabels, columnTypePrimitivos } from '../../lib/icons';
+import type { ColumnaTabla, TipoColumna } from '../../types';
 
 interface Props {
   columna: ColumnaTabla;
   allColumnas: ColumnaTabla[];
-  isJerarquica?: boolean;
-  isMatrizPeriodos?: boolean;
-  esColumnaDinamica?: boolean;
-  onSetColumnaDinamica?: (esDinamica: boolean) => void;
-  numPeriodos?: number;
-  etiquetaPeriodo?: string;
-  onPeriodosChange?: (updates: { numPeriodos?: number; etiquetaPeriodo?: string }) => void;
   onChange: (updates: Partial<ColumnaTabla>) => void;
 }
 
-const allColumnTypes = Object.entries(columnTypeLabels) as [TipoColumna, string][];
-
-// Contenido del formulario de detalle de columna — se monta dentro de ColumnDetailModal
-export default function ColumnDetailEditor({
-  columna,
-  allColumnas,
-  onChange,
-  isJerarquica,
-  isMatrizPeriodos,
-  esColumnaDinamica,
-  onSetColumnaDinamica,
-  numPeriodos,
-  etiquetaPeriodo,
-  onPeriodosChange,
-}: Props) {
+// Contenido del formulario de detalle de columna — se monta dentro de ColumnDetailModal.
+// Solo se usa para subtipo filas_dinamicas; jerarquica usa JerarquicaColumnsEditor y
+// matriz_por_periodos usa MatrizPeriodosEditor.
+export default function ColumnDetailEditor({ columna, allColumnas, onChange }: Props) {
   const icon = columnTypeIcons[columna.tipo];
   const otherCols = allColumnas.filter((c) => c.id !== columna.id);
 
@@ -64,78 +46,11 @@ export default function ColumnDetailEditor({
           onChange={(e) => onChange({ tipo: e.target.value as TipoColumna })}
           className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-brand-500/30 bg-white"
         >
-          {allColumnTypes.map(([key, label]) => (
-            <option key={key} value={key}>{label}</option>
+          {columnTypePrimitivos.map((key) => (
+            <option key={key} value={key}>{columnTypeLabels[key]}</option>
           ))}
         </select>
       </div>
-
-      {/* Nivel (solo para tabla jerárquica) */}
-      {isJerarquica && (
-        <div>
-          <label className="block text-xs font-medium text-heading mb-1">Nivel</label>
-          <div className="flex rounded-lg border border-gray-200 overflow-hidden">
-            {(['padre', 'hijo'] as NivelColumna[]).map((nv) => (
-              <button
-                key={nv}
-                onClick={() => onChange({ nivel: nv })}
-                className={`flex-1 px-3 py-1.5 text-xs font-medium transition-colors duration-75 ${
-                  columna.nivel === nv
-                    ? 'bg-brand-50 text-brand-600'
-                    : 'bg-white text-gray-400 hover:bg-gray-50'
-                }`}
-              >
-                {nv === 'padre' ? 'Padre (fusiona)' : 'Hijo (repite)'}
-              </button>
-            ))}
-          </div>
-          <p className="text-[10px] text-muted mt-1">
-            {columna.nivel === 'padre'
-              ? 'La celda se fusiona verticalmente por grupo.'
-              : 'Se repite por cada fila hija del grupo.'}
-          </p>
-        </div>
-      )}
-
-      {/* Columna dinámica (solo matriz por períodos) */}
-      {isMatrizPeriodos && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-3 space-y-3">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-medium text-heading">Columna dinámica (se repite por período)</label>
-            <button
-              onClick={() => onSetColumnaDinamica?.(!esColumnaDinamica)}
-              className={`relative w-10 h-6 rounded-full transition-colors duration-100 shrink-0 ml-3 ${esColumnaDinamica ? 'bg-amber-500' : 'bg-gray-300'}`}
-            >
-              <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-100 ${esColumnaDinamica ? 'left-4.5' : 'left-0.5'}`} />
-            </button>
-          </div>
-          {esColumnaDinamica && (
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[10px] font-medium text-muted mb-1">Cantidad de períodos</label>
-                <input
-                  type="number"
-                  value={numPeriodos ?? ''}
-                  onChange={(e) => onPeriodosChange?.({ numPeriodos: e.target.value ? Number(e.target.value) : undefined })}
-                  placeholder="Ej. 10"
-                  min={1}
-                  className="w-full px-3 py-2 rounded-lg border border-amber-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-medium text-muted mb-1">Etiqueta</label>
-                <input
-                  type="text"
-                  value={etiquetaPeriodo ?? ''}
-                  onChange={(e) => onPeriodosChange?.({ etiquetaPeriodo: e.target.value })}
-                  placeholder="Ej. Año (vacío = 1, 2, 3...)"
-                  className="w-full px-3 py-2 rounded-lg border border-amber-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30"
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Requerido */}
       <div className="flex items-center justify-between">

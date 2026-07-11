@@ -21,13 +21,19 @@ export type VersionTab = 'estructura' | 'ejemplos' | 'proyecto';
 
 export type SubtipoTabla = 'filas_dinamicas' | 'matriz_por_periodos' | 'jerarquica';
 
+// Primitivos documentados (esquema oficial) + catalogo/catalogo_encadenado/auto_numerico,
+// que se mantienen por compatibilidad con datos existentes pero ya no se ofrecen en el selector de tipo.
 export type TipoColumna =
-  | 'texto'
+  | 'texto_corto'
+  | 'texto_largo'
   | 'numero'
+  | 'decimal'
+  | 'fecha'
+  | 'booleano'
+  | 'coordenadas'
+  | 'calculado'
   | 'catalogo'
   | 'catalogo_encadenado'
-  | 'fecha'
-  | 'calculado'
   | 'auto_numerico';
 
 export type NivelColumna = 'padre' | 'hijo';
@@ -49,10 +55,18 @@ export interface ColumnaTabla {
 }
 
 export interface CapturaTabla {
+  /** Letra de columna Excel donde inicia la tabla (referencia — cada columna puede pisarla con la suya) */
+  columnaInicial?: string;
   /** Primera fila de Excel donde empieza el primer registro de datos (no la cabecera) */
   filaInicial?: number;
   /** Cantidad de filas que ocupa la tabla en su estado base/ejemplo */
   filasBase?: number;
+}
+
+export interface CabeceraGrupo {
+  titulo: string;
+  /** Ids de ColumnaTabla que quedan agrupados bajo este título (incluye columnaDinamicaId si aplica) */
+  hijoIds: string[];
 }
 
 export interface ConfigTabla {
@@ -60,14 +74,14 @@ export interface ConfigTabla {
   columnas: ColumnaTabla[];
   filasIniciales?: number;
   maxFilas?: number;
-  /** Cantidad de columnas de período a generar (solo subtipo matriz_por_periodos) */
-  numPeriodos?: number;
-  /** Prefijo de la etiqueta de período, ej. "Año" → "Año 1", "Año 2"... (vacío = "1", "2"...) */
-  etiquetaPeriodo?: string;
+  /** Lista editable de nombres de las columnas dinámicas generadas, cada una insertable/editable individualmente (solo subtipo matriz_por_periodos) */
+  periodos?: string[];
   /** Filas planas agrupadas bajo un encabezado de grupo (no aplica a jerárquica) */
   agrupador?: boolean;
   /** Id de la columna cuyo valor se repite por período (solo subtipo matriz_por_periodos) */
   columnaDinamicaId?: string;
+  /** Encabezados que agrupan columnas existentes bajo un título común (equivalente a "cabecera" del esquema oficial) */
+  cabeceras?: CabeceraGrupo[];
   /** Posición de arranque de la tabla en el Excel */
   captura?: CapturaTabla;
 }

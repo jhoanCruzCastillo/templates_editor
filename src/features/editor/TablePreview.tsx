@@ -7,10 +7,9 @@ import {
   faArrowLeft,
   faArrowRight,
 } from '@fortawesome/free-solid-svg-icons';
-import { columnTypeIcons, columnTypeLabels } from '../../lib/icons';
+import { columnTypeIcons, columnTypeLabels, columnTypePrimitivos } from '../../lib/icons';
 import { generateId } from '../../lib/store';
-import { getPeriodos } from '../../lib/tableRowHelpers';
-import type { ConfigTabla, ColumnaTabla, TipoColumna } from '../../types';
+import type { ConfigTabla, ColumnaTabla } from '../../types';
 
 interface Props {
   config: ConfigTabla;
@@ -18,8 +17,9 @@ interface Props {
   onEditColumn: (colId: string) => void;
 }
 
+// Editor de columnas para subtipo "filas_dinamicas" (filas planas, columnas fijas).
+// jerarquica usa JerarquicaColumnsEditor y matriz_por_periodos usa MatrizPeriodosEditor.
 export default function TablePreview({ config, onChange, onEditColumn }: Props) {
-  const periodos = getPeriodos(config);
   const [typeDropdownColId, setTypeDropdownColId] = useState<string | null>(null);
   const [newColName, setNewColName] = useState('');
   const [isAddingCol, setIsAddingCol] = useState(false);
@@ -27,13 +27,7 @@ export default function TablePreview({ config, onChange, onEditColumn }: Props) 
 
   const addColumn = (name: string) => {
     if (!name.trim()) return;
-    const newCol: ColumnaTabla = {
-      id: generateId(),
-      nombre: name.trim(),
-      tipo: 'texto',
-      requerido: false,
-      ...(config.subtipo === 'jerarquica' ? { nivel: 'hijo' as const } : {}),
-    };
+    const newCol: ColumnaTabla = { id: generateId(), nombre: name.trim(), tipo: 'texto_corto', requerido: false };
     onChange({ ...config, columnas: [...config.columnas, newCol] });
     setNewColName('');
   };
@@ -79,16 +73,13 @@ export default function TablePreview({ config, onChange, onEditColumn }: Props) 
               {config.columnas.map((col, i) => {
                 const colIcon = columnTypeIcons[col.tipo];
                 const isTypeOpen = typeDropdownColId === col.id;
-                const esDinamica = col.id === config.columnaDinamicaId;
                 return (
                   <th
                     key={col.id}
-                    className={`relative px-2 py-1.5 text-left font-medium text-heading border-b whitespace-nowrap group ${
-                      esDinamica ? 'bg-amber-50 border-amber-300' : 'border-gray-200'
-                    }`}
+                    className="relative px-2 py-1.5 text-left font-medium text-heading border-b border-gray-200 whitespace-nowrap group"
                   >
                     <div className="flex items-center gap-1">
-                      <FontAwesomeIcon icon={colIcon} className={`w-2.5 h-2.5 shrink-0 ${esDinamica ? 'text-amber-500' : 'text-gray-400'}`} />
+                      <FontAwesomeIcon icon={colIcon} className="w-2.5 h-2.5 shrink-0 text-gray-400" />
                       <span className="truncate text-[11px]">{col.nombre}</span>
                     </div>
                     {/* Botones al hover */}
@@ -117,21 +108,13 @@ export default function TablePreview({ config, onChange, onEditColumn }: Props) 
                         className="text-[9px] font-normal text-muted mt-0.5 hover:text-brand-600 cursor-pointer transition-colors"
                       >
                         {columnTypeLabels[col.tipo]}
-                        {config.subtipo === 'jerarquica' && col.nivel && (
-                          <span className={col.nivel === 'padre' ? ' text-amber-500' : ' text-blue-500'}>
-                            {' '}· {col.nivel === 'padre' ? '↕ Padre' : '↔ Hijo'}
-                          </span>
-                        )}
-                        {esDinamica && (
-                          <span className="text-amber-600 font-medium"> · {periodos.length > 0 ? `×${periodos.length} períodos` : 'dinámica'}</span>
-                        )}
                         {' ▾'}
                       </button>
                       {isTypeOpen && (
                         <>
                           <div className="fixed inset-0 z-20" onClick={() => setTypeDropdownColId(null)} />
                           <div className="absolute left-0 top-full mt-0.5 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-30 min-w-32">
-                            {(Object.entries(columnTypeLabels) as [TipoColumna, string][]).map(([key, label]) => (
+                            {columnTypePrimitivos.map((key) => (
                               <button
                                 key={key}
                                 onClick={() => { updateColumn(col.id, { tipo: key }); setTypeDropdownColId(null); }}
@@ -140,7 +123,7 @@ export default function TablePreview({ config, onChange, onEditColumn }: Props) 
                                 }`}
                               >
                                 <FontAwesomeIcon icon={columnTypeIcons[key]} className="w-2.5 h-2.5 text-gray-400" />
-                                {label}
+                                {columnTypeLabels[key]}
                               </button>
                             ))}
                           </div>
@@ -173,43 +156,16 @@ export default function TablePreview({ config, onChange, onEditColumn }: Props) 
             </tr>
           </thead>
           <tbody>
-            {config.subtipo === 'jerarquica' ? (
-              [1, 2].map((group) =>
-                [1, 2].map((child, ci) => (
-                  <tr key={`${group}-${child}`} className="border-b border-gray-100">
-                    {config.columnas.map((col) => {
-                      if (col.nivel === 'padre' && ci > 0) return null;
-                      return (
-                        <td
-                          key={col.id}
-                          className={`px-2 py-1 text-muted whitespace-nowrap text-[10px] ${
-                            col.nivel === 'padre' ? 'bg-amber-50/50 align-top font-medium text-gray-500 border-r border-gray-200' : ''
-                          }`}
-                          rowSpan={col.nivel === 'padre' ? 2 : undefined}
-                        >
-                          {col.nivel === 'padre' ? `Grupo ${group}` : `${group}.${child}`}
-                        </td>
-                      );
-                    })}
-                    <td className="px-1 py-1" />
-                  </tr>
-                ))
-              ).flat()
-            ) : (
-              [1, 2, 3].map((row) => (
-                <tr key={row} className="border-b border-gray-100 last:border-0">
-                  {config.columnas.map((col) => (
-                    <td
-                      key={col.id}
-                      className={`px-2 py-1.5 text-muted whitespace-nowrap ${col.id === config.columnaDinamicaId ? 'bg-amber-50/40' : ''}`}
-                    >
-                      {col.tipo === 'auto_numerico' ? row : '—'}
-                    </td>
-                  ))}
-                  <td className="px-1 py-1.5" />
-                </tr>
-              ))
-            )}
+            {[1, 2, 3].map((row) => (
+              <tr key={row} className="border-b border-gray-100 last:border-0">
+                {config.columnas.map((col) => (
+                  <td key={col.id} className="px-2 py-1.5 text-muted whitespace-nowrap">
+                    {col.tipo === 'auto_numerico' ? row : '—'}
+                  </td>
+                ))}
+                <td className="px-1 py-1.5" />
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

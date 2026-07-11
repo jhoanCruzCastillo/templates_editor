@@ -1,6 +1,6 @@
 import { generateId } from './store';
 import type { FilaDinamica, GrupoFilas, TreeNode } from './tableRowHelpers';
-import type { Campo, CapturaCampo, ColumnaTabla, ConfigTabla, Seccion, Subseccion, SubtipoTabla, TipoCampo, TipoColumna } from '../types';
+import type { CabeceraGrupo, Campo, CapturaCampo, ColumnaTabla, ConfigTabla, Seccion, Subseccion, SubtipoTabla, TipoCampo, TipoColumna } from '../types';
 
 const ID_COLUMNA_DINAMICA = 'columnas_dinamicas';
 
@@ -23,18 +23,18 @@ function mapTipoCampoReverse(tipo: unknown): TipoCampo {
 }
 
 const tipoColumnaReverseMap: Record<string, TipoColumna> = {
-  texto_corto: 'texto',
-  texto_largo: 'texto',
+  texto_corto: 'texto_corto',
+  texto_largo: 'texto_largo',
   numero: 'numero',
-  decimal: 'numero',
+  decimal: 'decimal',
   fecha: 'fecha',
-  booleano: 'texto',
-  coordenadas: 'texto',
+  booleano: 'booleano',
+  coordenadas: 'coordenadas',
   calculado: 'calculado',
 };
 
 function mapTipoColumnaReverse(tipo: unknown): TipoColumna {
-  return tipoColumnaReverseMap[String(tipo)] ?? 'texto';
+  return tipoColumnaReverseMap[String(tipo)] ?? 'texto_corto';
 }
 
 function valorToString(tipo: TipoCampo, valor: unknown): string {
@@ -84,15 +84,27 @@ function buildColumnas(rawCols: unknown, rawCapturaCols: unknown, esJerarquica: 
   return { columnas, columnaDinamicaId };
 }
 
-function periodosDesdeColumnasBase(rawCapturaCols: unknown): { numPeriodos?: number; etiquetaPeriodo?: string } {
+function cabecerasFromDoc(rawCabecera: unknown, columnaDinamicaId?: string): CabeceraGrupo[] | undefined {
+  if (!Array.isArray(rawCabecera) || rawCabecera.length === 0) return undefined;
+  const grupos = rawCabecera
+    .map((g) => {
+      const raw = g as Record<string, unknown>;
+      const hijosRaw = Array.isArray(raw.hijos) ? raw.hijos : [];
+      const hijoIds = hijosRaw
+        .map((h) => (h === ID_COLUMNA_DINAMICA ? columnaDinamicaId : String(h)))
+        .filter((h): h is string => Boolean(h));
+      return { titulo: typeof raw.titulo === 'string' ? raw.titulo : '', hijoIds };
+    })
+    .filter((g) => g.hijoIds.length > 0);
+  return grupos.length > 0 ? grupos : undefined;
+}
+
+function periodosDesdeColumnasBase(rawCapturaCols: unknown): string[] | undefined {
   const capturaCols = Array.isArray(rawCapturaCols) ? rawCapturaCols : [];
   const dinCol = capturaCols.find((c) => (c as Record<string, unknown>).id === ID_COLUMNA_DINAMICA) as Record<string, unknown> | undefined;
   const base = dinCol?.columnas_base;
-  if (!Array.isArray(base) || base.length === 0) return {};
-  const primero = String(base[0] ?? '').trim();
-  const match = primero.match(/^(.*?)\s*\d+$/);
-  const etiqueta = match ? match[1].trim() : undefined;
-  return { numPeriodos: base.length, etiquetaPeriodo: etiqueta || undefined };
+  if (!Array.isArray(base) || base.length === 0) return undefined;
+  return base.map((p) => String(p));
 }
 
 // --- Valor de tabla ---
@@ -163,17 +175,18 @@ function campoFromDoc(rawCampo: unknown): Campo {
     const rawCaptura = (raw.captura as Record<string, unknown>) ?? {};
     const rawCols = raw[esJerarquica ? 'niveles' : 'columnas'];
     const { columnas, columnaDinamicaId } = buildColumnas(rawCols, rawCaptura.columnas, esJerarquica);
-    const { numPeriodos, etiquetaPeriodo } = periodosDesdeColumnasBase(rawCaptura.columnas);
+    const periodos = periodosDesdeColumnasBase(rawCaptura.columnas);
 
     const config: ConfigTabla = {
       subtipo,
       columnas,
       agrupador: Boolean(rawConfig.agrupador),
       columnaDinamicaId,
-      numPeriodos,
-      etiquetaPeriodo,
+      periodos,
+      cabeceras: cabecerasFromDoc(raw.cabecera, columnaDinamicaId),
       filasIniciales: 3,
       captura: {
+        columnaInicial: typeof rawCaptura.columna_inicial === 'string' && rawCaptura.columna_inicial ? rawCaptura.columna_inicial : undefined,
         filaInicial: typeof rawCaptura.fila_inicial === 'number' ? rawCaptura.fila_inicial : undefined,
         filasBase: typeof rawCaptura.filas_base === 'number' ? rawCaptura.filas_base : undefined,
       },

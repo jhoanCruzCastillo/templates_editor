@@ -4,12 +4,14 @@ import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import DynamicEditor from './DynamicEditor';
 import GroupedRowsEditor from './GroupedRowsEditor';
 import { createNodeChain, parseTree, type TreeNode } from '../../lib/tableRowHelpers';
-import type { ConfigTabla } from '../../types';
+import type { ConfigTabla, CabeceraGrupo } from '../../types';
 
 interface Props {
   config: ConfigTabla;
   value: string;
   onChange: (value: string) => void;
+  /** Cuando se puede editar la estructura de la tabla desde este preview (solo tab Estructura) — permite agregar columnas dinámicas */
+  onConfigChange?: (config: ConfigTabla) => void;
 }
 
 // --- Helpers (jerárquica) ---
@@ -24,10 +26,10 @@ function getNode(roots: TreeNode[], path: number[]): TreeNode | null {
 
 // --- Componente principal ---
 
-export default function ExampleTableEditor({ config, value, onChange }: Props) {
-  if (config.subtipo === 'jerarquica') return <HierarchicalEditor columns={config.columnas} value={value} onChange={onChange} />;
-  if (config.agrupador) return <GroupedRowsEditor config={config} value={value} onChange={onChange} />;
-  return <DynamicEditor config={config} value={value} onChange={onChange} />;
+export default function ExampleTableEditor({ config, value, onChange, onConfigChange }: Props) {
+  if (config.subtipo === 'jerarquica') return <HierarchicalEditor columns={config.columnas} value={value} onChange={onChange} cabeceras={config.cabeceras} />;
+  if (config.agrupador) return <GroupedRowsEditor config={config} value={value} onChange={onChange} onConfigChange={onConfigChange} />;
+  return <DynamicEditor config={config} value={value} onChange={onChange} onConfigChange={onConfigChange} />;
 }
 
 // ==================== JERÁRQUICA ====================
@@ -46,7 +48,7 @@ interface FlatRow { cells: FlatCell[]; isGroupStart?: boolean }
 // Estructura para navegación: mapa de celdas navegables
 interface NavCell { path: number[]; colIndex: number }
 
-function HierarchicalEditor({ columns, value, onChange }: { columns: ColDef[]; value: string; onChange: (v: string) => void }) {
+function HierarchicalEditor({ columns, value, onChange, cabeceras }: { columns: ColDef[]; value: string; onChange: (v: string) => void; cabeceras?: CabeceraGrupo[] }) {
   const numCols = columns.length;
   const [roots, setRoots] = useState<TreeNode[]>(() => parseTree(value, numCols));
   const [selectedPath, setSelectedPath] = useState<number[] | null>(null);
@@ -202,6 +204,19 @@ function HierarchicalEditor({ columns, value, onChange }: { columns: ColDef[]; v
 
   const flatRows = buildFlatRows(roots, numCols, selectedPath);
 
+  const grupos = cabeceras ?? [];
+  const hasCabeceras = grupos.length > 0;
+  const grupoForId = (id: string) => grupos.find((g) => g.hijoIds.includes(id));
+  const runs: { grupo?: CabeceraGrupo; cols: ColDef[] }[] = [];
+  for (const col of columns) {
+    const g = grupoForId(col.id);
+    const last = runs[runs.length - 1];
+    if (last && g && last.grupo === g) last.cols.push(col);
+    else runs.push({ grupo: g, cols: [col] });
+  }
+  const colHeaderCls = (isLast: boolean) =>
+    `px-3 py-2 text-left font-semibold text-heading border-b-2 border-gray-300 whitespace-nowrap text-[11px] uppercase tracking-wider align-top ${isLast ? '' : 'border-r border-gray-300'}`;
+
   return (
     <div className="mt-2">
       <div
@@ -212,13 +227,41 @@ function HierarchicalEditor({ columns, value, onChange }: { columns: ColDef[]; v
       >
         <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
           <thead>
+            {hasCabeceras && (
+              <tr className="bg-indigo-50">
+                {runs.map((run, ri) =>
+                  run.grupo ? (
+                    <th key={`grp-${ri}`} colSpan={run.cols.length} className="px-2 py-1.5 text-center font-semibold text-indigo-700 border-2 border-indigo-400 bg-indigo-100 whitespace-nowrap text-[11px]">
+                      {run.grupo.titulo || 'Sin título'}
+                    </th>
+                  ) : (
+                    run.cols.map((col) => (
+                      <th key={col.id} rowSpan={2} className={colHeaderCls(col.id === columns[numCols - 1].id)}>
+                        {col.nombre}
+                      </th>
+                    ))
+                  )
+                )}
+                <th rowSpan={2} className="w-6 border-b-2 border-gray-300" />
+              </tr>
+            )}
             <tr className="bg-gray-100">
-              {columns.map((col, ci) => (
-                <th key={col.id} className={`px-3 py-2 text-left font-semibold text-heading border-b-2 border-gray-300 whitespace-nowrap text-[11px] uppercase tracking-wider ${ci < numCols - 1 ? 'border-r border-gray-300' : ''}`}>
-                  {col.nombre}
-                </th>
-              ))}
-              <th className="w-6 border-b-2 border-gray-300" />
+              {hasCabeceras
+                ? runs.flatMap((run) =>
+                    run.grupo
+                      ? run.cols.map((col) => (
+                          <th key={col.id} className={colHeaderCls(col.id === columns[numCols - 1].id)}>
+                            {col.nombre}
+                          </th>
+                        ))
+                      : []
+                  )
+                : columns.map((col, ci) => (
+                    <th key={col.id} className={colHeaderCls(ci === numCols - 1)}>
+                      {col.nombre}
+                    </th>
+                  ))}
+              {!hasCabeceras && <th className="w-6 border-b-2 border-gray-300" />}
             </tr>
           </thead>
           <tbody>

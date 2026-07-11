@@ -2,6 +2,8 @@ import { useState, useCallback } from 'react';
 import { subtipoTablaLabels } from '../../lib/icons';
 import ColumnDetailModal from './ColumnDetailModal';
 import TablePreview from './TablePreview';
+import MatrizPeriodosEditor from './MatrizPeriodosEditor';
+import JerarquicaColumnsEditor from './JerarquicaColumnsEditor';
 import type { ConfigTabla, ColumnaTabla, SubtipoTabla } from '../../types';
 
 interface Props {
@@ -40,7 +42,17 @@ export default function TableColumnsEditor({ config, onChange }: Props) {
       </div>
 
       {/* Ubicación en Excel (captura de la tabla) */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
+        <div>
+          <label className="block text-xs font-medium text-heading mb-1">Columna inicial</label>
+          <input
+            type="text"
+            value={config.captura?.columnaInicial ?? ''}
+            onChange={(e) => onChange({ ...config, captura: { ...config.captura, columnaInicial: e.target.value } })}
+            placeholder="Ej. B"
+            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+          />
+        </div>
         <div>
           <label className="block text-xs font-medium text-heading mb-1">Fila inicial (Excel)</label>
           <input
@@ -93,26 +105,27 @@ export default function TableColumnsEditor({ config, onChange }: Props) {
       )}
 
       {/* Tabla interactiva */}
-      <TablePreview
-        config={config}
-        onChange={onChange}
-        onEditColumn={setEditingColId}
-      />
+      {config.subtipo === 'matriz_por_periodos' ? (
+        <MatrizPeriodosEditor config={config} onChange={onChange} />
+      ) : config.subtipo === 'jerarquica' ? (
+        <JerarquicaColumnsEditor config={config} onChange={onChange} />
+      ) : (
+        <>
+          <TablePreview
+            config={config}
+            onChange={onChange}
+            onEditColumn={setEditingColId}
+          />
 
-      <ColumnDetailModal
-        isOpen={!!editingCol}
-        onClose={() => setEditingColId(null)}
-        columna={editingCol}
-        allColumnas={config.columnas}
-        isJerarquica={config.subtipo === 'jerarquica'}
-        isMatrizPeriodos={config.subtipo === 'matriz_por_periodos'}
-        esColumnaDinamica={!!editingCol && config.columnaDinamicaId === editingCol.id}
-        onSetColumnaDinamica={(esDinamica) => editingCol && onChange({ ...config, columnaDinamicaId: esDinamica ? editingCol.id : undefined })}
-        numPeriodos={config.numPeriodos}
-        etiquetaPeriodo={config.etiquetaPeriodo}
-        onPeriodosChange={(updates) => onChange({ ...config, ...updates })}
-        onChange={(updates) => editingCol && updateColumn(editingCol.id, updates)}
-      />
+          <ColumnDetailModal
+            isOpen={!!editingCol}
+            onClose={() => setEditingColId(null)}
+            columna={editingCol}
+            allColumnas={config.columnas}
+            onChange={(updates) => editingCol && updateColumn(editingCol.id, updates)}
+          />
+        </>
+      )}
     </div>
   );
 }

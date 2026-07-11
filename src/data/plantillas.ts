@@ -148,7 +148,7 @@ export const plantillas: Plantilla[] = [
                     { id: 'col-dep', nombre: 'Departamento', tipo: 'catalogo_encadenado', fuenteCatalogo: 'UBIGEO — Departamentos', encadenaA: 'col-prov', requerido: true },
                     { id: 'col-prov', nombre: 'Provincia', tipo: 'catalogo_encadenado', fuenteCatalogo: 'UBIGEO — Provincias', encadenaA: 'col-dist', requerido: true },
                     { id: 'col-dist', nombre: 'Distrito', tipo: 'catalogo_encadenado', fuenteCatalogo: 'UBIGEO — Distritos', requerido: true },
-                    { id: 'col-loc', nombre: 'Localidad / Centro poblado', tipo: 'texto' },
+                    { id: 'col-loc', nombre: 'Localidad / Centro poblado', tipo: 'texto_corto' },
                     { id: 'col-ubi', nombre: 'Ubigeo', tipo: 'calculado', formula: 'Código UBIGEO del distrito seleccionado' },
                   ],
                 },

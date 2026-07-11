@@ -18,7 +18,7 @@ import { useAppContext } from '../../lib/context';
 import { useToast } from '../../components/Toast';
 import { generateId, saveDocumentoJSON } from '../../lib/store';
 import { buildDocumento } from '../../lib/schemaExport';
-import type { VersionTab, Campo, Plantilla, Ejemplo } from '../../types';
+import type { VersionTab, Campo, Plantilla, Ejemplo, ConfigTabla } from '../../types';
 
 // Archivo de referencia del prototipo — con backend, cada ejemplo tendrá su propio archivo
 const FORMATO_6A_URL = '/docs/formato6a_directiva001_2019EF6301.xlsm';
@@ -128,6 +128,10 @@ export default function PlantillaEditPage() {
 
   const handleDefaultValueChange = useCallback((campoId: string, value: string) => {
     handleFieldUpdate(campoId, { valorEjemplo: value });
+  }, [handleFieldUpdate]);
+
+  const handleConfigTablaChange = useCallback((campoId: string, config: ConfigTabla) => {
+    handleFieldUpdate(campoId, { configTabla: config });
   }, [handleFieldUpdate]);
 
   const handleAddCampo = useCallback((subseccionId: string, subseccionCodigo: string, camposCount: number) => {
@@ -403,6 +407,7 @@ export default function PlantillaEditPage() {
                     onAddSubsection={handleAddSubsection}
                     onDeleteSubsection={handleDeleteSubsection}
                     onDefaultValueChange={!showExamples ? handleDefaultValueChange : undefined}
+                    onConfigTablaChange={!showExamples ? handleConfigTablaChange : undefined}
                     showMenuButton
                   />
                 </motion.div>

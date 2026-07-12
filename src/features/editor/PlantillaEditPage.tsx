@@ -399,7 +399,7 @@ export default function PlantillaEditPage() {
                 activeEjemplo={activeEjemplo}
                 onSelect={setActiveEjemplo}
                 onNewExample={() => setShowNuevoEjemplo(true)}
-                onPreview={() => setShowPreview(true)}
+                onPreview={(ej) => { setActiveEjemplo(ej); setShowPreview(true); }}
                 onDownload={handleDownloadExcel}
                 onDelete={setDeleteTarget}
               />
@@ -546,8 +546,16 @@ export default function PlantillaEditPage() {
       <ExcelPreviewModal
         isOpen={showPreview}
         onClose={() => setShowPreview(false)}
-        fileUrl={archivoExcelAsignado?.dataUrl ?? null}
-        fileName={archivoExcelAsignado?.nombre}
+        fileUrl={
+          (activeTab === 'ejemplos' && activeEjemplo
+            ? excelEjemplos[activeEjemplo.id]?.dataUrl
+            : undefined) ?? archivoExcelAsignado?.dataUrl ?? null
+        }
+        fileName={
+          (activeTab === 'ejemplos' && activeEjemplo
+            ? excelEjemplos[activeEjemplo.id]?.nombre
+            : undefined) ?? archivoExcelAsignado?.nombre
+        }
         title={`${plantilla.codigo} — ${plantilla.nombre}`}
       />
 

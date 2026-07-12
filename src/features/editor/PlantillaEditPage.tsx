@@ -13,15 +13,15 @@ import ExcelPreviewModal from './ExcelPreviewModal';
 import JsonPreviewModal from './JsonPreviewModal';
 import ConfirmModal from '../../components/ConfirmModal';
 import NuevoEjemploModal from './NuevoEjemploModal';
-import { usePlantilla, useEjemplos } from '../../lib/hooks';
+import SeccionHojaModal from './SeccionHojaModal';
+import ExcelCatalogModal from '../plantillas/ExcelCatalogModal';
+import { usePlantilla, useEjemplos, useCatalogoExcel } from '../../lib/hooks';
 import { useAppContext } from '../../lib/context';
 import { useToast } from '../../components/Toast';
 import { generateId, saveDocumentoJSON } from '../../lib/store';
 import { buildDocumento } from '../../lib/schemaExport';
+import { insertarValoresEnExcel } from '../../lib/excelWriter';
 import type { VersionTab, Campo, Plantilla, Ejemplo, ConfigTabla } from '../../types';
-
-// Archivo de referencia del prototipo — con backend, cada ejemplo tendrá su propio archivo
-const FORMATO_6A_URL = '/docs/formato6a_directiva001_2019EF6301.xlsm';
 
 const MIN_LEFT = 180;
 const MIN_RIGHT = 300;
@@ -34,7 +34,9 @@ export default function PlantillaEditPage() {
   const { sectorId, plantillaId } = useParams<{ sectorId: string; plantillaId: string }>();
   const plantillaOriginal = usePlantilla(plantillaId!);
   const ejemplos = useEjemplos(plantillaId!);
-  const { updatePlantilla, addEjemplo, updateEjemplo, deleteEjemplo, pushActividad } = useAppContext();
+  const catalogoExcel = useCatalogoExcel(plantillaId!);
+  const archivoExcelAsignado = catalogoExcel.archivos.find((a) => a.id === catalogoExcel.asignadoId) ?? null;
+  const { updatePlantilla, addEjemplo, updateEjemplo, deleteEjemplo, pushActividad, setExcelEjemplo, excelEjemplos } = useAppContext();
   const { toast } = useToast();
 
   const [editData, setEditData] = useState<Plantilla | null>(null);
@@ -48,9 +50,13 @@ export default function PlantillaEditPage() {
   const [activeEjemplo, setActiveEjemplo] = useState<Ejemplo | null>(ejemplos[0] ?? null);
   const [editedValores, setEditedValores] = useState<Record<string, string>>({});
   const [showNuevoEjemplo, setShowNuevoEjemplo] = useState(false);
+  const [showExcelCatalogModal, setShowExcelCatalogModal] = useState(false);
+  const [showInsertConfirm, setShowInsertConfirm] = useState(false);
+  const [isInserting, setIsInserting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [jsonPreview, setJsonPreview] = useState<{ title: string; json: string } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Ejemplo | null>(null);
+  const [editingHojaSeccionId, setEditingHojaSeccionId] = useState<string | null>(null);
   const [isNewCampo, setIsNewCampo] = useState(false);
   const [leftWidth, setLeftWidth] = useState(DEFAULT_LEFT);
   const [rightWidth, setRightWidth] = useState(DEFAULT_RIGHT);
@@ -264,6 +270,7 @@ export default function PlantillaEditPage() {
   }, []);
 
   const handleCreateExample = useCallback((nombre: string, subtitulo: string, detalle: string) => {
+    if (!editData || !archivoExcelAsignado) return;
     const nuevo: Ejemplo = {
       id: generateId(), nombre, subtitulo, detalle,
       plantillaId: plantillaId!, activo: false, valores: {},
@@ -271,18 +278,51 @@ export default function PlantillaEditPage() {
     addEjemplo(nuevo);
     setActiveEjemplo(nuevo);
     setEditedValores({});
+
+    // Snapshot del JSON de estructura para este ejemplo (se actualiza al Guardar)
+    const ejemploDoc = buildDocumento(editData, 'ejemplo', nuevo);
+    saveDocumentoJSON(`${editData.id}__ejemplo__${nuevo.id}`, ejemploDoc);
+
+    // Copia propia del Excel asignado a la plantilla
+    setExcelEjemplo(nuevo.id, {
+      id: generateId(),
+      nombre: archivoExcelAsignado.nombre,
+      dataUrl: archivoExcelAsignado.dataUrl,
+      fechaSubida: new Date().toLocaleDateString('es-PE'),
+    });
+
     pushActividad(`Nuevo ejemplo "${nombre}" creado`, 'green');
     toast(`Ejemplo "${nombre}" creado — completa los valores`);
-  }, [plantillaId, addEjemplo, pushActividad, toast]);
+  }, [editData, archivoExcelAsignado, plantillaId, addEjemplo, setExcelEjemplo, pushActividad, toast]);
 
-  const handleDownloadExcel = useCallback(() => {
+  const handleDownloadExcel = useCallback((ejemplo: Ejemplo) => {
+    const archivo = excelEjemplos[ejemplo.id];
+    if (!archivo) { toast('Este ejemplo no tiene una copia de Excel asociada'); return; }
     const a = document.createElement('a');
-    a.href = FORMATO_6A_URL;
-    a.download = '';
+    a.href = archivo.dataUrl;
+    a.download = archivo.nombre;
     document.body.appendChild(a);
     a.click();
     a.remove();
-  }, []);
+  }, [excelEjemplos, toast]);
+
+  const handleInsertExcel = useCallback(async () => {
+    if (!editData || !activeEjemplo) return;
+    const archivo = excelEjemplos[activeEjemplo.id];
+    if (!archivo) { toast('Este ejemplo no tiene una copia de Excel asociada'); setShowInsertConfirm(false); return; }
+    setIsInserting(true);
+    try {
+      const nuevaDataUrl = await insertarValoresEnExcel(archivo.dataUrl, editData, editedValores);
+      setExcelEjemplo(activeEjemplo.id, { ...archivo, dataUrl: nuevaDataUrl });
+      pushActividad(`Se insertaron los valores del ejemplo "${activeEjemplo.nombre}" en su Excel`, 'blue');
+      toast('Valores insertados en el Excel del ejemplo');
+    } catch (e) {
+      toast(e instanceof Error ? e.message : 'No se pudo insertar los valores en el Excel');
+    } finally {
+      setIsInserting(false);
+      setShowInsertConfirm(false);
+    }
+  }, [editData, activeEjemplo, excelEjemplos, editedValores, setExcelEjemplo, pushActividad, toast]);
 
   const handleDeleteEjemplo = useCallback(() => {
     if (!deleteTarget) return;
@@ -346,6 +386,7 @@ export default function PlantillaEditPage() {
         onSave={handleSave}
         onPreviewExcel={() => setShowPreview(true)}
         onViewJson={handleViewJson}
+        onInsertExcel={() => setShowInsertConfirm(true)}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -375,6 +416,7 @@ export default function PlantillaEditPage() {
             onSeccionClick={handleSectionSelect}
             showAddButton
             onAddSection={handleAddSection}
+            onEditHoja={setEditingHojaSeccionId}
           />
         </div>
 
@@ -467,6 +509,21 @@ export default function PlantillaEditPage() {
         isOpen={showNuevoEjemplo}
         onClose={() => setShowNuevoEjemplo(false)}
         onCreate={handleCreateExample}
+        hasExcelAsignado={!!archivoExcelAsignado}
+        onAssignExcel={() => { setShowNuevoEjemplo(false); setShowExcelCatalogModal(true); }}
+      />
+
+      <ExcelCatalogModal
+        isOpen={showExcelCatalogModal}
+        onClose={() => setShowExcelCatalogModal(false)}
+        plantilla={plantilla}
+      />
+
+      <SeccionHojaModal
+        isOpen={!!editingHojaSeccionId}
+        onClose={() => setEditingHojaSeccionId(null)}
+        seccion={secciones.find((s) => s.id === editingHojaSeccionId) ?? null}
+        onChange={(hoja) => editingHojaSeccionId && handleSectionHojaChange(editingHojaSeccionId, hoja)}
       />
 
       <ConfirmModal
@@ -477,11 +534,21 @@ export default function PlantillaEditPage() {
         onClose={() => setDeleteTarget(null)}
       />
 
+      <ConfirmModal
+        isOpen={showInsertConfirm}
+        title="Insertar valores en el Excel"
+        message={`Se sobreescribirán todos los datos actuales del Excel asignado al ejemplo "${activeEjemplo?.nombre}" con los valores de este ejemplo. Esta acción no se puede deshacer.`}
+        confirmLabel={isInserting ? 'Insertando...' : 'Insertar'}
+        onConfirm={handleInsertExcel}
+        onClose={() => setShowInsertConfirm(false)}
+      />
+
       <ExcelPreviewModal
         isOpen={showPreview}
         onClose={() => setShowPreview(false)}
-        fileUrl={FORMATO_6A_URL}
-        title="Formato 6A — Directiva 001-2019-EF/63.01"
+        fileUrl={archivoExcelAsignado?.dataUrl ?? null}
+        fileName={archivoExcelAsignado?.nombre}
+        title={`${plantilla.codigo} — ${plantilla.nombre}`}
       />
 
       <JsonPreviewModal

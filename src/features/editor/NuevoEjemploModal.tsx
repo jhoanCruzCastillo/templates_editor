@@ -1,15 +1,19 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faXmark, faCheck, faFileAlt } from '@fortawesome/free-solid-svg-icons';
+import { faXmark, faCheck, faFileAlt, faFileExcel, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   onCreate: (nombre: string, subtitulo: string, detalle: string) => void;
+  /** Cada ejemplo requiere una copia del Excel asignado a la plantilla — si no hay ninguno asignado, se bloquea la creación.
+   * Opcional: los editores que no manejan catálogo de Excel (p. ej. Perfil) omiten esta validación. */
+  hasExcelAsignado?: boolean;
+  onAssignExcel?: () => void;
 }
 
-export default function NuevoEjemploModal({ isOpen, onClose, onCreate }: Props) {
+export default function NuevoEjemploModal({ isOpen, onClose, onCreate, hasExcelAsignado = true, onAssignExcel }: Props) {
   const [nombre, setNombre] = useState('');
   const [subtitulo, setSubtitulo] = useState('');
   const [detalle, setDetalle] = useState('');
@@ -60,55 +64,79 @@ export default function NuevoEjemploModal({ isOpen, onClose, onCreate }: Props) 
               </button>
             </div>
 
-            <div className="px-6 pb-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-heading mb-1.5">
-                  Nombre <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={nombre}
-                  onChange={(e) => setNombre(e.target.value)}
-                  placeholder="Ej. I.E. N° 50123 — Wanchaq, Cusco"
-                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
-                  autoFocus
-                />
+            {!hasExcelAsignado ? (
+              <div className="px-6 pb-6 space-y-4">
+                <div className="flex items-start gap-3 p-4 rounded-lg bg-amber-50 border border-amber-200">
+                  <FontAwesomeIcon icon={faTriangleExclamation} className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                  <p className="text-sm text-amber-800 leading-relaxed">
+                    Esta plantilla no tiene un Excel asignado. Cada ejemplo necesita su propia copia del Excel,
+                    así que primero debes asignar uno.
+                  </p>
+                </div>
+                <div className="flex justify-end gap-3 pt-2">
+                  <button onClick={onClose} className="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors duration-75">
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={onAssignExcel}
+                    className="px-5 py-2.5 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 transition-colors duration-75 flex items-center gap-2"
+                  >
+                    <FontAwesomeIcon icon={faFileExcel} className="w-3.5 h-3.5" />
+                    Asignar Excel ahora
+                  </button>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-heading mb-1.5">Subtítulo</label>
-                <input
-                  type="text"
-                  value={subtitulo}
-                  onChange={(e) => setSubtitulo(e.target.value)}
-                  placeholder="Ej. Educación inicial"
-                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-heading mb-1.5">Detalle</label>
-                <input
-                  type="text"
-                  value={detalle}
-                  onChange={(e) => setDetalle(e.target.value)}
-                  placeholder="Ej. 365 alumnos"
-                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
-                />
-              </div>
+            ) : (
+              <div className="px-6 pb-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-heading mb-1.5">
+                    Nombre <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
+                    placeholder="Ej. I.E. N° 50123 — Wanchaq, Cusco"
+                    className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
+                    autoFocus
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-heading mb-1.5">Subtítulo</label>
+                  <input
+                    type="text"
+                    value={subtitulo}
+                    onChange={(e) => setSubtitulo(e.target.value)}
+                    placeholder="Ej. Educación inicial"
+                    className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-heading mb-1.5">Detalle</label>
+                  <input
+                    type="text"
+                    value={detalle}
+                    onChange={(e) => setDetalle(e.target.value)}
+                    placeholder="Ej. 365 alumnos"
+                    className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
+                  />
+                </div>
 
-              <div className="flex justify-end gap-3 pt-2">
-                <button onClick={onClose} className="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors duration-75">
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  disabled={!nombre.trim()}
-                  className="px-5 py-2.5 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-75 flex items-center gap-2"
-                >
-                  <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5" />
-                  Crear ejemplo
-                </button>
+                <div className="flex justify-end gap-3 pt-2">
+                  <button onClick={onClose} className="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors duration-75">
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={!nombre.trim()}
+                    className="px-5 py-2.5 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-75 flex items-center gap-2"
+                  >
+                    <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5" />
+                    Crear ejemplo
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </motion.div>
         </motion.div>
       )}

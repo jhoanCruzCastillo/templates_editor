@@ -201,3 +201,18 @@ export interface ActividadReciente {
   fecha: string;
   color: 'blue' | 'green' | 'orange' | 'gray';
 }
+
+// Catálogo de archivos Excel de referencia asignables a una plantilla (para previsualización)
+export interface ArchivoExcel {
+  id: string;
+  nombre: string;
+  /** Contenido del archivo como data URL (localStorage no soporta blobs) */
+  dataUrl: string;
+  fechaSubida: string;
+}
+
+export interface CatalogoExcelPlantilla {
+  archivos: ArchivoExcel[];
+  /** Id del archivo actualmente asignado a la plantilla (se previsualiza en el editor) */
+  asignadoId?: string;
+}

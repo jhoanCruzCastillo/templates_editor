@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faPen, faCopy } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faPen, faFileExcel } from '@fortawesome/free-solid-svg-icons';
 import { motion } from 'framer-motion';
-import { useAppContext } from '../../lib/context';
-import { useToast } from '../../components/Toast';
 import { instrumentoLabels, tipologiaIoarrLabels } from '../../lib/icons';
 import InstrumentoTabs from './InstrumentoTabs';
+import ExcelCatalogModal from './ExcelCatalogModal';
 import type { Plantilla, TipoInstrumento, TipologiaIoarr } from '../../types';
 
 interface Props {
@@ -25,8 +24,7 @@ const tabOrder: TipoInstrumento[] = ['formato', 'ioarr', 'ficha_tecnica', 'perfi
 type FiltroTipologia = 'todas' | TipologiaIoarr;
 
 export default function PlantillaTable({ plantillas, sectorId }: Props) {
-  const { duplicatePlantilla, pushActividad } = useAppContext();
-  const { toast } = useToast();
+  const [excelPlantillaId, setExcelPlantillaId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TipoInstrumento>(
     () => tabOrder.find((t) => plantillas.some((p) => p.instrumento === t)) ?? 'formato',
   );
@@ -41,12 +39,6 @@ export default function PlantillaTable({ plantillas, sectorId }: Props) {
     setTipologia('todas');
   };
 
-  const handleDuplicate = (p: Plantilla) => {
-    duplicatePlantilla(p.id);
-    pushActividad(`Se duplicó la plantilla ${p.codigo} — ${p.nombre}`, 'blue');
-    toast(`Plantilla "${p.codigo}" duplicada`);
-  };
-
   const filtered = plantillas.filter(
     (p) =>
       p.instrumento === activeTab &&
@@ -57,6 +49,8 @@ export default function PlantillaTable({ plantillas, sectorId }: Props) {
     p.instrumento === 'perfil'
       ? `/sectores/${sectorId}/plantilla/${p.id}/perfil`
       : `/sectores/${sectorId}/plantilla/${p.id}/editar`;
+
+  const excelPlantilla = plantillas.find((p) => p.id === excelPlantillaId) ?? null;
 
   return (
     <motion.div
@@ -94,7 +88,7 @@ export default function PlantillaTable({ plantillas, sectorId }: Props) {
             <th className="text-left text-[11px] font-semibold uppercase tracking-wider text-muted px-4 py-4">Secciones</th>
             <th className="text-left text-[11px] font-semibold uppercase tracking-wider text-muted px-4 py-4">Ejemplos</th>
             <th className="text-left text-[11px] font-semibold uppercase tracking-wider text-muted px-4 py-4">Actualizado</th>
-            <th className="text-right text-[11px] font-semibold uppercase tracking-wider text-muted px-6 py-4">Acciones</th>
+            <th className="text-center text-[11px] font-semibold uppercase tracking-wider text-muted px-6 py-4">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -135,7 +129,7 @@ export default function PlantillaTable({ plantillas, sectorId }: Props) {
                 </td>
                 <td className="px-4 py-4 text-sm text-gray-500">{p.fechaActualizacion}</td>
                 <td className="px-6 py-4">
-                  <div className="flex items-center justify-end gap-2">
+                  <div className="flex items-center justify-center gap-2">
                     <Link
                       to={`/sectores/${sectorId}/plantilla/${p.id}`}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-brand-600 hover:bg-brand-50 transition-colors"
@@ -151,11 +145,11 @@ export default function PlantillaTable({ plantillas, sectorId }: Props) {
                       Editar
                     </Link>
                     <button
-                      onClick={() => handleDuplicate(p)}
+                      onClick={() => setExcelPlantillaId(p.id)}
                       className="inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
-                      title="Duplicar plantilla"
+                      title="Gestionar Excel"
                     >
-                      <FontAwesomeIcon icon={faCopy} className="w-3.5 h-3.5" />
+                      <FontAwesomeIcon icon={faFileExcel} className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </td>
@@ -171,6 +165,14 @@ export default function PlantillaTable({ plantillas, sectorId }: Props) {
           )}
         </tbody>
       </table>
+
+      {excelPlantilla && (
+        <ExcelCatalogModal
+          isOpen
+          onClose={() => setExcelPlantillaId(null)}
+          plantilla={excelPlantilla}
+        />
+      )}
     </motion.div>
   );
 }

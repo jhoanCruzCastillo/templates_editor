@@ -1,12 +1,14 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 import * as store from './store';
-import type { Sector, Plantilla, Ejemplo, ActividadReciente } from '../types';
+import type { Sector, Plantilla, Ejemplo, ActividadReciente, ArchivoExcel, CatalogoExcelPlantilla } from '../types';
 
 interface AppState {
   sectores: Sector[];
   plantillas: Plantilla[];
   ejemplos: Ejemplo[];
   actividad: ActividadReciente[];
+  excelCatalogos: Record<string, CatalogoExcelPlantilla>;
+  excelEjemplos: Record<string, ArchivoExcel>;
 
   // Sectores
   addSector: (sector: Sector) => void;
@@ -27,6 +29,14 @@ interface AppState {
   // Actividad
   pushActividad: (mensaje: string, color: ActividadReciente['color']) => void;
 
+  // Catálogo de Excel por plantilla
+  addArchivoExcel: (plantillaId: string, archivo: ArchivoExcel) => void;
+  deleteArchivoExcel: (plantillaId: string, archivoId: string) => void;
+  asignarArchivoExcel: (plantillaId: string, archivoId: string) => void;
+
+  // Copia de Excel por ejemplo
+  setExcelEjemplo: (ejemploId: string, archivo: ArchivoExcel) => void;
+
   // Métricas
   getMetricas: () => { totalSectores: number; totalPlantillas: number; totalEjemplos: number };
 }
@@ -38,6 +48,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [plantillas, setPlantillas] = useState<Plantilla[]>(() => store.loadPlantillas());
   const [ejemplos, setEjemplos] = useState<Ejemplo[]>(() => store.loadEjemplos());
   const [actividad, setActividad] = useState<ActividadReciente[]>(() => store.loadActividad());
+  const [excelCatalogos, setExcelCatalogos] = useState<Record<string, CatalogoExcelPlantilla>>(() => store.loadCatalogosExcel());
+  const [excelEjemplos, setExcelEjemplos] = useState<Record<string, ArchivoExcel>>(() => store.loadExcelEjemplos());
 
   // --- Sectores ---
 
@@ -171,6 +183,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       store.saveEjemplos(next);
       return next;
     });
+    setExcelEjemplos((prev) => {
+      if (!(id in prev)) return prev;
+      const next = { ...prev };
+      delete next[id];
+      store.saveExcelEjemplos(next);
+      return next;
+    });
   }, []);
 
   // --- Actividad ---
@@ -185,6 +204,58 @@ export function AppProvider({ children }: { children: ReactNode }) {
       };
       const next = [entry, ...prev].slice(0, 20);
       store.saveActividad(next);
+      return next;
+    });
+  }, []);
+
+  // --- Catálogo de Excel por plantilla ---
+
+  const addArchivoExcel = useCallback((plantillaId: string, archivo: ArchivoExcel) => {
+    setExcelCatalogos((prev) => {
+      const actual = prev[plantillaId] ?? { archivos: [] };
+      const next = {
+        ...prev,
+        [plantillaId]: {
+          archivos: [...actual.archivos, archivo],
+          asignadoId: actual.asignadoId ?? archivo.id,
+        },
+      };
+      store.saveCatalogosExcel(next);
+      return next;
+    });
+  }, []);
+
+  const deleteArchivoExcel = useCallback((plantillaId: string, archivoId: string) => {
+    setExcelCatalogos((prev) => {
+      const actual = prev[plantillaId];
+      if (!actual) return prev;
+      const next = {
+        ...prev,
+        [plantillaId]: {
+          archivos: actual.archivos.filter((a) => a.id !== archivoId),
+          asignadoId: actual.asignadoId === archivoId ? undefined : actual.asignadoId,
+        },
+      };
+      store.saveCatalogosExcel(next);
+      return next;
+    });
+  }, []);
+
+  const asignarArchivoExcel = useCallback((plantillaId: string, archivoId: string) => {
+    setExcelCatalogos((prev) => {
+      const actual = prev[plantillaId] ?? { archivos: [] };
+      const next = { ...prev, [plantillaId]: { ...actual, asignadoId: archivoId } };
+      store.saveCatalogosExcel(next);
+      return next;
+    });
+  }, []);
+
+  // --- Copia de Excel por ejemplo ---
+
+  const setExcelEjemplo = useCallback((ejemploId: string, archivo: ArchivoExcel) => {
+    setExcelEjemplos((prev) => {
+      const next = { ...prev, [ejemploId]: archivo };
+      store.saveExcelEjemplos(next);
       return next;
     });
   }, []);
@@ -206,6 +277,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         plantillas,
         ejemplos,
         actividad,
+        excelCatalogos,
+        excelEjemplos,
         addSector,
         updateSector,
         deleteSector,
@@ -217,6 +290,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         updateEjemplo,
         deleteEjemplo,
         pushActividad,
+        addArchivoExcel,
+        deleteArchivoExcel,
+        asignarArchivoExcel,
+        setExcelEjemplo,
         getMetricas,
       }}
     >

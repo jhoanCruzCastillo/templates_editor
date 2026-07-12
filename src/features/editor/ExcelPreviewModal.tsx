@@ -1,117 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faXmark, faFileExcel, faSpinner, faDownload } from '@fortawesome/free-solid-svg-icons';
+import { faXmark, faFileExcel, faDownload } from '@fortawesome/free-solid-svg-icons';
+import ExcelViewer from '../../components/ExcelViewer';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  fileUrl: string;
+  fileUrl: string | null;
+  fileName?: string;
   title: string;
 }
 
-const VENDOR = '/vendor/luckysheet';
-const CSS_FILES = [
-  `${VENDOR}/plugins/css/pluginsCss.css`,
-  `${VENDOR}/plugins/plugins.css`,
-  `${VENDOR}/css/luckysheet.css`,
-  `${VENDOR}/assets/iconfont/iconfont.css`,
-];
-const JS_FILES = [`${VENDOR}/plugins/js/plugin.js`, `${VENDOR}/luckysheet.umd.js`];
-
-// Inyecta un <link> o <script> una sola vez y espera a que cargue
-function loadAsset(url: string, kind: 'css' | 'js'): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const selector = kind === 'css' ? `link[href="${url}"]` : `script[src="${url}"]`;
-    if (document.querySelector(selector)) return resolve();
-    const el = kind === 'css' ? document.createElement('link') : document.createElement('script');
-    if (el instanceof HTMLLinkElement) {
-      el.rel = 'stylesheet';
-      el.href = url;
-    } else {
-      el.src = url;
-    }
-    el.onload = () => resolve();
-    el.onerror = () => reject(new Error(`No se pudo cargar ${url}`));
-    document.head.appendChild(el);
-  });
-}
-
-export default function ExcelPreviewModal({ isOpen, onClose, fileUrl, title }: Props) {
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [reloadKey, setReloadKey] = useState(0);
-  const sheetsRef = useRef<unknown[] | null>(null);
-
-  // Cargar assets del visor + convertir el xlsm (se cachea entre aperturas)
-  useEffect(() => {
-    if (!isOpen) return;
-    let disposed = false;
-    (async () => {
-      try {
-        setStatus('loading');
-        await Promise.all(CSS_FILES.map((u) => loadAsset(u, 'css')));
-        for (const js of JS_FILES) await loadAsset(js, 'js'); // plugin.js debe ir antes del umd
-        if (!sheetsRef.current) {
-          const [{ default: LuckyExcel }, res] = await Promise.all([import('luckyexcel'), fetch(fileUrl)]);
-          if (!res.ok) throw new Error(`No se pudo cargar el archivo (${res.status})`);
-          const buffer = await res.arrayBuffer();
-          const json = await new Promise<{ sheets?: unknown[] }>((resolve, reject) =>
-            LuckyExcel.transformExcelToLucky(buffer, resolve, reject),
-          );
-          // Omitir hojas sin celdas (p. ej. la portada "MENÚ" del 6A)
-          const sheets = (json.sheets ?? []).filter(
-            (s) => ((s as { celldata?: unknown[] }).celldata?.length ?? 0) > 0,
-          );
-          if (sheets.length === 0) throw new Error('El archivo no contiene hojas legibles');
-          sheets.forEach((s, i) => { (s as { status: number }).status = i === 0 ? 1 : 0; });
-          sheetsRef.current = sheets;
-        }
-        if (!disposed) setStatus('ready');
-      } catch (e) {
-        if (!disposed) {
-          setErrorMsg(e instanceof Error ? e.message : 'Error al leer el archivo');
-          setStatus('error');
-        }
-      }
-    })();
-    return () => { disposed = true; };
-  }, [isOpen, fileUrl, reloadKey]);
-
-  // Montar Luckysheet cuando los datos están listos; destruir al cerrar
-  useEffect(() => {
-    if (!isOpen || status !== 'ready' || !sheetsRef.current) return;
-    window.luckysheet?.create({
-      container: 'excel-preview-container',
-      data: structuredClone(sheetsRef.current), // luckysheet muta los datos
-      lang: 'es',
-      allowEdit: false,
-      showtoolbar: false,
-      showinfobar: false,
-      showstatisticBar: false,
-      sheetFormulaBar: false,
-      enableAddRow: false,
-      enableAddBackTop: false,
-      showsheetbarConfig: { add: false, menu: false },
-      cellRightClickConfig: {
-        copy: true, copyAs: false, paste: false, insertRow: false, insertColumn: false,
-        deleteRow: false, deleteColumn: false, deleteCell: false, hideRow: false,
-        hideColumn: false, rowHeight: false, columnWidth: false, clear: false,
-        matrix: false, sort: false, filter: false, chart: false, image: false,
-        link: false, data: false, cellFormat: false,
-      },
-    });
-    return () => {
-      try { window.luckysheet?.destroy(); } catch { /* ya destruido */ }
-    };
-  }, [isOpen, status]);
-
-  const handleRetry = () => {
-    sheetsRef.current = null;
-    setErrorMsg('');
-    setReloadKey((k) => k + 1);
-  };
-
+export default function ExcelPreviewModal({ isOpen, onClose, fileUrl, fileName, title }: Props) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -139,18 +39,20 @@ export default function ExcelPreviewModal({ isOpen, onClose, fileUrl, title }: P
                 </div>
                 <div className="min-w-0">
                   <h2 className="text-base font-bold text-heading truncate">{title}</h2>
-                  <p className="text-xs text-muted">Previsualización — solo lectura</p>
+                  <p className="text-xs text-muted">{fileUrl ? 'Previsualización — solo lectura' : 'Sin Excel asignado'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <a
-                  href={fileUrl}
-                  download
-                  className="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 transition-colors duration-75 flex items-center gap-2"
-                >
-                  <FontAwesomeIcon icon={faDownload} className="w-3.5 h-3.5" />
-                  Descargar
-                </a>
+                {fileUrl && (
+                  <a
+                    href={fileUrl}
+                    download={fileName ?? ''}
+                    className="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 transition-colors duration-75 flex items-center gap-2"
+                  >
+                    <FontAwesomeIcon icon={faDownload} className="w-3.5 h-3.5" />
+                    Descargar
+                  </a>
+                )}
                 <button
                   onClick={onClose}
                   className="w-9 h-9 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors duration-100"
@@ -162,25 +64,8 @@ export default function ExcelPreviewModal({ isOpen, onClose, fileUrl, title }: P
             </div>
 
             {/* Visor */}
-            <div className="flex-1 relative min-h-0">
-              {status === 'loading' && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-muted">
-                  <FontAwesomeIcon icon={faSpinner} className="w-6 h-6 animate-spin text-brand-600" />
-                  <span className="text-sm">Cargando formato...</span>
-                </div>
-              )}
-              {status === 'error' && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                  <span className="text-sm text-red-600">{errorMsg}</span>
-                  <button
-                    onClick={handleRetry}
-                    className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors duration-75"
-                  >
-                    Reintentar
-                  </button>
-                </div>
-              )}
-              <div id="excel-preview-container" className="absolute inset-0" />
+            <div className="flex-1 min-h-0">
+              <ExcelViewer fileUrl={fileUrl} />
             </div>
           </motion.div>
         </motion.div>

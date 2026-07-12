@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "formato": {
+    "codigo": "TESTEO-APOLO",
+    "nombre": "AAAAAAAAAAAAAA-AAAAAAAAAAAAA",
+    "fuente_archivo": "",
+    "tipo_version": "estructura",
+    "nota_secciones": ""
+  },
+  "secciones": [
+    {
+      "id": "01",
+      "nombre": "Nueva sección custom01",
+      "tipo_nodo": "seccion",
+      "hoja": "",
+      "campos": [
+        {
+          "id": "01.01",
+          "nombre": "SUBSECCIÓN qustom01",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "01.01.1",
+              "nombre": "qustom text_corto",
+              "tipo_nodo": "campo",
+              "tipo": "texto_corto",
+              "editable": true,
+              "captura": {
+                "hoja": "",
+                "columna": "A",
+                "fila": 1,
+                "abarca_columnas": 1,
+                "abarca_filas": 1
+              },
+              "valor": ""
+            },
+            {
+              "id": "01.01.2",
+              "nombre": "qustom01 number",
+              "tipo_nodo": "campo",
+              "tipo": "numero",
+              "editable": true,
+              "captura": {
+                "hoja": "",
+                "columna": "B",
+                "fila": 1,
+                "abarca_columnas": 1,
+                "abarca_filas": 1
+              },
+              "valor": null
+            },
+            {
+              "id": "01.01.3",
+              "nombre": "qustom02 decimal",
+              "tipo_nodo": "campo",
+              "tipo": "decimal",
+              "editable": true,
+              "captura": {
+                "hoja": "",
+                "columna": "C",
+                "fila": 1,
+                "abarca_columnas": 1,
+                "abarca_filas": 1
+              },
+              "valor": null
+            },
+            {
+              "id": "01.01.4",
+              "nombre": "qustom 03 tabla simple",
+              "tipo_nodo": "campo",
+              "tipo": "tabla",
+              "editable": true,
+              "config": {
+                "filas": "planas",
+                "columnas": "fijas",
+                "agrupador": false
+              },
+              "captura": {
+                "hoja": "",
+                "columna_inicial": "D",
+                "fila_inicial": 1,
+                "filas_base": 3,
+                "columnas": [
+                  {
+                    "id": "3f9f743c-8eca-4f90-9611-7eefed67949b",
+                    "columna": "",
+                    "abarca_columnas": 1
+                  },
+                  {
+                    "id": "c5dfe4d0-2101-4af4-b012-4e5783411a9b",
+                    "columna": "",
+                    "abarca_columnas": 1
+                  },
+                  {
+                    "id": "17e91821-de3c-4e90-8d46-b4fc2d749109",
+                    "columna": "",
+                    "abarca_columnas": 1
+                  }
+                ]
+              },
+              "cabecera": [],
+              "columnas": [
+                {
+                  "id": "3f9f743c-8eca-4f90-9611-7eefed67949b",
+                  "nombre": "q1",
+                  "tipo": "texto_corto"
+                },
+                {
+                  "id": "c5dfe4d0-2101-4af4-b012-4e5783411a9b",
+                  "nombre": "q2",
+                  "tipo": "texto_corto"
+                },
+                {
+                  "id": "17e91821-de3c-4e90-8d46-b4fc2d749109",
+                  "nombre": "q3",
+                  "tipo": "texto_corto"
+                }
+              ],
+              "valor": [
+                {
+                  "3f9f743c-8eca-4f90-9611-7eefed67949b": "qustom example 01",
+                  "c5dfe4d0-2101-4af4-b012-4e5783411a9b": "",
+                  "17e91821-de3c-4e90-8d46-b4fc2d749109": ""
+                },
+                {
+                  "3f9f743c-8eca-4f90-9611-7eefed67949b": "",
+                  "c5dfe4d0-2101-4af4-b012-4e5783411a9b": "qustom example 02",
+                  "17e91821-de3c-4e90-8d46-b4fc2d749109": ""
+                },
+                {
+                  "3f9f743c-8eca-4f90-9611-7eefed67949b": "",
+                  "c5dfe4d0-2101-4af4-b012-4e5783411a9b": "",
+                  "17e91821-de3c-4e90-8d46-b4fc2d749109": "qustom example 034"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "nombre": "Nueva sección custom02",
+      "tipo_nodo": "seccion",
+      "hoja": "",
+      "campos": [
+        {
+          "id": "02.01",
+          "nombre": "SUBSECCIÓN q21",
+          "tipo_nodo": "grupo",
+          "campos": [
+            {
+              "id": "02.01.1",
+              "nombre": "Nuevo campo",
+              "tipo_nodo": "campo",
+              "tipo": "texto_corto",
+              "editable": true,
+              "captura": {
+                "hoja": "",
+                "columna": "",
+                "fila": 0,
+                "abarca_columnas": 1,
+                "abarca_filas": 1
+              },
+              "valor": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faSave, faArrowLeft, faFileCode } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faSave, faArrowLeft, faFileCode, faFileExport } from '@fortawesome/free-solid-svg-icons';
 import VersionTabs from '../../components/VersionTabs';
 import { useAuth } from '../../lib/auth';
 import type { VersionTab, Plantilla } from '../../types';
@@ -15,6 +15,8 @@ interface Props {
   /** Si se define, "Vista previa" abre el modal de Excel en vez de navegar */
   onPreviewExcel?: () => void;
   onViewJson?: () => void;
+  /** Si se define, reemplaza "Vista previa" por "Insertar" (solo en tab Ejemplos) */
+  onInsertExcel?: () => void;
 }
 
 export default function EditorTopBar({
@@ -26,10 +28,12 @@ export default function EditorTopBar({
   onSave,
   onPreviewExcel,
   onViewJson,
+  onInsertExcel,
 }: Props) {
   const { sesion } = useAuth();
   const esSuperusuario = sesion?.rol === 'superusuario';
   const previewAsModal = Boolean(onPreviewExcel);
+  const showInsert = activeTab === 'ejemplos' && Boolean(onInsertExcel);
   return (
     <div className="shrink-0 border-b border-gray-100 bg-white px-6 py-3">
       <div className="flex items-center justify-between">
@@ -58,7 +62,15 @@ export default function EditorTopBar({
               Ver JSON
             </button>
           )}
-          {previewAsModal ? (
+          {showInsert ? (
+            <button
+              onClick={onInsertExcel}
+              className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <FontAwesomeIcon icon={faFileExport} className="w-3.5 h-3.5" />
+              Insertar
+            </button>
+          ) : previewAsModal ? (
             <button
               onClick={onPreviewExcel}
               className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2"

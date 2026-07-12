@@ -26,6 +26,16 @@ export function useEjemplos(plantillaId: string) {
   return useMemo(() => ejemplos.filter((e) => e.plantillaId === plantillaId), [ejemplos, plantillaId]);
 }
 
+export function useCatalogoExcel(plantillaId: string) {
+  const { excelCatalogos } = useAppContext();
+  return useMemo(() => excelCatalogos[plantillaId] ?? { archivos: [] }, [excelCatalogos, plantillaId]);
+}
+
+export function useExcelEjemplo(ejemploId: string) {
+  const { excelEjemplos } = useAppContext();
+  return useMemo(() => excelEjemplos[ejemploId] ?? null, [excelEjemplos, ejemploId]);
+}
+
 export function useActividadReciente() {
   const { actividad } = useAppContext();
   return actividad;

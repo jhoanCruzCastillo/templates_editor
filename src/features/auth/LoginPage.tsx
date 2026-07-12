@@ -11,8 +11,8 @@ export default function LoginPage() {
   const { sesion, login } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [usuario, setUsuario] = useState('');
-  const [password, setPassword] = useState('');
+  const [usuario, setUsuario] = useState('superuser');
+  const [password, setPassword] = useState('Super#2026');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 

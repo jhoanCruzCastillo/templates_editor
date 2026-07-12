@@ -1,3 +1,5 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
 import type { Seccion } from '../../types';
 
 interface Props {
@@ -6,9 +8,11 @@ interface Props {
   onSeccionClick: (seccionId: string) => void;
   showAddButton?: boolean;
   onAddSection?: () => void;
+  /** Si se pasa, aparece un ícono de engranaje para asignar la hoja de Excel de cada sección */
+  onEditHoja?: (seccionId: string) => void;
 }
 
-export default function SectionIndex({ secciones, activeSeccionId, onSeccionClick, showAddButton, onAddSection }: Props) {
+export default function SectionIndex({ secciones, activeSeccionId, onSeccionClick, showAddButton, onAddSection, onEditHoja }: Props) {
   return (
     <div className="flex flex-col h-full">
       <h3 className="text-xs font-semibold uppercase tracking-widest text-muted mb-3 px-2">
@@ -18,10 +22,10 @@ export default function SectionIndex({ secciones, activeSeccionId, onSeccionClic
         {secciones.map((seccion) => {
           const isActive = activeSeccionId === seccion.id;
           return (
-            <button
+            <div
               key={seccion.id}
               onClick={() => onSeccionClick(seccion.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all text-sm ${
+              className={`w-full flex items-center gap-3 pl-3 pr-1.5 py-2.5 rounded-lg text-left transition-all text-sm cursor-pointer ${
                 isActive
                   ? 'bg-brand-50 text-brand-700 font-semibold border-l-3 border-brand-600'
                   : 'text-gray-600 hover:bg-gray-50'
@@ -36,8 +40,17 @@ export default function SectionIndex({ secciones, activeSeccionId, onSeccionClic
               >
                 {seccion.numero}
               </span>
-              <span className="truncate leading-tight">{seccion.nombre}</span>
-            </button>
+              <span className="truncate leading-tight flex-1">{seccion.nombre}</span>
+              {onEditHoja && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onEditHoja(seccion.id); }}
+                  title="Asignar hoja de Excel"
+                  className="w-6 h-6 rounded flex items-center justify-center text-gray-300 hover:text-brand-500 hover:bg-white transition-colors shrink-0"
+                >
+                  <FontAwesomeIcon icon={faGear} className="w-3 h-3" />
+                </button>
+              )}
+            </div>
           );
         })}
       </nav>

@@ -3,7 +3,7 @@ import { plantillas as plantillasSeed } from '../data/plantillas';
 import { ejemplos as ejemplosSeed } from '../data/ejemplos';
 import { actividadReciente as actividadSeed } from '../data/actividad';
 import { usuarios } from '../data/usuarios';
-import type { Sector, Plantilla, Ejemplo, ActividadReciente, Usuario, Sesion } from '../types';
+import type { Sector, Plantilla, Ejemplo, ActividadReciente, Usuario, Sesion, CatalogoExcelPlantilla, ArchivoExcel } from '../types';
 import type { DocumentoJSON } from './schemaExport';
 
 const KEYS = {
@@ -14,6 +14,8 @@ const KEYS = {
   sesion: 'pf_sesion',
   initialized: 'pf_initialized',
   documentos: 'pf_documentos',
+  excelCatalogo: 'pf_excel_catalogo',
+  excelEjemplos: 'pf_excel_ejemplos',
 } as const;
 
 function read<T>(key: string, fallback: T): T {
@@ -91,6 +93,26 @@ export function saveDocumentoJSON(clave: string, doc: DocumentoJSON): void {
   const all = loadDocumentos();
   all[clave] = doc;
   write(KEYS.documentos, all);
+}
+
+// --- Catálogo de archivos Excel por plantilla ---
+
+export function loadCatalogosExcel(): Record<string, CatalogoExcelPlantilla> {
+  return read<Record<string, CatalogoExcelPlantilla>>(KEYS.excelCatalogo, {});
+}
+
+export function saveCatalogosExcel(data: Record<string, CatalogoExcelPlantilla>): void {
+  write(KEYS.excelCatalogo, data);
+}
+
+// --- Copia de archivo Excel por ejemplo (snapshot tomado al crear el ejemplo) ---
+
+export function loadExcelEjemplos(): Record<string, ArchivoExcel> {
+  return read<Record<string, ArchivoExcel>>(KEYS.excelEjemplos, {});
+}
+
+export function saveExcelEjemplos(data: Record<string, ArchivoExcel>): void {
+  write(KEYS.excelEjemplos, data);
 }
 
 // --- Autenticación ---

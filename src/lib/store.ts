@@ -2,8 +2,8 @@ import { sectores as sectoresSeed } from '../data/sectores';
 import { plantillas as plantillasSeed } from '../data/plantillas';
 import { ejemplos as ejemplosSeed } from '../data/ejemplos';
 import { actividadReciente as actividadSeed } from '../data/actividad';
-import { usuarios } from '../data/usuarios';
-import type { Sector, Plantilla, Ejemplo, ActividadReciente, Usuario, Sesion, CatalogoExcelPlantilla, ArchivoExcel } from '../types';
+import { usuarios as usuariosSeed } from '../data/usuarios';
+import type { Sector, Plantilla, Ejemplo, ActividadReciente, Usuario, Sesion, CatalogoExcelPlantilla, ArchivoExcel, FacturacionMock } from '../types';
 import type { DocumentoJSON } from './schemaExport';
 
 const KEYS = {
@@ -16,6 +16,8 @@ const KEYS = {
   documentos: 'pf_documentos',
   excelCatalogo: 'pf_excel_catalogo',
   excelEjemplos: 'pf_excel_ejemplos',
+  usuarios: 'pf_usuarios',
+  facturacion: 'pf_facturacion',
 } as const;
 
 function read<T>(key: string, fallback: T): T {
@@ -67,6 +69,7 @@ export function initStore() {
     reseedReplacingKnown(KEYS.plantillas, plantillasSeed, SEED_IDS_V9.plantillas);
     if (!localStorage.getItem(KEYS.ejemplos)) write(KEYS.ejemplos, ejemplosSeed);
     if (!localStorage.getItem(KEYS.actividad)) write(KEYS.actividad, actividadSeed);
+    if (!localStorage.getItem(KEYS.usuarios)) write(KEYS.usuarios, usuariosSeed);
     localStorage.setItem(KEYS.initialized, String(SEED_VERSION));
   }
 }
@@ -143,11 +146,55 @@ export function saveExcelEjemplos(data: Record<string, ArchivoExcel>): void {
   write(KEYS.excelEjemplos, data);
 }
 
+// --- Usuarios ---
+
+export function loadUsuarios(): Usuario[] {
+  return read<Usuario[]>(KEYS.usuarios, usuariosSeed);
+}
+
+export function saveUsuarios(data: Usuario[]): void {
+  write(KEYS.usuarios, data);
+}
+
+// --- Facturación (datos de muestra — sin pasarela de pago real) ---
+
+export function loadFacturacion(): Record<string, FacturacionMock> {
+  return read<Record<string, FacturacionMock>>(KEYS.facturacion, {});
+}
+
+export function saveFacturacion(data: Record<string, FacturacionMock>): void {
+  write(KEYS.facturacion, data);
+}
+
+export function generarFacturacionDefault(): FacturacionMock {
+  const hoy = new Date();
+  const renovacion = new Date(hoy);
+  renovacion.setMonth(renovacion.getMonth() + 1);
+  const facturaMesPasado = new Date(hoy);
+  facturaMesPasado.setMonth(facturaMesPasado.getMonth() - 1);
+  const facturaDosMeses = new Date(hoy);
+  facturaDosMeses.setMonth(facturaDosMeses.getMonth() - 2);
+
+  return {
+    plan: 'Plan Pro',
+    precio: 'S/ 89',
+    periodicidad: 'Mensual',
+    cancelada: false,
+    fechaRenovacion: renovacion.toLocaleDateString('es-PE'),
+    tarjetaMarca: 'Visa',
+    tarjetaUltimos4: '4242',
+    facturas: [
+      { id: generateId(), fecha: facturaMesPasado.toLocaleDateString('es-PE'), total: 'S/ 89.00', estado: 'Pagado' },
+      { id: generateId(), fecha: facturaDosMeses.toLocaleDateString('es-PE'), total: 'S/ 89.00', estado: 'Pagado' },
+    ],
+  };
+}
+
 // --- Autenticación ---
 
 export function findUsuario(usuario: string, password: string): Usuario | null {
   return (
-    usuarios.find(
+    loadUsuarios().find(
       (u) => u.usuario.toLowerCase() === usuario.trim().toLowerCase() && u.password === password,
     ) ?? null
   );

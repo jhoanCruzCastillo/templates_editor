@@ -6,6 +6,7 @@ interface AuthState {
   sesion: Sesion | null;
   login: (usuario: string, password: string) => Sesion | null;
   logout: () => void;
+  actualizarNombreSesion: (nombre: string) => void;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -16,7 +17,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback((usuario: string, password: string): Sesion | null => {
     const u = store.findUsuario(usuario, password);
     if (!u) return null;
-    const nueva: Sesion = { usuarioId: u.id, nombre: u.nombre, usuario: u.usuario, rol: u.rol };
+    const nueva: Sesion = {
+      usuarioId: u.id,
+      nombre: u.nombre,
+      usuario: u.usuario,
+      rol: u.rol,
+      iniciadaEn: new Date().toISOString(),
+    };
     store.saveSesion(nueva);
     setSesion(nueva);
     return nueva;
@@ -27,7 +34,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSesion(null);
   }, []);
 
-  return <AuthContext.Provider value={{ sesion, login, logout }}>{children}</AuthContext.Provider>;
+  const actualizarNombreSesion = useCallback((nombre: string) => {
+    setSesion((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, nombre };
+      store.saveSesion(next);
+      return next;
+    });
+  }, []);
+
+  return (
+    <AuthContext.Provider value={{ sesion, login, logout, actualizarNombreSesion }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

@@ -35,6 +35,7 @@ import {
   faShieldHalved,
   faLandmark,
   faUmbrellaBeach,
+  faUserGear,
   type IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import type { TipoCampo, TipoColumna, SubtipoTabla, TipoInstrumento, TipologiaIoarr, RolUsuario } from '../types';
@@ -201,4 +202,5 @@ export {
   faShieldHalved,
   faLandmark,
   faUmbrellaBeach,
+  faUserGear,
 };

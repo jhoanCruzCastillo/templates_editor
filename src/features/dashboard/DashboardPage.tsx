@@ -5,9 +5,12 @@ import MetricCard from './MetricCard';
 import QuickAccessItem from './QuickAccessItem';
 import ActivityFeed from './ActivityFeed';
 import { useMetricas } from '../../lib/hooks';
+import { useAuth } from '../../lib/auth';
 
 export default function DashboardPage() {
   const metricas = useMetricas();
+  const { sesion } = useAuth();
+  const primerNombre = sesion?.nombre.split(' ')[0] ?? '';
 
   return (
     <div className="p-8">
@@ -18,7 +21,7 @@ export default function DashboardPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.15 }}
       >
-        <h1 className="text-3xl font-bold text-heading mb-2">Bienvenida, María</h1>
+        <h1 className="text-3xl font-bold text-heading mb-2">Bienvenido/a, {primerNombre}</h1>
         <p className="text-muted mb-8">
           Administra los sectores, plantillas y ejemplos que alimentan el asistente de formulación.
         </p>

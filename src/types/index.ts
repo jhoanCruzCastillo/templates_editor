@@ -184,12 +184,16 @@ export interface Ejemplo {
 
 export type RolUsuario = 'superusuario' | 'administrador' | 'cliente';
 
+export type TemaPreferencia = 'claro' | 'oscuro' | 'sistema';
+
 export interface Usuario {
   id: string;
   nombre: string;
   usuario: string;
   password: string;
   rol: RolUsuario;
+  apodo?: string;
+  tema?: TemaPreferencia;
 }
 
 // Sesión activa — nunca guarda la contraseña
@@ -198,6 +202,29 @@ export interface Sesion {
   nombre: string;
   usuario: string;
   rol: RolUsuario;
+  iniciadaEn?: string;
+}
+
+export type EstadoFactura = 'Pagado' | 'Pendiente';
+
+export interface FacturaMock {
+  id: string;
+  fecha: string;
+  total: string;
+  estado: EstadoFactura;
+}
+
+// Datos de facturación de muestra — no hay pasarela de pago real ni backend;
+// esto solo alimenta la UI de Ajustes > Facturación con datos ilustrativos.
+export interface FacturacionMock {
+  plan: string;
+  precio: string;
+  periodicidad: string;
+  cancelada: boolean;
+  fechaRenovacion: string;
+  tarjetaMarca: string;
+  tarjetaUltimos4: string;
+  facturas: FacturaMock[];
 }
 
 export interface ActividadReciente {

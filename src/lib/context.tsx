@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import * as store from './store';
-import type { Sector, Plantilla, Ejemplo, ActividadReciente, ArchivoExcel, CatalogoExcelPlantilla } from '../types';
+import type { Sector, Plantilla, Ejemplo, ActividadReciente, ArchivoExcel, CatalogoExcelPlantilla, Usuario, FacturacionMock } from '../types';
 
 interface AppState {
   sectores: Sector[];
@@ -9,6 +9,8 @@ interface AppState {
   actividad: ActividadReciente[];
   excelCatalogos: Record<string, CatalogoExcelPlantilla>;
   excelEjemplos: Record<string, ArchivoExcel>;
+  usuarios: Usuario[];
+  facturacion: Record<string, FacturacionMock>;
 
   // Sectores
   addSector: (sector: Sector) => void;
@@ -37,6 +39,14 @@ interface AppState {
   // Copia de Excel por ejemplo
   setExcelEjemplo: (ejemploId: string, archivo: ArchivoExcel) => void;
 
+  // Usuarios
+  addUsuario: (usuario: Usuario) => void;
+  updateUsuario: (id: string, data: Partial<Usuario>) => void;
+  deleteUsuario: (id: string) => void;
+
+  // Facturación (datos de muestra)
+  updateFacturacion: (usuarioId: string, data: Partial<FacturacionMock>) => void;
+
   // Métricas
   getMetricas: () => { totalSectores: number; totalPlantillas: number; totalEjemplos: number };
 }
@@ -50,6 +60,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [actividad, setActividad] = useState<ActividadReciente[]>(() => store.loadActividad());
   const [excelCatalogos, setExcelCatalogos] = useState<Record<string, CatalogoExcelPlantilla>>(() => store.loadCatalogosExcel());
   const [excelEjemplos, setExcelEjemplos] = useState<Record<string, ArchivoExcel>>(() => store.loadExcelEjemplos());
+  const [usuarios, setUsuarios] = useState<Usuario[]>(() => store.loadUsuarios());
+  const [facturacion, setFacturacion] = useState<Record<string, FacturacionMock>>(() => store.loadFacturacion());
 
   // --- Sectores ---
 
@@ -289,6 +301,43 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  // --- Usuarios ---
+
+  const addUsuario = useCallback((usuario: Usuario) => {
+    setUsuarios((prev) => {
+      const next = [...prev, usuario];
+      store.saveUsuarios(next);
+      return next;
+    });
+  }, []);
+
+  const updateUsuario = useCallback((id: string, data: Partial<Usuario>) => {
+    setUsuarios((prev) => {
+      const next = prev.map((u) => (u.id === id ? { ...u, ...data } : u));
+      store.saveUsuarios(next);
+      return next;
+    });
+  }, []);
+
+  const deleteUsuario = useCallback((id: string) => {
+    setUsuarios((prev) => {
+      const next = prev.filter((u) => u.id !== id);
+      store.saveUsuarios(next);
+      return next;
+    });
+  }, []);
+
+  // --- Facturación (datos de muestra) ---
+
+  const updateFacturacion = useCallback((usuarioId: string, data: Partial<FacturacionMock>) => {
+    setFacturacion((prev) => {
+      const actual = prev[usuarioId] ?? store.generarFacturacionDefault();
+      const next = { ...prev, [usuarioId]: { ...actual, ...data } };
+      store.saveFacturacion(next);
+      return next;
+    });
+  }, []);
+
   // --- Métricas ---
 
   const getMetricas = useCallback(() => {
@@ -308,6 +357,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         actividad,
         excelCatalogos,
         excelEjemplos,
+        usuarios,
+        facturacion,
         addSector,
         updateSector,
         deleteSector,
@@ -323,6 +374,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         deleteArchivoExcel,
         asignarArchivoExcel,
         setExcelEjemplo,
+        addUsuario,
+        updateUsuario,
+        deleteUsuario,
+        updateFacturacion,
         getMetricas,
       }}
     >

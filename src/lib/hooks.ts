@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useAppContext } from './context';
+import { generarFacturacionDefault } from './store';
 
 export function useSectores() {
   const { sectores } = useAppContext();
@@ -26,6 +27,11 @@ export function useEjemplos(plantillaId: string) {
   return useMemo(() => ejemplos.filter((e) => e.plantillaId === plantillaId), [ejemplos, plantillaId]);
 }
 
+export function useEjemplo(id: string) {
+  const { ejemplos } = useAppContext();
+  return useMemo(() => ejemplos.find((e) => e.id === id), [ejemplos, id]);
+}
+
 export function useCatalogoExcel(plantillaId: string) {
   const { excelCatalogos } = useAppContext();
   return useMemo(() => excelCatalogos[plantillaId] ?? { archivos: [] }, [excelCatalogos, plantillaId]);
@@ -39,6 +45,16 @@ export function useExcelEjemplo(ejemploId: string) {
 export function useActividadReciente() {
   const { actividad } = useAppContext();
   return actividad;
+}
+
+export function useUsuarios() {
+  const { usuarios } = useAppContext();
+  return usuarios;
+}
+
+export function useFacturacion(usuarioId: string) {
+  const { facturacion } = useAppContext();
+  return useMemo(() => facturacion[usuarioId] ?? generarFacturacionDefault(), [facturacion, usuarioId]);
 }
 
 export function useMetricas() {

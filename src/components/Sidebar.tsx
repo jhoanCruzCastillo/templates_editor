@@ -1,29 +1,15 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHouse, faLayerGroup, faRightFromBracket, faAngleLeft } from '@fortawesome/free-solid-svg-icons';
+import { faHouse, faLayerGroup, faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../lib/auth';
-import { rolUsuarioLabels } from '../lib/icons';
-import type { RolUsuario } from '../types';
+import { faUserGear } from '../lib/icons';
+import { puedeAccederGestionUsuarios } from '../lib/permisos';
+import UserMenu from '../features/settings/UserMenu';
 
 const navItems = [
   { to: '/', label: 'Inicio', icon: faHouse },
   { to: '/sectores', label: 'Sectores', icon: faLayerGroup },
 ];
-
-const rolColor: Record<RolUsuario, string> = {
-  superusuario: 'text-amber-300',
-  administrador: 'text-brand-400',
-  cliente: 'text-sky-300',
-};
-
-function iniciales(nombre: string): string {
-  return nombre
-    .split(' ')
-    .slice(0, 2)
-    .map((p) => p[0])
-    .join('')
-    .toUpperCase();
-}
 
 interface Props {
   hidden?: boolean;
@@ -31,13 +17,14 @@ interface Props {
 }
 
 export default function Sidebar({ hidden = false, onHide }: Props) {
-  const { sesion, logout } = useAuth();
-  const navigate = useNavigate();
+  const { sesion } = useAuth();
+  const esCliente = sesion?.rol === 'cliente';
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login', { replace: true });
-  };
+  const base = esCliente ? navItems.filter((item) => item.to !== '/sectores') : navItems;
+  const items = sesion && puedeAccederGestionUsuarios(sesion.rol)
+    ? [...base, { to: '/usuarios', label: 'Usuarios y roles', icon: faUserGear }]
+    : base;
+
   return (
     <aside
       className={`fixed left-0 top-0 bottom-0 w-56 bg-sidebar text-white flex flex-col z-40 transition-transform duration-150 ease-out ${
@@ -70,7 +57,7 @@ export default function Sidebar({ hidden = false, onHide }: Props) {
           Navegación
         </p>
         <ul className="space-y-1">
-          {navItems.map((item) => (
+          {items.map((item) => (
             <li key={item.to}>
               <NavLink
                 to={item.to}
@@ -91,25 +78,7 @@ export default function Sidebar({ hidden = false, onHide }: Props) {
         </ul>
       </nav>
 
-      {/* Bloque usuario */}
-      {sesion && (
-        <div className="px-4 py-4 border-t border-white/10 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-sidebar-active flex items-center justify-center text-xs font-bold">
-            {iniciales(sesion.nombre)}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium truncate">{sesion.nombre}</div>
-            <div className={`text-[11px] ${rolColor[sesion.rol]}`}>{rolUsuarioLabels[sesion.rol]}</div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="text-white/50 hover:text-white transition-colors"
-            title="Cerrar sesión"
-          >
-            <FontAwesomeIcon icon={faRightFromBracket} className="w-4" />
-          </button>
-        </div>
-      )}
+      <UserMenu />
     </aside>
   );
 }

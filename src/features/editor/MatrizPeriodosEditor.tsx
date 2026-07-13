@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTrash, faBolt, faXmark, faGripVertical, faGear } from '@fortawesome/free-solid-svg-icons';
 import { columnTypeIcons, columnTypeLabels, columnTypePrimitivos } from '../../lib/icons';
+import { columnaFaltaCaptura } from '../../lib/campoValidation';
 import { generateId } from '../../lib/store';
 import ColumnaCapturaModal from './ColumnaCapturaModal';
 import ConfirmModal from '../../components/ConfirmModal';
@@ -215,7 +216,11 @@ export default function MatrizPeriodosEditor({ config, onChange }: Props) {
             <option key={t} value={t}>{columnTypeLabels[t]}</option>
           ))}
         </select>
-        <button onClick={() => { setConfiguringColId(col.id); setSoloGrupoMode(false); }} title="Configurar columna" className="w-4 h-4 rounded flex items-center justify-center text-amber-500 hover:text-amber-700 shrink-0">
+        <button
+          onClick={() => { setConfiguringColId(col.id); setSoloGrupoMode(false); }}
+          title={columnaFaltaCaptura(col) ? 'Falta posición en Excel — configúrala aquí' : 'Configurar columna'}
+          className={`w-4 h-4 rounded flex items-center justify-center shrink-0 ${columnaFaltaCaptura(col) ? 'text-red-500 hover:text-red-700' : 'text-amber-500 hover:text-amber-700'}`}
+        >
           <FontAwesomeIcon icon={faGear} className="w-2.5 h-2.5" />
         </button>
         <button onClick={() => removeColumn(col.id)} title="Eliminar columna" className="w-4 h-4 rounded flex items-center justify-center text-gray-400 hover:text-red-500 shrink-0">
@@ -252,7 +257,11 @@ export default function MatrizPeriodosEditor({ config, onChange }: Props) {
         <button onClick={() => toggleDinamica(col.id)} title="Marcar como dinámica" className="w-4 h-4 rounded flex items-center justify-center text-gray-300 hover:text-amber-500 shrink-0">
           <FontAwesomeIcon icon={faBolt} className="w-2.5 h-2.5" />
         </button>
-        <button onClick={() => { setConfiguringColId(col.id); setSoloGrupoMode(false); }} title="Configurar columna" className="w-4 h-4 rounded flex items-center justify-center text-gray-300 hover:text-brand-500 shrink-0">
+        <button
+          onClick={() => { setConfiguringColId(col.id); setSoloGrupoMode(false); }}
+          title={columnaFaltaCaptura(col) ? 'Falta posición en Excel — configúrala aquí' : 'Configurar columna'}
+          className={`w-4 h-4 rounded flex items-center justify-center shrink-0 ${columnaFaltaCaptura(col) ? 'text-amber-500 hover:text-amber-600' : 'text-gray-300 hover:text-brand-500'}`}
+        >
           <FontAwesomeIcon icon={faGear} className="w-2.5 h-2.5" />
         </button>
         <button onClick={() => removeColumn(col.id)} title="Eliminar columna" className="w-4 h-4 rounded flex items-center justify-center text-gray-300 hover:text-red-500 shrink-0">

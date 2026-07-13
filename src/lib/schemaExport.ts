@@ -117,11 +117,12 @@ function mapFila(config: ConfigTabla, fila: FilaDinamica): Record<string, unknow
   return out;
 }
 
-function mapTreeNode(node: TreeNode, depth: number, niveles: ColumnaTabla[]): Record<string, unknown> {
-  const key = niveles[depth]?.id ?? `nivel_${depth}`;
+function mapTreeNode(node: TreeNode, depth: number, config: ConfigTabla): Record<string, unknown> {
+  const col = config.columnas[depth];
+  const key = col ? idColumna(col, config) : `nivel_${depth}`;
   const out: Record<string, unknown> = { [key]: node.value };
   if (node.children.length > 0) {
-    out.hijos = node.children.map((child) => mapTreeNode(child, depth + 1, niveles));
+    out.hijos = node.children.map((child) => mapTreeNode(child, depth + 1, config));
   }
   return out;
 }
@@ -129,8 +130,8 @@ function mapTreeNode(node: TreeNode, depth: number, niveles: ColumnaTabla[]): Re
 function valorTabla(config: ConfigTabla, raw: string | undefined): unknown {
   const value = raw ?? '';
   if (config.subtipo === 'jerarquica') {
-    const roots = parseTree(value, config.columnas.length);
-    return roots.map((r) => mapTreeNode(r, 0, config.columnas));
+    const roots = parseTree(value, config.columnas, config);
+    return roots.map((r) => mapTreeNode(r, 0, config));
   }
   if (config.agrupador) {
     const grupos = parseGroupedRows(value, config);

@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faTrash, faGear, faGripVertical } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faTrash, faGear, faGripVertical, faBolt, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { columnTypeIcons, columnTypeLabels, columnTypePrimitivos } from '../../lib/icons';
+import { columnaFaltaCaptura } from '../../lib/campoValidation';
 import { generateId } from '../../lib/store';
 import ColumnaCapturaModal from './ColumnaCapturaModal';
 import type { ConfigTabla, ColumnaTabla, TipoColumna, CabeceraGrupo } from '../../types';
@@ -20,6 +21,8 @@ export default function JerarquicaColumnsEditor({ config, onChange }: Props) {
   const cols = config.columnas;
   const cabeceras = config.cabeceras ?? [];
   const hasCabeceras = cabeceras.length > 0;
+  const dinamicaId = config.columnaDinamicaId;
+  const periodos = config.periodos ?? [];
   const [newColName, setNewColName] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
@@ -37,6 +40,7 @@ export default function JerarquicaColumnsEditor({ config, onChange }: Props) {
     onChange({
       ...config,
       columnas: cols.filter((c) => c.id !== colId),
+      columnaDinamicaId: colId === dinamicaId ? undefined : dinamicaId,
       cabeceras: nextCabeceras.length ? nextCabeceras : undefined,
     });
   };
@@ -44,6 +48,34 @@ export default function JerarquicaColumnsEditor({ config, onChange }: Props) {
   const toggleNivel = (colId: string) => {
     const col = cols.find((c) => c.id === colId);
     if (col) updateColumn(colId, { nivel: col.nivel === 'padre' ? 'hijo' : 'padre' });
+  };
+
+  // Marca/desmarca una columna como el nivel del árbol que lleva un valor por período (en vez de
+  // texto) — mismo mecanismo (config.columnaDinamicaId + config.periodos) que matriz_por_periodos.
+  const toggleDinamica = (colId: string) => {
+    const yaEsDinamica = dinamicaId === colId;
+    onChange({
+      ...config,
+      columnaDinamicaId: yaEsDinamica ? undefined : colId,
+      periodos: yaEsDinamica ? config.periodos : (config.periodos?.length ? config.periodos : ['', '']),
+    });
+  };
+
+  const renamePeriodo = (i: number, val: string) => {
+    const next = [...periodos];
+    next[i] = val;
+    onChange({ ...config, periodos: next });
+  };
+
+  const insertPeriodoAfter = (i: number) => {
+    const next = [...periodos];
+    next.splice(i + 1, 0, '');
+    onChange({ ...config, periodos: next });
+  };
+
+  const removePeriodo = (i: number) => {
+    if (periodos.length <= 1) return;
+    onChange({ ...config, periodos: periodos.filter((_, idx) => idx !== i) });
   };
 
   const addColumn = (name: string) => {
@@ -126,7 +158,18 @@ export default function JerarquicaColumnsEditor({ config, onChange }: Props) {
         >
           {col.nivel === 'padre' ? '↕ Padre' : '↔ Hijo'}
         </button>
-        <button onClick={() => setConfiguringColId(col.id)} title="Configurar columna" className="w-4 h-4 rounded flex items-center justify-center text-gray-300 hover:text-brand-500 shrink-0">
+        <button
+          onClick={() => toggleDinamica(col.id)}
+          title={col.id === dinamicaId ? 'Quitar columna dinámica (un valor por período)' : 'Marcar como columna dinámica (un valor por período)'}
+          className={`w-4 h-4 rounded flex items-center justify-center shrink-0 ${col.id === dinamicaId ? 'text-amber-600' : 'text-gray-300 hover:text-amber-500'}`}
+        >
+          <FontAwesomeIcon icon={faBolt} className="w-2.5 h-2.5" />
+        </button>
+        <button
+          onClick={() => setConfiguringColId(col.id)}
+          title={columnaFaltaCaptura(col) ? 'Falta posición en Excel — configúrala aquí' : 'Configurar columna'}
+          className={`w-4 h-4 rounded flex items-center justify-center shrink-0 ${columnaFaltaCaptura(col) ? 'text-amber-500 hover:text-amber-600' : 'text-gray-300 hover:text-brand-500'}`}
+        >
           <FontAwesomeIcon icon={faGear} className="w-2.5 h-2.5" />
         </button>
         <button onClick={() => removeColumn(col.id)} title="Eliminar columna" className="w-4 h-4 rounded flex items-center justify-center text-gray-300 hover:text-red-500 shrink-0">
@@ -206,6 +249,42 @@ export default function JerarquicaColumnsEditor({ config, onChange }: Props) {
               {rowNombres}
               {!hasCabeceras && addColumnBtn}
             </tr>
+            {dinamicaId && (
+              <tr className="bg-amber-50">
+                <th colSpan={cols.length + 1} className="px-2 py-1.5 border border-amber-200">
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <span className="text-[9px] font-semibold text-amber-700 uppercase tracking-wide shrink-0">Períodos:</span>
+                    {periodos.map((nombre, i) => (
+                      <div key={i} className="flex items-center gap-1">
+                        <input
+                          type="text"
+                          value={nombre}
+                          onChange={(e) => renamePeriodo(i, e.target.value)}
+                          placeholder="Nombre..."
+                          className="w-14 px-1 py-0.5 rounded border border-amber-300 bg-white text-[10px] focus:outline-none focus:ring-1 focus:ring-amber-400/40 focus:border-amber-400"
+                        />
+                        {periodos.length > 1 && (
+                          <button
+                            onClick={() => removePeriodo(i)}
+                            title="Eliminar período"
+                            className="w-4 h-4 rounded-full bg-white border border-red-200 text-red-500 hover:bg-red-50 flex items-center justify-center shrink-0"
+                          >
+                            <FontAwesomeIcon icon={faXmark} className="w-2 h-2" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => insertPeriodoAfter(i)}
+                          title="Insertar período a la derecha"
+                          className="w-4 h-4 rounded-full bg-amber-500 hover:bg-amber-600 text-white flex items-center justify-center shrink-0"
+                        >
+                          <FontAwesomeIcon icon={faPlus} className="w-2 h-2" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </th>
+              </tr>
+            )}
           </thead>
           <tbody>
             {[1, 2].map((group) =>

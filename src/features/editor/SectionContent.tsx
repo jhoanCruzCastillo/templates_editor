@@ -1,6 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import type { Seccion, Campo, ConfigTabla } from '../../types';
+import type { ResolucionToken } from '../../lib/formula';
 import FieldCard from './FieldCard';
 
 interface Props {
@@ -10,7 +11,7 @@ interface Props {
   onExampleValueChange?: (campoId: string, value: string) => void;
   selectedCampoId?: string | null;
   onCampoClick?: (campo: Campo) => void;
-  onAddCampo?: (subseccionId: string, subseccionCodigo: string, camposCount: number) => void;
+  onAddCampo?: (subseccionId: string, subseccionCodigo: string) => void;
   onDeleteCampo?: (campoId: string, subseccionId: string) => void;
   onSectionNameChange?: (seccionId: string, nombre: string) => void;
   onSectionHojaChange?: (seccionId: string, hoja: string) => void;
@@ -20,6 +21,14 @@ interface Props {
   onDefaultValueChange?: (campoId: string, value: string) => void;
   onConfigTablaChange?: (campoId: string, config: ConfigTabla) => void;
   showMenuButton?: boolean;
+  /** Flash de aviso en los campos sin posición Excel tras un intento de guardado */
+  highlightMissingCaptura?: boolean;
+  /** Fórmulas tipo Excel para campos calculados — ver FieldCard */
+  formulaTargetCampoId?: string | null;
+  onFormulaFocus?: (campoId: string) => void;
+  onFormulaBlur?: (campoId: string) => void;
+  onInsertReferencia?: (targetCampoId: string, identificadorReferenciado: string) => void;
+  resolverFormula?: (token: string) => ResolucionToken;
 }
 
 export default function SectionContent({
@@ -39,6 +48,12 @@ export default function SectionContent({
   onDefaultValueChange,
   onConfigTablaChange,
   showMenuButton,
+  highlightMissingCaptura,
+  formulaTargetCampoId,
+  onFormulaFocus,
+  onFormulaBlur,
+  onInsertReferencia,
+  resolverFormula,
 }: Props) {
   return (
     <div data-section-id={seccion.id} className="mb-10">
@@ -112,11 +127,17 @@ export default function SectionContent({
                 onDelete={onDeleteCampo ? () => onDeleteCampo(campo.id, sub.id) : undefined}
                 onDefaultValueChange={onDefaultValueChange ? (v) => onDefaultValueChange(campo.id, v) : undefined}
                 onConfigTablaChange={onConfigTablaChange ? (c) => onConfigTablaChange(campo.id, c) : undefined}
+                highlightWarning={highlightMissingCaptura}
+                formulaTargetCampoId={formulaTargetCampoId}
+                onFormulaFocus={onFormulaFocus}
+                onFormulaBlur={onFormulaBlur}
+                onInsertReferencia={onInsertReferencia}
+                resolverFormula={resolverFormula}
               />
             ))}
             {onAddCampo && (
               <button
-                onClick={() => onAddCampo(sub.id, sub.codigo, sub.campos.length)}
+                onClick={() => onAddCampo(sub.id, sub.codigo)}
                 className="w-full py-2.5 rounded-lg border-2 border-dashed border-gray-200 text-sm font-medium text-gray-400 hover:border-brand-300 hover:text-brand-600 transition-colors flex items-center justify-center gap-2"
               >
                 <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />

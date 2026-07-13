@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import DynamicEditor from './DynamicEditor';
 import GroupedRowsEditor from './GroupedRowsEditor';
-import { createNodeChain, parseTree, type TreeNode } from '../../lib/tableRowHelpers';
+import { createNodeChain, parseTree, getPeriodos, type TreeNode } from '../../lib/tableRowHelpers';
 import type { ConfigTabla, CabeceraGrupo } from '../../types';
 
 interface Props {
@@ -27,7 +27,7 @@ function getNode(roots: TreeNode[], path: number[]): TreeNode | null {
 // --- Componente principal ---
 
 export default function ExampleTableEditor({ config, value, onChange, onConfigChange }: Props) {
-  if (config.subtipo === 'jerarquica') return <HierarchicalEditor columns={config.columnas} value={value} onChange={onChange} cabeceras={config.cabeceras} />;
+  if (config.subtipo === 'jerarquica') return <HierarchicalEditor config={config} value={value} onChange={onChange} />;
   if (config.agrupador) return <GroupedRowsEditor config={config} value={value} onChange={onChange} onConfigChange={onConfigChange} />;
   return <DynamicEditor config={config} value={value} onChange={onChange} onConfigChange={onConfigChange} />;
 }
@@ -38,7 +38,7 @@ interface ColDef { id: string; nombre: string }
 
 // Celda en la grilla aplanada
 type FlatCell =
-  | { type: 'data'; value: string; path: number[]; rowSpan: number }
+  | { type: 'data'; value: string | string[]; path: number[]; rowSpan: number }
   | { type: 'add'; parentPath: number[] }
   | { type: 'empty' }
   | null;
@@ -48,9 +48,13 @@ interface FlatRow { cells: FlatCell[]; isGroupStart?: boolean }
 // Estructura para navegación: mapa de celdas navegables
 interface NavCell { path: number[]; colIndex: number }
 
-function HierarchicalEditor({ columns, value, onChange, cabeceras }: { columns: ColDef[]; value: string; onChange: (v: string) => void; cabeceras?: CabeceraGrupo[] }) {
+function HierarchicalEditor({ config, value, onChange }: { config: ConfigTabla; value: string; onChange: (v: string) => void }) {
+  const columns = config.columnas;
+  const cabeceras = config.cabeceras;
   const numCols = columns.length;
-  const [roots, setRoots] = useState<TreeNode[]>(() => parseTree(value, numCols));
+  const dinamicaId = config.columnaDinamicaId;
+  const periodos = getPeriodos(config);
+  const [roots, setRoots] = useState<TreeNode[]>(() => parseTree(value, columns, config));
   const [selectedPath, setSelectedPath] = useState<number[] | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [focusPath, setFocusPath] = useState<string | null>(null);
@@ -66,9 +70,19 @@ function HierarchicalEditor({ columns, value, onChange, cabeceras }: { columns: 
     persist(next);
   };
 
+  const updateNodePeriodo = (path: number[], periodoIdx: number, val: string) => {
+    const next = cloneTree(roots);
+    const node = getNode(next, path);
+    if (!node) return;
+    const arr = Array.isArray(node.value) ? [...node.value] : [];
+    arr[periodoIdx] = val;
+    node.value = arr;
+    persist(next);
+  };
+
   const addRoot = () => {
     const newIdx = roots.length;
-    persist([...roots, createNodeChain(numCols)]);
+    persist([...roots, createNodeChain(columns, config)]);
     setSelectedPath([newIdx]);
     setIsEditing(true);
     setFocusPath(JSON.stringify([newIdx]));
@@ -79,7 +93,7 @@ function HierarchicalEditor({ columns, value, onChange, cabeceras }: { columns: 
     const parent = getNode(next, path);
     if (!parent) return;
     const newChildIdx = parent.children.length;
-    parent.children.push(createNodeChain(numCols - path.length));
+    parent.children.push(createNodeChain(columns, config, path.length));
     persist(next);
     const newPath = [...path, newChildIdx];
     setSelectedPath(newPath);
@@ -309,24 +323,41 @@ function HierarchicalEditor({ columns, value, onChange, cabeceras }: { columns: 
                       }}
                     >
                       <div className="flex items-start gap-0.5 group/cell">
-                        <input
-                          type="text"
-                          value={cell.value}
-                          onChange={(e) => { e.stopPropagation(); updateNodeValue(cell.path, e.target.value); }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (!editing) { setSelectedPath(cell.path); setIsEditing(true); setFocusPath(pathStr); }
-                          }}
-                          readOnly={!editing}
-                          tabIndex={-1}
-                          placeholder={`${columns[ci]?.nombre}...`}
-                          className={`flex-1 px-1.5 py-1 rounded border text-xs text-heading focus:outline-none min-w-0 ${
-                            editing
-                              ? 'border-brand-400 bg-white ring-1 ring-brand-500/30'
-                              : 'border-transparent bg-transparent cursor-pointer'
-                          }`}
-                          ref={(el) => { if (el) inputRefs.current.set(pathStr, el); }}
-                        />
+                        {columns[ci]?.id === dinamicaId ? (
+                          <div className="flex-1 flex flex-wrap gap-1 min-w-0">
+                            {periodos.map((p, pi) => (
+                              <input
+                                key={pi}
+                                type="text"
+                                value={(Array.isArray(cell.value) ? cell.value[pi] : '') || ''}
+                                title={p}
+                                placeholder={p || '—'}
+                                onChange={(e) => { e.stopPropagation(); updateNodePeriodo(cell.path, pi, e.target.value); }}
+                                onClick={(e) => e.stopPropagation()}
+                                className="w-14 px-1 py-0.5 rounded border border-amber-200 bg-amber-50/40 text-[10px] text-heading focus:outline-none focus:ring-1 focus:ring-amber-400/40 focus:border-amber-400"
+                              />
+                            ))}
+                          </div>
+                        ) : (
+                          <input
+                            type="text"
+                            value={typeof cell.value === 'string' ? cell.value : ''}
+                            onChange={(e) => { e.stopPropagation(); updateNodeValue(cell.path, e.target.value); }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!editing) { setSelectedPath(cell.path); setIsEditing(true); setFocusPath(pathStr); }
+                            }}
+                            readOnly={!editing}
+                            tabIndex={-1}
+                            placeholder={`${columns[ci]?.nombre}...`}
+                            className={`flex-1 px-1.5 py-1 rounded border text-xs text-heading focus:outline-none min-w-0 ${
+                              editing
+                                ? 'border-brand-400 bg-white ring-1 ring-brand-500/30'
+                                : 'border-transparent bg-transparent cursor-pointer'
+                            }`}
+                            ref={(el) => { if (el) inputRefs.current.set(pathStr, el); }}
+                          />
+                        )}
                         <button
                           onClick={(e) => { e.stopPropagation(); removeNode(cell.path); }}
                           className="w-4 h-4 rounded flex items-center justify-center text-gray-300 opacity-0 group-hover/cell:opacity-100 hover:text-red-500 transition-opacity shrink-0 mt-1"

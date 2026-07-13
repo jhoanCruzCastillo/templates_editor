@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -21,6 +21,8 @@ import { useToast } from '../../components/Toast';
 import { generateId, saveDocumentoJSON } from '../../lib/store';
 import { buildDocumento } from '../../lib/schemaExport';
 import { insertarValoresEnExcel } from '../../lib/excelWriter';
+import { contarCamposSinCaptura } from '../../lib/campoValidation';
+import { crearResolver } from '../../lib/formula';
 import type { VersionTab, Campo, Plantilla, Ejemplo, ConfigTabla } from '../../types';
 
 const MIN_LEFT = 180;
@@ -62,6 +64,8 @@ export default function PlantillaEditPage() {
   const [leftWidth, setLeftWidth] = useState(DEFAULT_LEFT);
   const [rightWidth, setRightWidth] = useState(DEFAULT_RIGHT);
   const [examplesWidth, setExamplesWidth] = useState(DEFAULT_EXAMPLES);
+  const [highlightMissingCaptura, setHighlightMissingCaptura] = useState(false);
+  const [formulaTargetCampoId, setFormulaTargetCampoId] = useState<string | null>(null);
 
   const handleLeftResize = useCallback((d: number) => setLeftWidth((w) => Math.max(MIN_LEFT, w + d)), []);
   const handleRightResize = useCallback((d: number) => setRightWidth((w) => Math.max(MIN_RIGHT, w - d)), []);
@@ -141,26 +145,41 @@ export default function PlantillaEditPage() {
     handleFieldUpdate(campoId, { configTabla: config });
   }, [handleFieldUpdate]);
 
-  const handleAddCampo = useCallback((subseccionId: string, subseccionCodigo: string, camposCount: number) => {
-    const nuevoCampo: Campo = {
-      id: generateId(),
-      identificador: `${subseccionCodigo}.${camposCount + 1}`,
-      etiqueta: 'Nuevo campo',
-      tipo: 'texto_corto',
-      editable: true,
-      descripcion: '',
-    };
+  const handleAddCampo = useCallback((subseccionId: string, subseccionCodigo: string) => {
+    const nuevoId = generateId();
+    let nuevoCampo: Campo | null = null;
     setEditData((prev) => {
       if (!prev) return prev;
       const next = structuredClone(prev);
       for (const sec of next.secciones) {
         const sub = sec.subsecciones.find((s) => s.id === subseccionId);
-        if (sub) { sub.campos.push(nuevoCampo); sec.cantidadCampos += 1; break; }
+        if (sub) {
+          // Numerar según el máximo identificador existente, no según la cantidad de
+          // campos actual — si se eliminó un campo antes, campos.length puede repetir
+          // un identificador que otro campo ya tiene.
+          const maxN = sub.campos.reduce((max, c) => {
+            const n = Number(c.identificador.split('.').pop());
+            return Number.isFinite(n) ? Math.max(max, n) : max;
+          }, 0);
+          nuevoCampo = {
+            id: nuevoId,
+            identificador: `${subseccionCodigo}.${maxN + 1}`,
+            etiqueta: 'Nuevo campo',
+            tipo: 'texto_corto',
+            editable: true,
+            descripcion: '',
+          };
+          sub.campos.push(nuevoCampo);
+          sec.cantidadCampos += 1;
+          break;
+        }
       }
       return next;
     });
-    setSelectedCampo(nuevoCampo);
-    setIsNewCampo(true);
+    if (nuevoCampo) {
+      setSelectedCampo(nuevoCampo);
+      setIsNewCampo(true);
+    }
     toast('Campo agregado');
   }, [toast]);
 
@@ -270,6 +289,46 @@ export default function PlantillaEditPage() {
     setEditedValores((prev) => ({ ...prev, [campoIdentificador]: value }));
   }, []);
 
+  // --- Fórmulas tipo Excel para campos calculados (no-tabla) ---
+  const showExamples = activeTab === 'ejemplos';
+
+  const todosCampos = useMemo(() => {
+    if (!editData) return [] as Campo[];
+    const lista: Campo[] = [];
+    for (const sec of editData.secciones) {
+      for (const sub of sec.subsecciones) {
+        for (const campo of sub.campos) lista.push(campo);
+      }
+    }
+    return lista;
+  }, [editData]);
+
+  const resolverFormula = useMemo(() => {
+    const obtenerValorRaw = showExamples
+      ? (id: string) => editedValores[id]
+      : (id: string) => todosCampos.find((c) => c.identificador === id)?.valorEjemplo;
+    return crearResolver(todosCampos, obtenerValorRaw);
+  }, [todosCampos, showExamples, editedValores]);
+
+  const handleFormulaFocus = useCallback((campoId: string) => setFormulaTargetCampoId(campoId), []);
+  const handleFormulaBlur = useCallback((campoId: string) => {
+    setFormulaTargetCampoId((prev) => (prev === campoId ? null : prev));
+  }, []);
+
+  const handleInsertReferencia = useCallback((targetCampoId: string, identificadorReferenciado: string) => {
+    const targetCampo = todosCampos.find((c) => c.id === targetCampoId);
+    if (!targetCampo) return;
+    const actual = (showExamples ? editedValores[targetCampo.identificador] : targetCampo.valorEjemplo) ?? '';
+    const actualTrim = actual.trim();
+    const necesitaOperador = actualTrim.length > 0 && actualTrim !== '=' && !/[+\-*/(]$/.test(actualTrim);
+    const nuevo = (actualTrim || '=') + (necesitaOperador ? '+' : '') + identificadorReferenciado;
+    if (showExamples) {
+      handleExampleValueChange(targetCampo.identificador, nuevo);
+    } else {
+      handleDefaultValueChange(targetCampoId, nuevo);
+    }
+  }, [todosCampos, showExamples, editedValores, handleExampleValueChange, handleDefaultValueChange]);
+
   const handleCreateExample = useCallback((nombre: string, subtitulo: string, detalle: string) => {
     if (!editData || !archivoExcelAsignado) return;
     const nuevo: Ejemplo = {
@@ -310,11 +369,15 @@ export default function PlantillaEditPage() {
   const handleInsertExcel = useCallback(async () => {
     if (!editData || !activeEjemplo) return;
     const archivo = excelEjemplos[activeEjemplo.id];
-    if (!archivo) { toast('Este ejemplo no tiene una copia de Excel asociada'); setShowInsertConfirm(false); return; }
+    if (!archivo || !archivoExcelAsignado) { toast('Este ejemplo no tiene una copia de Excel asociada'); setShowInsertConfirm(false); return; }
     setIsInserting(true);
     setInsertProgress(0);
     try {
-      const nuevaDataUrl = await insertarValoresEnExcel(archivo.dataUrl, editData, editedValores, (fraction) => {
+      // Siempre se inserta sobre el Excel original del catálogo (no sobre la copia ya insertada
+      // del ejemplo) — igual que dice la confirmación, "se sobreescriben TODOS los datos actuales":
+      // insertar dos veces sobre la copia ya modificada duplicaría las filas insertadas por tablas
+      // que crecen más allá de sus filas base.
+      const nuevaDataUrl = await insertarValoresEnExcel(archivoExcelAsignado.dataUrl, editData, editedValores, (fraction) => {
         setInsertProgress(Math.round(fraction * 100));
       });
       setExcelEjemplo(activeEjemplo.id, { ...archivo, dataUrl: nuevaDataUrl });
@@ -326,7 +389,7 @@ export default function PlantillaEditPage() {
       setIsInserting(false);
       setShowInsertConfirm(false);
     }
-  }, [editData, activeEjemplo, excelEjemplos, editedValores, setExcelEjemplo, pushActividad, toast]);
+  }, [editData, activeEjemplo, excelEjemplos, archivoExcelAsignado, editedValores, setExcelEjemplo, pushActividad, toast]);
 
   const handleDeleteEjemplo = useCallback(() => {
     if (!deleteTarget) return;
@@ -356,7 +419,17 @@ export default function PlantillaEditPage() {
     }
 
     pushActividad(`Se guardó la plantilla ${editData.codigo} — ${editData.nombre}`, 'blue');
-    toast(`Plantilla "${editData.codigo}" guardada`);
+
+    // Aunque la estructura se guarda igual, avisamos si hay campos sin posición en el Excel —
+    // sin eso, excelWriter.ts los salta silenciosamente al insertar valores.
+    const sinCaptura = contarCamposSinCaptura(editData);
+    if (sinCaptura > 0) {
+      toast(`Guardado, pero ${sinCaptura} campo${sinCaptura === 1 ? '' : 's'} no ${sinCaptura === 1 ? 'tiene' : 'tienen'} registrada su posición en el Excel`, 'error');
+      setHighlightMissingCaptura(true);
+      setTimeout(() => setHighlightMissingCaptura(false), 2500);
+    } else {
+      toast(`Plantilla "${editData.codigo}" guardada`);
+    }
   }, [editData, activeTab, activeEjemplo, editedValores, updatePlantilla, updateEjemplo, pushActividad, toast]);
 
   const handleViewJson = useCallback(() => {
@@ -372,7 +445,6 @@ export default function PlantillaEditPage() {
 
   if (!plantilla) return <div className="p-8 text-muted">Plantilla no encontrada</div>;
 
-  const showExamples = activeTab === 'ejemplos';
   const secciones = plantilla.secciones;
   const safeIdx = Math.min(activeSectionIndex, secciones.length - 1);
   const seccionActiva = secciones[safeIdx];
@@ -455,6 +527,12 @@ export default function PlantillaEditPage() {
                     onDefaultValueChange={!showExamples ? handleDefaultValueChange : undefined}
                     onConfigTablaChange={!showExamples ? handleConfigTablaChange : undefined}
                     showMenuButton
+                    highlightMissingCaptura={highlightMissingCaptura}
+                    formulaTargetCampoId={formulaTargetCampoId}
+                    onFormulaFocus={handleFormulaFocus}
+                    onFormulaBlur={handleFormulaBlur}
+                    onInsertReferencia={handleInsertReferencia}
+                    resolverFormula={resolverFormula}
                   />
                 </motion.div>
               )}

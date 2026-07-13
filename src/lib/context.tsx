@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import * as store from './store';
 import type { Sector, Plantilla, Ejemplo, ActividadReciente, ArchivoExcel, CatalogoExcelPlantilla } from '../types';
 
@@ -249,6 +249,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return next;
     });
   }, []);
+
+  // Algunas plantillas semilla traen un `archivoDefaultUrl` (ruta pública bajo /fichas_oficiales)
+  // — la primera vez que se cargan sin ningún archivo en su catálogo, se asignan automáticamente,
+  // así el usuario no tiene que subir a mano el Excel oficial de cada ficha. Se guarda la RUTA
+  // pública tal cual como `dataUrl` (fetch() funciona igual con una ruta que con un data: URL) en
+  // vez de descargar y convertir el archivo a base64 — varios de estos Excel pesan varios MB, muy
+  // por encima de la cuota de localStorage (~5-10 MB) si se guardaran codificados.
+  useEffect(() => {
+    // Se calcula "pendientes" contra `prev` (el estado más reciente dentro del propio updater),
+    // no contra la variable `excelCatalogos` del closure — StrictMode ejecuta este efecto dos
+    // veces seguidas en desarrollo, y comparar contra el closure (desactualizado en la segunda
+    // pasada) duplicaba el archivo asignado.
+    setExcelCatalogos((prev) => {
+      const pendientes = plantillas.filter((p) => p.archivoDefaultUrl && !prev[p.id]?.archivos.length);
+      if (pendientes.length === 0) return prev;
+      const next = { ...prev };
+      for (const p of pendientes) {
+        const archivo: ArchivoExcel = {
+          id: store.generateId(),
+          nombre: p.archivoDefaultUrl!.split('/').pop() || p.codigo,
+          dataUrl: p.archivoDefaultUrl!,
+          fechaSubida: new Date().toLocaleDateString('es-PE'),
+        };
+        next[p.id] = { archivos: [archivo], asignadoId: archivo.id };
+      }
+      store.saveCatalogosExcel(next);
+      return next;
+    });
+  }, [plantillas]);
 
   // --- Copia de Excel por ejemplo ---
 

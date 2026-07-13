@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGear } from '@fortawesome/free-solid-svg-icons';
-import { subtipoTablaLabels } from '../../lib/icons';
+import { subtipoTablaLabels, faTriangleExclamation } from '../../lib/icons';
+import { columnaFaltaCaptura } from '../../lib/campoValidation';
 import FilasDinamicasColumnsEditor from './FilasDinamicasColumnsEditor';
 import MatrizPeriodosEditor from './MatrizPeriodosEditor';
 import JerarquicaColumnsEditor from './JerarquicaColumnsEditor';
@@ -17,6 +18,7 @@ const subtipos = Object.entries(subtipoTablaLabels) as [SubtipoTabla, string][];
 
 export default function TableColumnsEditor({ config, onChange }: Props) {
   const [showAgrupadorConfig, setShowAgrupadorConfig] = useState(false);
+  const columnasSinPosicion = config.columnas.filter(columnaFaltaCaptura).length;
   return (
     <div className="space-y-4">
       {/* Subtipo */}
@@ -53,7 +55,7 @@ export default function TableColumnsEditor({ config, onChange }: Props) {
             onChange={(e) => onChange({ ...config, captura: { ...config.captura, filaInicial: e.target.value ? Number(e.target.value) : undefined } })}
             placeholder="Ej. 18"
             min={1}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+            className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 ${config.captura?.filaInicial ? 'border-gray-200' : 'border-amber-300'}`}
           />
         </div>
         <div>
@@ -114,6 +116,13 @@ export default function TableColumnsEditor({ config, onChange }: Props) {
         <JerarquicaColumnsEditor config={config} onChange={onChange} />
       ) : (
         <FilasDinamicasColumnsEditor config={config} onChange={onChange} />
+      )}
+
+      {columnasSinPosicion > 0 && (
+        <p className="flex items-center gap-1.5 text-[11px] text-amber-600 font-medium">
+          <FontAwesomeIcon icon={faTriangleExclamation} className="w-2.5 h-2.5 shrink-0" />
+          {columnasSinPosicion} columna{columnasSinPosicion === 1 ? '' : 's'} sin posición en Excel — configúra{columnasSinPosicion === 1 ? 'la' : 'las'} desde el engranaje de cada columna.
+        </p>
       )}
 
       <AgrupadorConfigModal

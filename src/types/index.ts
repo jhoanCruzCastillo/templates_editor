@@ -117,6 +117,9 @@ export interface Plantilla {
   cantidadEjemplos: number;
   fechaActualizacion: string;
   secciones: Seccion[];
+  /** Ruta pública (bajo /fichas_oficiales) del archivo Excel oficial que se asigna automáticamente
+   * al catálogo de esta plantilla la primera vez que se carga la app — ver AppProvider en context.tsx */
+  archivoDefaultUrl?: string;
 }
 
 // Bloque de contenido de un apartado de Perfil

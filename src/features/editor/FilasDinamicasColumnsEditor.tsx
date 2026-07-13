@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTrash, faGear, faGripVertical } from '@fortawesome/free-solid-svg-icons';
 import { columnTypeIcons, columnTypeLabels, columnTypePrimitivos } from '../../lib/icons';
+import { columnaFaltaCaptura } from '../../lib/campoValidation';
 import { generateId } from '../../lib/store';
 import ColumnaCapturaModal from './ColumnaCapturaModal';
 import type { ConfigTabla, ColumnaTabla, TipoColumna, CabeceraGrupo } from '../../types';
@@ -111,7 +112,11 @@ export default function FilasDinamicasColumnsEditor({ config, onChange }: Props)
         </span>
         <FontAwesomeIcon icon={columnTypeIcons[col.tipo]} className="w-2.5 h-2.5 text-gray-400 shrink-0" />
         <input type="text" value={col.nombre} onChange={(e) => updateColumn(col.id, { nombre: e.target.value })} className={inputCls} />
-        <button onClick={() => setConfiguringColId(col.id)} title="Configurar columna" className="w-4 h-4 rounded flex items-center justify-center text-gray-300 hover:text-brand-500 shrink-0">
+        <button
+          onClick={() => setConfiguringColId(col.id)}
+          title={columnaFaltaCaptura(col) ? 'Falta posición en Excel — configúrala aquí' : 'Configurar columna'}
+          className={`w-4 h-4 rounded flex items-center justify-center shrink-0 ${columnaFaltaCaptura(col) ? 'text-amber-500 hover:text-amber-600' : 'text-gray-300 hover:text-brand-500'}`}
+        >
           <FontAwesomeIcon icon={faGear} className="w-2.5 h-2.5" />
         </button>
         <button onClick={() => removeColumn(col.id)} title="Eliminar columna" className="w-4 h-4 rounded flex items-center justify-center text-gray-300 hover:text-red-500 shrink-0">

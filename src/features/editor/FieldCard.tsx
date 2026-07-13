@@ -1,6 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisVertical, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { fieldTypeIcons, fieldTypeLabels, subtipoTablaLabels, columnTypeLabels } from '../../lib/icons';
+import { fieldTypeIcons, fieldTypeLabels, subtipoTablaLabels, columnTypeLabels, faTriangleExclamation } from '../../lib/icons';
+import { campoFaltaCaptura } from '../../lib/campoValidation';
+import { evaluarFormula, type ResolucionToken } from '../../lib/formula';
 import ExampleTableEditor from './ExampleTableEditor';
 import CampoCoordenadasInput from '../../components/CampoCoordenadasInput';
 import type { Campo, ConfigTabla } from '../../types';
@@ -16,6 +18,14 @@ interface Props {
   onDelete?: () => void;
   onDefaultValueChange?: (value: string) => void;
   onConfigTablaChange?: (config: ConfigTabla) => void;
+  /** Flash de aviso tras un intento de guardado — solo tiene efecto si el campo falta captura */
+  highlightWarning?: boolean;
+  /** Id del campo calculado que está "escuchando" clics en otros campos para insertar su referencia */
+  formulaTargetCampoId?: string | null;
+  onFormulaFocus?: (campoId: string) => void;
+  onFormulaBlur?: (campoId: string) => void;
+  onInsertReferencia?: (targetCampoId: string, identificadorReferenciado: string) => void;
+  resolverFormula?: (token: string) => ResolucionToken;
 }
 
 export default function FieldCard({
@@ -29,6 +39,12 @@ export default function FieldCard({
   onDelete,
   onDefaultValueChange,
   onConfigTablaChange,
+  highlightWarning,
+  formulaTargetCampoId,
+  onFormulaFocus,
+  onFormulaBlur,
+  onInsertReferencia,
+  resolverFormula,
 }: Props) {
   const icon = fieldTypeIcons[campo.tipo];
   const typeLabel = fieldTypeLabels[campo.tipo];
@@ -37,16 +53,33 @@ export default function FieldCard({
   const displayValue = onExampleValueChange ? (exampleValue ?? '') : (exampleValue ?? campo.valorEjemplo);
   const isTableField = campo.tipo === 'tabla' || campo.tipo === 'tabla_jerarquica';
   const isCoordField = campo.tipo === 'mapa_coordenadas';
+  const faltaCaptura = campoFaltaCaptura(campo);
+  // Campo calculado (no editable) de tipo simple: su "valor" es una fórmula tipo Excel
+  // ("=1.01.1+1.02.3") que referencia otros campos numero/decimal.
+  const esCampoFormula = !campo.editable && !isTableField && !isCoordField;
+  const esOtroCampoEnModoReferencia = !!formulaTargetCampoId && formulaTargetCampoId !== campo.id;
+  const interceptarClicParaReferencia = (e: React.MouseEvent) => {
+    if (esOtroCampoEnModoReferencia && onInsertReferencia) {
+      e.preventDefault();
+      e.stopPropagation();
+      onInsertReferencia(formulaTargetCampoId!, campo.identificador);
+    }
+  };
+  const resultadoFormula = esCampoFormula && resolverFormula
+    ? evaluarFormula(displayValue ?? campo.valorEjemplo ?? '', resolverFormula)
+    : null;
 
   return (
     <div
       onClick={onClick}
       className={`rounded-xl border-2 p-4 transition-all ${
-        isSelected
-          ? 'border-brand-500 bg-brand-50/30 shadow-sm cursor-pointer'
-          : onClick
-            ? 'border-gray-100 bg-white hover:border-brand-200 cursor-pointer'
-            : 'border-gray-100 bg-white'
+        faltaCaptura && highlightWarning
+          ? 'border-red-400 bg-red-50/40 shadow-sm animate-pulse'
+          : isSelected
+            ? 'border-brand-500 bg-brand-50/30 shadow-sm cursor-pointer'
+            : onClick
+              ? 'border-gray-100 bg-white hover:border-brand-200 cursor-pointer'
+              : 'border-gray-100 bg-white'
       }`}
     >
       <div className="flex items-start gap-3">
@@ -75,6 +108,15 @@ export default function FieldCard({
                 className="w-3 h-3 text-gray-400"
                 title="Campo calculado (solo lectura)"
               />
+            )}
+            {faltaCaptura && (
+              <span
+                title="Falta registrar su posición en el Excel (columna/fila) — no se insertará al Excel hasta configurarla"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 text-[10px] font-semibold shrink-0"
+              >
+                <FontAwesomeIcon icon={faTriangleExclamation} className="w-2.5 h-2.5" />
+                Sin posición Excel
+              </span>
             )}
           </div>
           <div className="text-xs text-muted mt-1 flex items-center gap-2">
@@ -139,14 +181,37 @@ export default function FieldCard({
                   onConfigChange={onConfigTablaChange}
                 />
               ) : (
-                <input
-                  type={campo.tipo === 'numero' ? 'number' : 'text'}
-                  value={campo.valorEjemplo || ''}
-                  onChange={(e) => onDefaultValueChange(e.target.value)}
-                  onClick={(e) => e.stopPropagation()}
-                  placeholder="Valor inicial por defecto..."
-                  className="w-full mt-1 px-2 py-1.5 rounded border border-gray-200 bg-white text-sm text-heading focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
-                />
+                <>
+                  <input
+                    type={esCampoFormula ? 'text' : campo.tipo === 'numero' ? 'number' : 'text'}
+                    value={campo.valorEjemplo || ''}
+                    onChange={(e) => onDefaultValueChange(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    onMouseDown={interceptarClicParaReferencia}
+                    onFocus={() => {
+                      if (esCampoFormula) {
+                        onFormulaFocus?.(campo.id);
+                        if (!campo.valorEjemplo) onDefaultValueChange('=');
+                      }
+                    }}
+                    onBlur={() => { if (esCampoFormula) onFormulaBlur?.(campo.id); }}
+                    placeholder={esCampoFormula ? '=1.01.1+1.02.3' : 'Valor inicial por defecto...'}
+                    className={`w-full mt-1 px-2 py-1.5 rounded border bg-white text-sm text-heading focus:outline-none focus:ring-2 ${
+                      resultadoFormula?.error
+                        ? 'border-red-400 focus:ring-red-300 focus:border-red-400'
+                        : 'border-gray-200 focus:ring-gray-300 focus:border-gray-400'
+                    }`}
+                  />
+                  {resultadoFormula?.error && (
+                    <p className="mt-1 text-[11px] text-red-600 flex items-center gap-1">
+                      <FontAwesomeIcon icon={faTriangleExclamation} className="w-2.5 h-2.5 shrink-0" />
+                      {resultadoFormula.error}
+                    </p>
+                  )}
+                  {!resultadoFormula?.error && resultadoFormula?.valor != null && (
+                    <p className="mt-1 text-[11px] text-muted">= {resultadoFormula.valor}</p>
+                  )}
+                </>
               )}
             </div>
           )}
@@ -169,14 +234,37 @@ export default function FieldCard({
                   onChange={(v) => onExampleValueChange(campo.identificador, v)}
                 />
               ) : onExampleValueChange ? (
-                <input
-                  type="text"
-                  value={displayValue || ''}
-                  onChange={(e) => onExampleValueChange(campo.identificador, e.target.value)}
-                  onClick={(e) => e.stopPropagation()}
-                  placeholder="Escribe el valor de ejemplo..."
-                  className="w-full mt-1 px-2 py-1.5 rounded border border-brand-200 bg-white text-sm text-heading focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
-                />
+                <>
+                  <input
+                    type="text"
+                    value={displayValue || ''}
+                    onChange={(e) => onExampleValueChange(campo.identificador, e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    onMouseDown={interceptarClicParaReferencia}
+                    onFocus={() => {
+                      if (esCampoFormula) {
+                        onFormulaFocus?.(campo.id);
+                        if (!displayValue) onExampleValueChange(campo.identificador, '=');
+                      }
+                    }}
+                    onBlur={() => { if (esCampoFormula) onFormulaBlur?.(campo.id); }}
+                    placeholder={esCampoFormula ? '=1.01.1+1.02.3' : 'Escribe el valor de ejemplo...'}
+                    className={`w-full mt-1 px-2 py-1.5 rounded border bg-white text-sm text-heading focus:outline-none focus:ring-2 ${
+                      resultadoFormula?.error
+                        ? 'border-red-400 focus:ring-red-300 focus:border-red-400'
+                        : 'border-brand-200 focus:ring-brand-500/30 focus:border-brand-500'
+                    }`}
+                  />
+                  {resultadoFormula?.error && (
+                    <p className="mt-1 text-[11px] text-red-600 flex items-center gap-1">
+                      <FontAwesomeIcon icon={faTriangleExclamation} className="w-2.5 h-2.5 shrink-0" />
+                      {resultadoFormula.error}
+                    </p>
+                  )}
+                  {!resultadoFormula?.error && resultadoFormula?.valor != null && (
+                    <p className="mt-1 text-[11px] text-muted">= {resultadoFormula.valor}</p>
+                  )}
+                </>
               ) : (
                 <div className="text-sm text-heading mt-0.5">
                   {displayValue || <span className="text-muted italic">Sin valor</span>}

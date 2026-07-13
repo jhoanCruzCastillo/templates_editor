@@ -31,6 +31,10 @@ import {
   faBook,
   faFileInvoice,
   faScrewdriverWrench,
+  faTriangleExclamation,
+  faShieldHalved,
+  faLandmark,
+  faUmbrellaBeach,
   type IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import type { TipoCampo, TipoColumna, SubtipoTabla, TipoInstrumento, TipologiaIoarr, RolUsuario } from '../types';
@@ -48,6 +52,10 @@ export const sectorIcons: Record<string, IconDefinition> = {
   faTractor,
   faCity,
   faHouse,
+  faShieldHalved,
+  faLandmark,
+  faUmbrellaBeach,
+  faFileInvoice,
 };
 
 export const sectorIconList = [
@@ -63,6 +71,10 @@ export const sectorIconList = [
   'faCity',
   'faHouse',
   'faPeopleGroup',
+  'faShieldHalved',
+  'faLandmark',
+  'faUmbrellaBeach',
+  'faFileInvoice',
 ] as const;
 
 export const fieldTypeIcons: Record<TipoCampo, IconDefinition> = {
@@ -185,4 +197,8 @@ export {
   faPeopleGroup,
   faTractor,
   faCity,
+  faTriangleExclamation,
+  faShieldHalved,
+  faLandmark,
+  faUmbrellaBeach,
 };

@@ -133,18 +133,23 @@ function gruposFromDoc(rawGrupos: unknown[], columnaDinamicaId?: string): GrupoF
   });
 }
 
-function nodeFromDoc(rawNode: unknown, depth: number, niveles: ColumnaTabla[]): TreeNode {
+function nodeFromDoc(rawNode: unknown, depth: number, config: ConfigTabla): TreeNode {
   const raw = rawNode as Record<string, unknown>;
-  const key = niveles[depth]?.id;
-  const value = key ? raw[key] : undefined;
-  const hijos = Array.isArray(raw.hijos) ? raw.hijos.map((h) => nodeFromDoc(h, depth + 1, niveles)) : [];
-  return { value: value == null ? '' : String(value), children: hijos };
+  const col = config.columnas[depth];
+  const esDinamico = Boolean(col && col.id === config.columnaDinamicaId);
+  const rawKey = esDinamico ? ID_COLUMNA_DINAMICA : col?.id;
+  const rawValue = rawKey ? raw[rawKey] : undefined;
+  const hijos = Array.isArray(raw.hijos) ? raw.hijos.map((h) => nodeFromDoc(h, depth + 1, config)) : [];
+  const value: string | string[] = esDinamico
+    ? (Array.isArray(rawValue) ? rawValue.map((v) => String(v)) : [])
+    : (rawValue == null ? '' : String(rawValue));
+  return { value, children: hijos };
 }
 
 function valorEjemploTabla(config: ConfigTabla, rawValor: unknown): string {
   const items = Array.isArray(rawValor) ? rawValor : [];
   if (config.subtipo === 'jerarquica') {
-    return JSON.stringify(items.map((r) => nodeFromDoc(r, 0, config.columnas)));
+    return JSON.stringify(items.map((r) => nodeFromDoc(r, 0, config)));
   }
   if (config.agrupador) {
     return JSON.stringify(gruposFromDoc(items, config.columnaDinamicaId));

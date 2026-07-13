@@ -43,10 +43,13 @@ export default function AgrupadorConfigModal({ isOpen, onClose, abarcaColumnas, 
             </div>
             <div className="p-5 space-y-3">
               <p className="text-xs text-muted">
-                Cantidad de columnas que fusiona el título de cada grupo, contando desde la primera columna de la tabla. Las columnas restantes quedan vacías en esa fila.
+                Cantidad de <strong>cabeceras/columnas</strong> (no de columnas físicas de Excel) que fusiona el título de cada grupo, contando desde la primera cabecera de la tabla. Las cabeceras restantes quedan vacías en esa fila.
+              </p>
+              <p className="text-xs text-muted">
+                Si alguna de esas cabeceras ya abarca varias columnas de Excel (configurado en la columna misma), el ancho real fusionado es la suma de todas ellas — ej. si la 1ª cabecera abarca 2 columnas y eliges "2", el título fusiona esa cabecera + la siguiente completa (3 columnas físicas en total).
               </p>
               <div>
-                <label className="block text-[10px] font-medium text-muted mb-1">Abarca columnas</label>
+                <label className="block text-[10px] font-medium text-muted mb-1">Abarca cabeceras/columnas</label>
                 <input
                   type="number"
                   value={abarcaColumnas}
@@ -55,7 +58,7 @@ export default function AgrupadorConfigModal({ isOpen, onClose, abarcaColumnas, 
                   max={totalColumnas}
                   className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
                 />
-                <p className="text-[10px] text-muted mt-1">De un total de {totalColumnas} columna{totalColumnas === 1 ? '' : 's'}.</p>
+                <p className="text-[10px] text-muted mt-1">De un total de {totalColumnas} cabecera{totalColumnas === 1 ? '' : 's'}.</p>
               </div>
             </div>
           </motion.div>

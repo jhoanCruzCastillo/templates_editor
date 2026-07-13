@@ -1,10 +1,11 @@
-import type { ConfigTabla } from '../types';
+import type { ColumnaTabla, ConfigTabla } from '../types';
 
 export interface FilaDinamica { [colId: string]: string | string[] }
 export interface GrupoFilas { grupo: string; filas: FilaDinamica[] }
 
 export interface TreeNode {
-  value: string;
+  /** Array cuando este nivel de profundidad es `config.columnaDinamicaId` (un valor por período), string en cualquier otro nivel */
+  value: string | string[];
   children: TreeNode[];
 }
 
@@ -39,15 +40,20 @@ export function parseGroupedRows(value: string, config: ConfigTabla): GrupoFilas
   return [{ grupo: 'Grupo 1', filas: Array.from({ length: config.filasIniciales ?? 3 }, () => emptyRow(config)) }];
 }
 
-export function createNodeChain(remainingLevels: number): TreeNode {
-  if (remainingLevels <= 1) return { value: '', children: [] };
-  return { value: '', children: [createNodeChain(remainingLevels - 1)] };
+function valorInicialNivel(columns: ColumnaTabla[], config: ConfigTabla, depth: number): string | string[] {
+  return columns[depth]?.id === config.columnaDinamicaId ? getPeriodos(config).map(() => '') : '';
 }
 
-export function parseTree(value: string, numCols: number): TreeNode[] {
+export function createNodeChain(columns: ColumnaTabla[], config: ConfigTabla, depth = 0): TreeNode {
+  const value = valorInicialNivel(columns, config, depth);
+  if (depth >= columns.length - 1) return { value, children: [] };
+  return { value, children: [createNodeChain(columns, config, depth + 1)] };
+}
+
+export function parseTree(value: string, columns: ColumnaTabla[], config: ConfigTabla): TreeNode[] {
   try {
     const p = JSON.parse(value);
     if (Array.isArray(p) && p.length > 0 && 'value' in p[0]) return p;
   } catch { /* valor previo no es JSON (placeholder viejo) */ }
-  return [createNodeChain(numCols)];
+  return [createNodeChain(columns, config)];
 }

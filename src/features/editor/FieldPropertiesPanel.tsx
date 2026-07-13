@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLeaf } from '@fortawesome/free-solid-svg-icons';
-import { fieldTypeIcons, fieldTypeLabels } from '../../lib/icons';
+import { fieldTypeIcons, fieldTypeLabels, faTriangleExclamation } from '../../lib/icons';
+import { campoFaltaCaptura } from '../../lib/campoValidation';
 import TableColumnsEditor from './TableColumnsEditor';
 import CampoCoordenadasInput, { parseCoords } from '../../components/CampoCoordenadasInput';
 import type { Campo, TipoCampo, ConfigTabla } from '../../types';
@@ -38,6 +39,7 @@ export default function FieldPropertiesPanel({ campo, autoFocusEtiqueta, ejemplo
   const typeLabel = fieldTypeLabels[campo.tipo];
   const isTable = campo.tipo === 'tabla' || campo.tipo === 'tabla_jerarquica';
   const etiquetaRef = useRef<HTMLInputElement>(null);
+  const faltaCaptura = campoFaltaCaptura(campo);
 
   useEffect(() => {
     if (autoFocusEtiqueta) {
@@ -143,7 +145,10 @@ export default function FieldPropertiesPanel({ campo, autoFocusEtiqueta, ejemplo
             Editable
           </button>
           <button
-            onClick={() => update({ editable: false })}
+            onClick={() => update({
+              editable: false,
+              valorEjemplo: !isTable && !campo.valorEjemplo ? '=' : campo.valorEjemplo,
+            })}
             className={`flex-1 px-4 py-2 text-sm font-medium transition-colors duration-75 ${
               !campo.editable
                 ? 'bg-brand-50 text-brand-600'
@@ -183,9 +188,20 @@ export default function FieldPropertiesPanel({ campo, autoFocusEtiqueta, ejemplo
       {/* === UBICACIÓN EN EXCEL (captura) — solo campos no-tabla === */}
       {!isTable && (
         <div className="pt-3 border-t border-gray-100">
-          <label className="block text-xs font-semibold uppercase tracking-widest text-muted mb-2">
-            Ubicación en Excel
-          </label>
+          <div className="flex items-center gap-2 mb-2">
+            <label className="text-xs font-semibold uppercase tracking-widest text-muted">
+              Ubicación en Excel
+            </label>
+            {faltaCaptura && (
+              <span
+                title="Sin columna/fila no se puede insertar el valor de este campo en el Excel"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 text-[10px] font-semibold"
+              >
+                <FontAwesomeIcon icon={faTriangleExclamation} className="w-2.5 h-2.5" />
+                Obligatorio
+              </span>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-[10px] font-medium text-muted mb-1">Columna</label>
@@ -194,7 +210,7 @@ export default function FieldPropertiesPanel({ campo, autoFocusEtiqueta, ejemplo
                 value={campo.captura?.columna || ''}
                 onChange={(e) => update({ captura: { columna: e.target.value, fila: campo.captura?.fila ?? 0, abarcaColumnas: campo.captura?.abarcaColumnas, abarcaFilas: campo.captura?.abarcaFilas } })}
                 placeholder="Ej. R"
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
+                className={`w-full px-3 py-2 rounded-lg border text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 ${campo.captura?.columna ? 'border-gray-200' : 'border-amber-300'}`}
               />
             </div>
             <div>
@@ -205,7 +221,7 @@ export default function FieldPropertiesPanel({ campo, autoFocusEtiqueta, ejemplo
                 onChange={(e) => update({ captura: { columna: campo.captura?.columna ?? '', fila: e.target.value ? Number(e.target.value) : 0, abarcaColumnas: campo.captura?.abarcaColumnas, abarcaFilas: campo.captura?.abarcaFilas } })}
                 placeholder="Ej. 9"
                 min={1}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
+                className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 ${campo.captura?.fila ? 'border-gray-200' : 'border-amber-300'}`}
               />
             </div>
             <div>

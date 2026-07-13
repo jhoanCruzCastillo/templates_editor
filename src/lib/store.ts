@@ -31,15 +31,43 @@ function write<T>(key: string, data: T): void {
   localStorage.setItem(key, JSON.stringify(data));
 }
 
+// IDs de sectores/plantillas que vinieron del seed original (v9 y anteriores). Al reseedear, todo
+// item existente cuyo id esté en esta lista se REEMPLAZA por la versión nueva del seed (así se
+// pueden corregir datos de demo desactualizados) — cualquier otro item existente (creado por el
+// propio usuario, con id generado por generateId()) se preserva tal cual.
+const SEED_IDS_V9 = {
+  sectores: ['sec-1', 'sec-2', 'sec-3', 'sec-4', 'sec-5', 'sec-6'],
+  plantillas: [
+    'plt-1', 'plt-2', 'plt-3', 'plt-fmt-5a', 'plt-fmt-5b', 'plt-fmt-7a',
+    'plt-ioarr-7c-opt', 'plt-ioarr-7c-amp', 'plt-ioarr-7d-rep', 'plt-ioarr-7e-reh',
+    'plt-4', 'plt-5', 'plt-perfil-1', 'plt-perfil-sal-1',
+  ],
+};
+
+function reseedReplacingKnown<T extends { id: string }>(key: string, seed: T[], knownOldIds: string[]): void {
+  const existingRaw = localStorage.getItem(key);
+  const existing: T[] = existingRaw ? JSON.parse(existingRaw) : [];
+  const known = new Set(knownOldIds);
+  const seedIds = new Set(seed.map((s) => s.id));
+  const preservados = existing.filter((item) => !known.has(item.id) && !seedIds.has(item.id));
+  write(key, [...seed, ...preservados]);
+}
+
+// Versión NUMÉRICA del seed — antes se comparaba como string ('10' < '9' es true léxicamente),
+// lo que hubiera impedido reseedear correctamente al pasar de un dígito a dos.
+const SEED_VERSION = 10;
+
 export function initStore() {
-  // v9: tipos de columna de tabla alineados a los primitivos del esquema oficial
-  const ver = localStorage.getItem(KEYS.initialized);
-  if (!ver || ver < '9') {
-    write(KEYS.sectores, sectoresSeed);
-    write(KEYS.plantillas, plantillasSeed);
-    write(KEYS.ejemplos, ejemplosSeed);
-    write(KEYS.actividad, actividadSeed);
-    localStorage.setItem(KEYS.initialized, '9');
+  // v10: sectores y plantillas alineados al catálogo real de fichas técnicas (ver memoria de
+  // proyecto "Proyecto José Herrera") — se reemplazan los sectores/plantillas de demo (v9 y
+  // anteriores) por la lista real, preservando cualquier sector/plantilla creado por el usuario.
+  const ver = Number(localStorage.getItem(KEYS.initialized)) || 0;
+  if (ver < SEED_VERSION) {
+    reseedReplacingKnown(KEYS.sectores, sectoresSeed, SEED_IDS_V9.sectores);
+    reseedReplacingKnown(KEYS.plantillas, plantillasSeed, SEED_IDS_V9.plantillas);
+    if (!localStorage.getItem(KEYS.ejemplos)) write(KEYS.ejemplos, ejemplosSeed);
+    if (!localStorage.getItem(KEYS.actividad)) write(KEYS.actividad, actividadSeed);
+    localStorage.setItem(KEYS.initialized, String(SEED_VERSION));
   }
 }
 

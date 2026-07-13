@@ -6,6 +6,7 @@ const dotColors: Record<string, string> = {
   green: 'bg-green-500',
   orange: 'bg-orange-500',
   gray: 'bg-gray-400',
+  red: 'bg-red-500',
 };
 
 export default function ActivityFeed() {

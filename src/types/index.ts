@@ -112,7 +112,9 @@ export interface Plantilla {
   descripcion: string;
   sectorId: string;
   instrumento: TipoInstrumento;
-  tipologiaIoarr?: TipologiaIoarr;
+  /** Tipologías IOARR que este documento cubre internamente (no son excluyentes entre sí — un mismo
+   * formato como el 07-C trae las 4 como secciones propias; ver [[ioarr-tipologias-transversales]]). */
+  tipologiasIoarr?: TipologiaIoarr[];
   cantidadSecciones: number;
   cantidadEjemplos: number;
   fechaActualizacion: string;
@@ -180,6 +182,9 @@ export interface Ejemplo {
   plantillaId: string;
   activo?: boolean;
   valores: Record<string, string>;
+  /** Solo relevante si la plantilla es IOARR: qué tipología(s) representa ESTE caso puntual
+   * (a diferencia de Plantilla.tipologiasIoarr, que describe la cobertura del documento completo). */
+  tipologiasIoarr?: TipologiaIoarr[];
 }
 
 export type RolUsuario = 'superusuario' | 'administrador' | 'cliente';
@@ -231,7 +236,7 @@ export interface ActividadReciente {
   id: string;
   mensaje: string;
   fecha: string;
-  color: 'blue' | 'green' | 'orange' | 'gray';
+  color: 'blue' | 'green' | 'orange' | 'gray' | 'red';
 }
 
 // Catálogo de archivos Excel de referencia asignables a una plantilla (para previsualización)

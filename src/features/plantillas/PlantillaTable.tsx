@@ -42,7 +42,7 @@ export default function PlantillaTable({ plantillas, sectorId }: Props) {
   const filtered = plantillas.filter(
     (p) =>
       p.instrumento === activeTab &&
-      (activeTab !== 'ioarr' || tipologia === 'todas' || p.tipologiaIoarr === tipologia),
+      (activeTab !== 'ioarr' || tipologia === 'todas' || (p.tipologiasIoarr ?? []).includes(tipologia)),
   );
 
   const getEditLink = (p: Plantilla) =>
@@ -103,18 +103,18 @@ export default function PlantillaTable({ plantillas, sectorId }: Props) {
                 className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors"
               >
                 <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center flex-wrap gap-1.5">
                     <span className="inline-flex items-center justify-center w-auto min-w-10 px-2 h-8 rounded-md border border-brand-200 text-brand-700 text-sm font-bold bg-brand-50">
                       {p.codigo}
                     </span>
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${badgeClasses[tipo]}`}>
                       {instrumentoLabels[tipo]}
                     </span>
-                    {p.tipologiaIoarr && (
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
-                        {tipologiaIoarrLabels[p.tipologiaIoarr]}
+                    {(p.tipologiasIoarr ?? []).map((t) => (
+                      <span key={t} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
+                        {tipologiaIoarrLabels[t]}
                       </span>
-                    )}
+                    ))}
                   </div>
                 </td>
                 <td className="px-4 py-4">

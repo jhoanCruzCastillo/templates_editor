@@ -9,7 +9,7 @@ import type { TipoInstrumento, TipologiaIoarr } from '../../types';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (codigo: string, nombre: string, descripcion: string, instrumento: TipoInstrumento, tipologiaIoarr?: TipologiaIoarr) => void;
+  onCreate: (codigo: string, nombre: string, descripcion: string, instrumento: TipoInstrumento, tipologiasIoarr?: TipologiaIoarr[]) => void;
 }
 
 const subtitulos: Record<TipoInstrumento, string> = {
@@ -28,7 +28,7 @@ const placeholders: Record<TipoInstrumento, { codigo: string; nombre: string }> 
 
 export default function NuevaPlantillaModal({ isOpen, onClose, onCreate }: Props) {
   const [instrumento, setInstrumento] = useState<TipoInstrumento>('formato');
-  const [tipologia, setTipologia] = useState<TipologiaIoarr>('optimizacion');
+  const [tipologias, setTipologias] = useState<TipologiaIoarr[]>([]);
   const [codigo, setCodigo] = useState('');
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -37,12 +37,12 @@ export default function NuevaPlantillaModal({ isOpen, onClose, onCreate }: Props
 
   const handleSubmit = () => {
     if (!codigo.trim() || !nombre.trim()) return;
-    onCreate(codigo.trim(), nombre.trim(), descripcion.trim(), instrumento, instrumento === 'ioarr' ? tipologia : undefined);
+    onCreate(codigo.trim(), nombre.trim(), descripcion.trim(), instrumento, instrumento === 'ioarr' ? tipologias : undefined);
     setCodigo('');
     setNombre('');
     setDescripcion('');
     setInstrumento('formato');
-    setTipologia('optimizacion');
+    setTipologias([]);
     onClose();
   };
 
@@ -84,8 +84,8 @@ export default function NuevaPlantillaModal({ isOpen, onClose, onCreate }: Props
               <InstrumentoSelector
                 instrumento={instrumento}
                 onChange={setInstrumento}
-                tipologia={tipologia}
-                onTipologiaChange={setTipologia}
+                tipologias={tipologias}
+                onTipologiasChange={setTipologias}
               />
 
               {/* Código + Nombre */}

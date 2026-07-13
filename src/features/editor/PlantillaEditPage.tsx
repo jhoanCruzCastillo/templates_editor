@@ -329,11 +329,11 @@ export default function PlantillaEditPage() {
     }
   }, [todosCampos, showExamples, editedValores, handleExampleValueChange, handleDefaultValueChange]);
 
-  const handleCreateExample = useCallback((nombre: string, subtitulo: string, detalle: string) => {
+  const handleCreateExample = useCallback((nombre: string, subtitulo: string, detalle: string, tipologiasIoarr?: import('../../types').TipologiaIoarr[]) => {
     if (!editData || !archivoExcelAsignado) return;
     const nuevo: Ejemplo = {
       id: generateId(), nombre, subtitulo, detalle,
-      plantillaId: plantillaId!, activo: false, valores: {},
+      plantillaId: plantillaId!, activo: false, valores: {}, tipologiasIoarr,
     };
     addEjemplo(nuevo);
     setActiveEjemplo(nuevo);
@@ -593,6 +593,7 @@ export default function PlantillaEditPage() {
         onCreate={handleCreateExample}
         hasExcelAsignado={!!archivoExcelAsignado}
         onAssignExcel={() => { setShowNuevoEjemplo(false); setShowExcelCatalogModal(true); }}
+        mostrarTipologiasIoarr={editData?.instrumento === 'ioarr'}
       />
 
       <ExcelCatalogModal

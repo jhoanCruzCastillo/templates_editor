@@ -9,14 +9,14 @@ import type { TipoInstrumento, TipologiaIoarr, Seccion } from '../../types';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onImport: (data: { codigo: string; nombre: string; instrumento: TipoInstrumento; tipologiaIoarr?: TipologiaIoarr; secciones: Seccion[] }) => void;
+  onImport: (data: { codigo: string; nombre: string; instrumento: TipoInstrumento; tipologiasIoarr?: TipologiaIoarr[]; secciones: Seccion[] }) => void;
 }
 
 export default function ImportarJsonModal({ isOpen, onClose, onImport }: Props) {
   const [parsed, setParsed] = useState<DocumentoParseResult | null>(null);
   const [error, setError] = useState('');
   const [instrumento, setInstrumento] = useState<TipoInstrumento>('ficha_tecnica');
-  const [tipologia, setTipologia] = useState<TipologiaIoarr>('optimizacion');
+  const [tipologias, setTipologias] = useState<TipologiaIoarr[]>([]);
   const [codigo, setCodigo] = useState('');
   const [nombre, setNombre] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -25,7 +25,7 @@ export default function ImportarJsonModal({ isOpen, onClose, onImport }: Props) 
     setParsed(null);
     setError('');
     setInstrumento('ficha_tecnica');
-    setTipologia('optimizacion');
+    setTipologias([]);
     setCodigo('');
     setNombre('');
   };
@@ -65,7 +65,7 @@ export default function ImportarJsonModal({ isOpen, onClose, onImport }: Props) 
       codigo: codigo.trim(),
       nombre: nombre.trim(),
       instrumento,
-      tipologiaIoarr: instrumento === 'ioarr' ? tipologia : undefined,
+      tipologiasIoarr: instrumento === 'ioarr' ? tipologias : undefined,
       secciones: parsed.secciones,
     });
     reset();
@@ -136,8 +136,8 @@ export default function ImportarJsonModal({ isOpen, onClose, onImport }: Props) 
                   <InstrumentoSelector
                     instrumento={instrumento}
                     onChange={setInstrumento}
-                    tipologia={tipologia}
-                    onTipologiaChange={setTipologia}
+                    tipologias={tipologias}
+                    onTipologiasChange={setTipologias}
                   />
 
                   <div className="grid grid-cols-3 gap-4">

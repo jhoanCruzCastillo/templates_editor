@@ -2,28 +2,37 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark, faCheck, faFileAlt, faFileExcel, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
+import { tipologiaIoarrLabels } from '../../lib/icons';
+import type { TipologiaIoarr } from '../../types';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (nombre: string, subtitulo: string, detalle: string) => void;
+  onCreate: (nombre: string, subtitulo: string, detalle: string, tipologiasIoarr?: TipologiaIoarr[]) => void;
   /** Cada ejemplo requiere una copia del Excel asignado a la plantilla — si no hay ninguno asignado, se bloquea la creación.
    * Opcional: los editores que no manejan catálogo de Excel (p. ej. Perfil) omiten esta validación. */
   hasExcelAsignado?: boolean;
   onAssignExcel?: () => void;
+  /** Solo true cuando la plantilla es IOARR — permite etiquetar qué tipología(s) representa ESTE caso puntual */
+  mostrarTipologiasIoarr?: boolean;
 }
 
-export default function NuevoEjemploModal({ isOpen, onClose, onCreate, hasExcelAsignado = true, onAssignExcel }: Props) {
+export default function NuevoEjemploModal({ isOpen, onClose, onCreate, hasExcelAsignado = true, onAssignExcel, mostrarTipologiasIoarr = false }: Props) {
   const [nombre, setNombre] = useState('');
   const [subtitulo, setSubtitulo] = useState('');
   const [detalle, setDetalle] = useState('');
+  const [tipologias, setTipologias] = useState<TipologiaIoarr[]>([]);
+
+  const toggleTipologia = (t: TipologiaIoarr) =>
+    setTipologias((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
 
   const handleSubmit = () => {
     if (!nombre.trim()) return;
-    onCreate(nombre.trim(), subtitulo.trim(), detalle.trim());
+    onCreate(nombre.trim(), subtitulo.trim(), detalle.trim(), mostrarTipologiasIoarr ? tipologias : undefined);
     setNombre('');
     setSubtitulo('');
     setDetalle('');
+    setTipologias([]);
     onClose();
   };
 
@@ -121,6 +130,30 @@ export default function NuevoEjemploModal({ isOpen, onClose, onCreate, hasExcelA
                     className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
                   />
                 </div>
+
+                {mostrarTipologiasIoarr && (
+                  <div>
+                    <label className="block text-sm font-medium text-heading mb-1.5">
+                      Tipología(s) que representa este caso <span className="text-muted font-normal">(opcional)</span>
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {(Object.keys(tipologiaIoarrLabels) as TipologiaIoarr[]).map((t) => (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => toggleTipologia(t)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors duration-75 ${
+                            tipologias.includes(t)
+                              ? 'bg-amber-600 text-white'
+                              : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                          }`}
+                        >
+                          {tipologiaIoarrLabels[t]}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex justify-end gap-3 pt-2">
                   <button onClick={onClose} className="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors duration-75">

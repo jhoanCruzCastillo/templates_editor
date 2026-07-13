@@ -5,8 +5,8 @@ import { instrumentoIcons, instrumentoLabels, tipologiaIoarrLabels } from '../..
 interface Props {
   instrumento: TipoInstrumento;
   onChange: (tipo: TipoInstrumento) => void;
-  tipologia: TipologiaIoarr;
-  onTipologiaChange: (t: TipologiaIoarr) => void;
+  tipologias: TipologiaIoarr[];
+  onTipologiasChange: (t: TipologiaIoarr[]) => void;
 }
 
 export const instrumentoAccent: Record<TipoInstrumento, { border: string; icon: string; text: string; iconBg: string; btn: string }> = {
@@ -25,7 +25,9 @@ const descripciones: Record<TipoInstrumento, string> = {
 
 const tipos: TipoInstrumento[] = ['formato', 'ioarr', 'ficha_tecnica', 'perfil'];
 
-export default function InstrumentoSelector({ instrumento, onChange, tipologia, onTipologiaChange }: Props) {
+export default function InstrumentoSelector({ instrumento, onChange, tipologias, onTipologiasChange }: Props) {
+  const toggleTipologia = (t: TipologiaIoarr) =>
+    onTipologiasChange(tipologias.includes(t) ? tipologias.filter((x) => x !== t) : [...tipologias, t]);
   return (
     <div className="space-y-3">
       <div>
@@ -60,19 +62,20 @@ export default function InstrumentoSelector({ instrumento, onChange, tipologia, 
         </div>
       </div>
 
-      {/* Tipología — solo para IOARR */}
+      {/* Tipologías — solo para IOARR. No son excluyentes: un mismo formato (ej. 07-C) suele
+          cubrir varias a la vez como secciones propias — por eso es selección múltiple. */}
       {instrumento === 'ioarr' && (
         <div>
           <label className="block text-sm font-medium text-heading mb-2">
-            Tipología IOARR <span className="text-red-500">*</span>
+            Tipologías que cubre este documento <span className="text-muted font-normal">(puede ser más de una)</span>
           </label>
           <div className="flex flex-wrap gap-2">
             {(Object.keys(tipologiaIoarrLabels) as TipologiaIoarr[]).map((t) => (
               <button
                 key={t}
-                onClick={() => onTipologiaChange(t)}
+                onClick={() => toggleTipologia(t)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors duration-75 ${
-                  tipologia === t
+                  tipologias.includes(t)
                     ? 'bg-amber-600 text-white'
                     : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                 }`}

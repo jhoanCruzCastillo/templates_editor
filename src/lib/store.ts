@@ -57,12 +57,16 @@ function reseedReplacingKnown<T extends { id: string }>(key: string, seed: T[], 
 
 // Versión NUMÉRICA del seed — antes se comparaba como string ('10' < '9' es true léxicamente),
 // lo que hubiera impedido reseedear correctamente al pasar de un dígito a dos.
-const SEED_VERSION = 10;
+const SEED_VERSION = 11;
 
 export function initStore() {
   // v10: sectores y plantillas alineados al catálogo real de fichas técnicas (ver memoria de
   // proyecto "Proyecto José Herrera") — se reemplazan los sectores/plantillas de demo (v9 y
   // anteriores) por la lista real, preservando cualquier sector/plantilla creado por el usuario.
+  // v11: IOARR pasa de 4 plantillas (una por tipología, incorrecto) a 3 plantillas reales por
+  // régimen (07-C, 07-D, 07-E) — las 4 tipologías son transversales/no excluyentes dentro de cada
+  // documento, ver [[ioarr-tipologias-transversales]]. `Plantilla.tipologiaIoarr` (único) pasa a
+  // `tipologiasIoarr` (array).
   const ver = Number(localStorage.getItem(KEYS.initialized)) || 0;
   if (ver < SEED_VERSION) {
     reseedReplacingKnown(KEYS.sectores, sectoresSeed, SEED_IDS_V9.sectores);

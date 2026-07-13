@@ -35,7 +35,7 @@ export default function SectorDetallePage() {
     nombre: string,
     descripcion: string,
     instrumento: import('../../types').TipoInstrumento,
-    tipologiaIoarr?: import('../../types').TipologiaIoarr,
+    tipologiasIoarr?: import('../../types').TipologiaIoarr[],
   ) => {
     addPlantilla({
       id: generateId(),
@@ -44,7 +44,7 @@ export default function SectorDetallePage() {
       descripcion,
       sectorId: sectorId!,
       instrumento,
-      tipologiaIoarr,
+      tipologiasIoarr,
       cantidadSecciones: 0,
       cantidadEjemplos: 0,
       fechaActualizacion: new Date().toLocaleDateString('es-PE'),
@@ -58,7 +58,7 @@ export default function SectorDetallePage() {
     codigo: string;
     nombre: string;
     instrumento: TipoInstrumento;
-    tipologiaIoarr?: TipologiaIoarr;
+    tipologiasIoarr?: TipologiaIoarr[];
     secciones: Seccion[];
   }) => {
     addPlantilla({
@@ -68,7 +68,7 @@ export default function SectorDetallePage() {
       descripcion: '',
       sectorId: sectorId!,
       instrumento: data.instrumento,
-      tipologiaIoarr: data.tipologiaIoarr,
+      tipologiasIoarr: data.tipologiasIoarr,
       cantidadSecciones: data.secciones.length,
       cantidadEjemplos: 0,
       fechaActualizacion: new Date().toLocaleDateString('es-PE'),

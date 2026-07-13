@@ -9,6 +9,8 @@ interface Props {
   confirmLabel?: string;
   onConfirm: () => void;
   onClose: () => void;
+  /** 0-100: si se define, reemplaza los botones por una barra de progreso y bloquea el cierre */
+  progress?: number | null;
 }
 
 export default function ConfirmModal({
@@ -18,7 +20,9 @@ export default function ConfirmModal({
   confirmLabel = 'Eliminar',
   onConfirm,
   onClose,
+  progress,
 }: Props) {
+  const isProgressing = progress != null;
   return (
     <AnimatePresence>
       {isOpen && (
@@ -28,7 +32,7 @@ export default function ConfirmModal({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.1 }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-          onClick={onClose}
+          onClick={isProgressing ? undefined : onClose}
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.97, y: 10 }}
@@ -47,20 +51,34 @@ export default function ConfirmModal({
                 <p className="text-sm text-muted leading-relaxed">{message}</p>
               </div>
             </div>
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={onClose}
-                className="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors duration-75"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={onConfirm}
-                className="px-5 py-2.5 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors duration-75"
-              >
-                {confirmLabel}
-              </button>
-            </div>
+            {isProgressing ? (
+              <div className="mt-6">
+                <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+                  <motion.div
+                    className="h-full bg-brand-600 rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ duration: 0.15 }}
+                  />
+                </div>
+                <p className="text-xs text-muted mt-2 text-right">{progress}%</p>
+              </div>
+            ) : (
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  onClick={onClose}
+                  className="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors duration-75"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={onConfirm}
+                  className="px-5 py-2.5 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors duration-75"
+                >
+                  {confirmLabel}
+                </button>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}

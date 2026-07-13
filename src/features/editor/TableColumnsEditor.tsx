@@ -1,10 +1,12 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { subtipoTablaLabels } from '../../lib/icons';
-import ColumnDetailModal from './ColumnDetailModal';
-import TablePreview from './TablePreview';
+import FilasDinamicasColumnsEditor from './FilasDinamicasColumnsEditor';
 import MatrizPeriodosEditor from './MatrizPeriodosEditor';
 import JerarquicaColumnsEditor from './JerarquicaColumnsEditor';
-import type { ConfigTabla, ColumnaTabla, SubtipoTabla } from '../../types';
+import AgrupadorConfigModal from './AgrupadorConfigModal';
+import type { ConfigTabla, SubtipoTabla } from '../../types';
 
 interface Props {
   config: ConfigTabla;
@@ -14,17 +16,7 @@ interface Props {
 const subtipos = Object.entries(subtipoTablaLabels) as [SubtipoTabla, string][];
 
 export default function TableColumnsEditor({ config, onChange }: Props) {
-  const [editingColId, setEditingColId] = useState<string | null>(null);
-
-  const updateColumn = useCallback((colId: string, updates: Partial<ColumnaTabla>) => {
-    onChange({
-      ...config,
-      columnas: config.columnas.map((c) => (c.id === colId ? { ...c, ...updates } : c)),
-    });
-  }, [config, onChange]);
-
-  const editingCol = editingColId ? config.columnas.find((c) => c.id === editingColId) ?? null : null;
-
+  const [showAgrupadorConfig, setShowAgrupadorConfig] = useState(false);
   return (
     <div className="space-y-4">
       {/* Subtipo */}
@@ -81,12 +73,23 @@ export default function TableColumnsEditor({ config, onChange }: Props) {
       {config.subtipo !== 'jerarquica' && (
         <div className="flex items-center justify-between">
           <label className="text-xs font-medium text-heading">Agrupar filas bajo encabezados</label>
-          <button
-            onClick={() => onChange({ ...config, agrupador: !config.agrupador })}
-            className={`relative w-10 h-6 rounded-full transition-colors duration-100 ${config.agrupador ? 'bg-brand-500' : 'bg-gray-300'}`}
-          >
-            <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-100 ${config.agrupador ? 'left-4.5' : 'left-0.5'}`} />
-          </button>
+          <div className="flex items-center gap-2">
+            {config.agrupador && (
+              <button
+                onClick={() => setShowAgrupadorConfig(true)}
+                title="Configurar fila de título de grupo"
+                className="w-6 h-6 rounded flex items-center justify-center text-gray-400 hover:text-brand-600 hover:bg-gray-50 transition-colors"
+              >
+                <FontAwesomeIcon icon={faGear} className="w-3 h-3" />
+              </button>
+            )}
+            <button
+              onClick={() => onChange({ ...config, agrupador: !config.agrupador })}
+              className={`relative w-10 h-6 rounded-full transition-colors duration-100 ${config.agrupador ? 'bg-brand-500' : 'bg-gray-300'}`}
+            >
+              <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-100 ${config.agrupador ? 'left-4.5' : 'left-0.5'}`} />
+            </button>
+          </div>
         </div>
       )}
 
@@ -110,22 +113,16 @@ export default function TableColumnsEditor({ config, onChange }: Props) {
       ) : config.subtipo === 'jerarquica' ? (
         <JerarquicaColumnsEditor config={config} onChange={onChange} />
       ) : (
-        <>
-          <TablePreview
-            config={config}
-            onChange={onChange}
-            onEditColumn={setEditingColId}
-          />
-
-          <ColumnDetailModal
-            isOpen={!!editingCol}
-            onClose={() => setEditingColId(null)}
-            columna={editingCol}
-            allColumnas={config.columnas}
-            onChange={(updates) => editingCol && updateColumn(editingCol.id, updates)}
-          />
-        </>
+        <FilasDinamicasColumnsEditor config={config} onChange={onChange} />
       )}
+
+      <AgrupadorConfigModal
+        isOpen={showAgrupadorConfig}
+        onClose={() => setShowAgrupadorConfig(false)}
+        abarcaColumnas={config.agrupadorAbarcaColumnas ?? config.columnas.length}
+        totalColumnas={config.columnas.length}
+        onChange={(v) => onChange({ ...config, agrupadorAbarcaColumnas: v })}
+      />
     </div>
   );
 }

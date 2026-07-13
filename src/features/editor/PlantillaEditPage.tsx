@@ -53,6 +53,7 @@ export default function PlantillaEditPage() {
   const [showExcelCatalogModal, setShowExcelCatalogModal] = useState(false);
   const [showInsertConfirm, setShowInsertConfirm] = useState(false);
   const [isInserting, setIsInserting] = useState(false);
+  const [insertProgress, setInsertProgress] = useState(0);
   const [showPreview, setShowPreview] = useState(false);
   const [jsonPreview, setJsonPreview] = useState<{ title: string; json: string } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Ejemplo | null>(null);
@@ -311,8 +312,11 @@ export default function PlantillaEditPage() {
     const archivo = excelEjemplos[activeEjemplo.id];
     if (!archivo) { toast('Este ejemplo no tiene una copia de Excel asociada'); setShowInsertConfirm(false); return; }
     setIsInserting(true);
+    setInsertProgress(0);
     try {
-      const nuevaDataUrl = await insertarValoresEnExcel(archivo.dataUrl, editData, editedValores);
+      const nuevaDataUrl = await insertarValoresEnExcel(archivo.dataUrl, editData, editedValores, (fraction) => {
+        setInsertProgress(Math.round(fraction * 100));
+      });
       setExcelEjemplo(activeEjemplo.id, { ...archivo, dataUrl: nuevaDataUrl });
       pushActividad(`Se insertaron los valores del ejemplo "${activeEjemplo.nombre}" en su Excel`, 'blue');
       toast('Valores insertados en el Excel del ejemplo');
@@ -538,7 +542,8 @@ export default function PlantillaEditPage() {
         isOpen={showInsertConfirm}
         title="Insertar valores en el Excel"
         message={`Se sobreescribirán todos los datos actuales del Excel asignado al ejemplo "${activeEjemplo?.nombre}" con los valores de este ejemplo. Esta acción no se puede deshacer.`}
-        confirmLabel={isInserting ? 'Insertando...' : 'Insertar'}
+        confirmLabel="Insertar"
+        progress={isInserting ? insertProgress : null}
         onConfirm={handleInsertExcel}
         onClose={() => setShowInsertConfirm(false)}
       />

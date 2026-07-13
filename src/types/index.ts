@@ -78,6 +78,8 @@ export interface ConfigTabla {
   periodos?: string[];
   /** Filas planas agrupadas bajo un encabezado de grupo (no aplica a jerárquica) */
   agrupador?: boolean;
+  /** Cantidad de columnas que abarca (fusiona) la fila de título de cada grupo, contando desde la primera columna (solo si agrupador=true; por defecto, todas las columnas) */
+  agrupadorAbarcaColumnas?: number;
   /** Id de la columna cuyo valor se repite por período (solo subtipo matriz_por_periodos) */
   columnaDinamicaId?: string;
   /** Encabezados que agrupan columnas existentes bajo un título común (equivalente a "cabecera" del esquema oficial) */

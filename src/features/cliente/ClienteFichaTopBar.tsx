@@ -17,18 +17,18 @@ export default function ClienteFichaTopBar({ plantilla, ejemplo, onSave, onDownl
   return (
     <div className="shrink-0 border-b border-gray-100 bg-white px-6 py-3">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/')}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors shrink-0"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
             title="Volver a Mis fichas"
           >
             <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4" />
           </button>
-          <span className="inline-flex items-center justify-center w-auto min-w-10 px-2 h-8 rounded-md border border-brand-200 text-brand-700 text-sm font-bold bg-brand-50 shrink-0">
+          <span className="inline-flex items-center justify-center w-auto min-w-10 px-2 h-8 rounded-md border border-brand-200 text-brand-700 text-sm font-bold bg-brand-50">
             {plantilla.codigo}
           </span>
-          <div className="min-w-0">
+          <div className="max-w-xs">
             <h1 className="text-lg font-bold text-heading truncate">{ejemplo.nombre}</h1>
             <p className="text-xs text-muted truncate">{plantilla.nombre}</p>
           </div>

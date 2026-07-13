@@ -1,9 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPen, faEye, faFileAlt, faPencil, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
-import { motion, AnimatePresence } from 'framer-motion';
-import Breadcrumbs from '../../components/Breadcrumbs';
+import { faPen, faEye, faArrowLeft, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { AnimatePresence, motion } from 'framer-motion';
 import VersionTabs from '../../components/VersionTabs';
 import ResizeHandle from '../../components/ResizeHandle';
 import SectionIndex from './SectionIndex';
@@ -32,13 +31,6 @@ export default function PlantillaViewPage() {
   const isLast = safeIdx === secciones.length - 1;
   const showExamples = activeTab === 'ejemplos';
 
-  const versionInfo = {
-    estructura: { icon: faFileAlt, title: 'Versión Estructura', desc: `El molde vacío: definición de las ${plantilla.cantidadSecciones} secciones y sus campos, sin valores.` },
-    ejemplos:   { icon: faPencil, title: 'Versión Ejemplos', desc: 'El mismo molde lleno con casos resueltos de referencia que alimentan el contexto de la IA.' },
-    proyecto:   { icon: faFileAlt, title: 'Versión Proyecto', desc: 'Vista del proyecto con datos reales completados.' },
-  };
-  const info = versionInfo[activeTab];
-
   const handleSectionSelect = (seccionId: string) => {
     const idx = secciones.findIndex((s) => s.id === seccionId);
     if (idx !== -1) setActiveSectionIndex(idx);
@@ -47,22 +39,23 @@ export default function PlantillaViewPage() {
   return (
     <div className="flex flex-col h-screen">
       {/* Barra superior */}
-      <div className="shrink-0 border-b border-gray-100 bg-white px-8 py-3">
-        <Breadcrumbs
-          items={[
-            { label: 'Sectores', to: '/sectores' },
-            { label: sector.nombre, to: `/sectores/${sectorId}` },
-            { label: `${plantilla.codigo} · ${plantilla.nombre}` },
-          ]}
-        />
+      <div className="shrink-0 border-b border-gray-100 bg-white px-6 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center justify-center w-10 h-8 rounded-md border border-brand-200 text-brand-700 text-sm font-bold bg-brand-50">
+            <Link
+              to={`/sectores/${sectorId}`}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+              title="Volver"
+            >
+              <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4" />
+            </Link>
+            <span className="inline-flex items-center justify-center w-auto min-w-10 px-2 h-8 rounded-md border border-brand-200 text-brand-700 text-sm font-bold bg-brand-50">
               {plantilla.codigo}
             </span>
-            <h1 className="text-lg font-bold text-heading">{plantilla.nombre}</h1>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 text-xs text-muted font-medium">
-              <FontAwesomeIcon icon={faEye} className="w-3 h-3" />
+            <h1 className="text-lg font-bold text-heading truncate max-w-xs">{plantilla.nombre}</h1>
+            <span className="text-xs text-muted">{plantilla.cantidadSecciones} secciones</span>
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
+              <FontAwesomeIcon icon={faEye} className="w-2.5 h-2.5" />
               Solo lectura
             </span>
           </div>
@@ -77,15 +70,6 @@ export default function PlantillaViewPage() {
             </Link>
           </div>
         </div>
-        <motion.div key={activeTab} initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 mt-3 text-sm">
-          <div className="w-8 h-8 rounded-lg bg-gray-100 text-gray-500 flex items-center justify-center">
-            <FontAwesomeIcon icon={info.icon} className="w-4 h-4" />
-          </div>
-          <div>
-            <div className="font-semibold text-heading text-sm">{info.title}</div>
-            <div className="text-xs text-muted">{info.desc}</div>
-          </div>
-        </motion.div>
       </div>
 
       {/* Cuerpo */}

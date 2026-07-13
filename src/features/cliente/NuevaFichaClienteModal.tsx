@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -8,6 +8,7 @@ import { useAppContext } from '../../lib/context';
 import { useToast } from '../../components/Toast';
 import { generateId } from '../../lib/store';
 import { instrumentoLabels } from '../../lib/icons';
+import FichaOficialSelector from './FichaOficialSelector';
 import type { TipoInstrumento } from '../../types';
 
 interface Props {
@@ -25,6 +26,7 @@ export default function NuevaFichaClienteModal({ isOpen, onClose }: Props) {
 
   const [sectorId, setSectorId] = useState('');
   const [tipo, setTipo] = useState<TipoInstrumento>('ficha_tecnica');
+  const [selectedPlantillaId, setSelectedPlantillaId] = useState('');
   const [codigo, setCodigo] = useState('');
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -33,20 +35,27 @@ export default function NuevaFichaClienteModal({ isOpen, onClose }: Props) {
     if (!isOpen) {
       setSectorId('');
       setTipo('ficha_tecnica');
+      setSelectedPlantillaId('');
       setCodigo('');
       setNombre('');
       setDescripcion('');
     }
   }, [isOpen]);
 
-  const handleSubmit = () => {
-    if (!sectorId || !nombre.trim()) return;
+  // Al cambiar sector o tipo, la selección de ficha oficial ya no aplica
+  useEffect(() => {
+    setSelectedPlantillaId('');
+  }, [sectorId, tipo]);
 
-    const plantilla = plantillas.find((p) => p.sectorId === sectorId && p.instrumento === tipo);
-    if (!plantilla) {
-      toast('No hay una ficha técnica de ese tipo registrada en este sector todavía', 'error');
-      return;
-    }
+  const plantillasCoincidentes = useMemo(
+    () => plantillas.filter((p) => p.sectorId === sectorId && p.instrumento === tipo),
+    [plantillas, sectorId, tipo],
+  );
+
+  const handleSubmit = () => {
+    if (!selectedPlantillaId || !nombre.trim()) return;
+    const plantilla = plantillas.find((p) => p.id === selectedPlantillaId);
+    if (!plantilla) return;
 
     const catalogo = excelCatalogos[plantilla.id];
     const archivoAsignado = catalogo?.archivos.find((a) => a.id === catalogo.asignadoId);
@@ -148,6 +157,14 @@ export default function NuevaFichaClienteModal({ isOpen, onClose }: Props) {
                 </div>
               </div>
 
+              {sectorId && (
+                <FichaOficialSelector
+                  plantillasCoincidentes={plantillasCoincidentes}
+                  selectedPlantillaId={selectedPlantillaId}
+                  onSelect={setSelectedPlantillaId}
+                />
+              )}
+
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-heading mb-1.5">Código</label>
@@ -199,7 +216,7 @@ export default function NuevaFichaClienteModal({ isOpen, onClose }: Props) {
                   </button>
                   <button
                     onClick={handleSubmit}
-                    disabled={!sectorId || !nombre.trim()}
+                    disabled={!selectedPlantillaId || !nombre.trim()}
                     className="px-5 py-2.5 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-75 flex items-center gap-2"
                   >
                     <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5" />

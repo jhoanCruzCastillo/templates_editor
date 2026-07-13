@@ -48,7 +48,7 @@ export default function EditorTopBar({
           <span className="inline-flex items-center justify-center w-auto min-w-10 px-2 h-8 rounded-md border border-brand-200 text-brand-700 text-sm font-bold bg-brand-50">
             {plantilla.codigo}
           </span>
-          <h1 className="text-lg font-bold text-heading">{plantilla.nombre}</h1>
+          <h1 className="text-lg font-bold text-heading truncate max-w-xs">{plantilla.nombre}</h1>
           <span className="text-xs text-muted">{plantilla.cantidadSecciones} secciones</span>
         </div>
         <div className="flex items-center gap-3">

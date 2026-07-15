@@ -76,6 +76,17 @@ export default function FichasTecnicasAgrupadas({ plantillas, sectores, onGestio
 
   return (
     <div className="p-4 space-y-6">
+      <div className="relative">
+        <FontAwesomeIcon icon={faMagnifyingGlass} className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-300" />
+        <input
+          type="text"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          placeholder="Buscar ficha técnica por nombre, código o descripción..."
+          className="w-full pl-9 pr-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
+        />
+      </div>
+
       {mefVisible && (
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-brand-600 mb-2 flex items-center gap-1.5">
@@ -102,17 +113,6 @@ export default function FichasTecnicasAgrupadas({ plantillas, sectores, onGestio
         {grupos.length === 0 && !mefVisible && (
           <p className="text-center text-sm text-muted py-8">No se encontraron fichas técnicas.</p>
         )}
-      </div>
-
-      <div className="relative pt-2">
-        <FontAwesomeIcon icon={faMagnifyingGlass} className="absolute left-3 top-[calc(50%+4px)] -translate-y-1/2 w-3.5 h-3.5 text-gray-300" />
-        <input
-          type="text"
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          placeholder="Buscar ficha técnica por nombre, código o descripción..."
-          className="w-full pl-9 pr-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
-        />
       </div>
     </div>
   );

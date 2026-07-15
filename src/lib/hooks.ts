@@ -60,6 +60,11 @@ export function useUsuarios() {
   return usuarios;
 }
 
+export function useTiposUsuario() {
+  const { tiposUsuario } = useAppContext();
+  return tiposUsuario;
+}
+
 export function useFacturacion(usuarioId: string) {
   const { facturacion } = useAppContext();
   return useMemo(() => facturacion[usuarioId] ?? generarFacturacionDefault(), [facturacion, usuarioId]);

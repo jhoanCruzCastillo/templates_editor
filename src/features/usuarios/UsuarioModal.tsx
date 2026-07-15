@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { useAppContext } from '../../lib/context';
+import { useTiposUsuario } from '../../lib/hooks';
 import { useToast } from '../../components/Toast';
 import { generateId } from '../../lib/store';
 import { rolUsuarioLabels, faUserGear } from '../../lib/icons';
@@ -18,26 +19,42 @@ interface Props {
 
 export default function UsuarioModal({ isOpen, onClose, actorRol, usuario }: Props) {
   const { usuarios, addUsuario, updateUsuario, pushActividad } = useAppContext();
+  const tiposUsuario = useTiposUsuario();
   const { toast } = useToast();
   const rolesDisponibles = rolesGestionablesPor(actorRol);
+  // Superusuario no es un tipo de usuario asignable desde este selector — es el rol raíz del
+  // sistema, no una simple etiqueta como Administrador/Cliente. Se protege aquí para que nadie
+  // pueda promoverse a sí mismo ni a otros, ni degradar por accidente al único superusuario.
+  const rolesSeleccionables = rolesDisponibles.filter((r) => r !== 'superusuario');
   const esEdicion = !!usuario;
+  const esSuperusuarioProtegido = usuario?.rol === 'superusuario';
 
   const [nombre, setNombre] = useState('');
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
-  const [rol, setRol] = useState<RolUsuario>(rolesDisponibles[rolesDisponibles.length - 1] ?? 'cliente');
+  const [rol, setRol] = useState<RolUsuario>(rolesSeleccionables[rolesSeleccionables.length - 1] ?? 'cliente');
+  const [tipoUsuarioId, setTipoUsuarioId] = useState('');
   const [error, setError] = useState('');
+
+  const tiposParaRol = tiposUsuario.filter((t) => t.nivelBase === rol);
 
   useEffect(() => {
     if (isOpen) {
       setNombre(usuario?.nombre ?? '');
       setLogin(usuario?.usuario ?? '');
       setPassword('');
-      setRol(usuario?.rol ?? rolesDisponibles[rolesDisponibles.length - 1] ?? 'cliente');
+      setRol(usuario?.rol ?? rolesSeleccionables[rolesSeleccionables.length - 1] ?? 'cliente');
+      setTipoUsuarioId(usuario?.tipoUsuarioId ?? '');
       setError('');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, usuario]);
+
+  const handleCambiarRol = (r: RolUsuario) => {
+    setRol(r);
+    // La etiqueta personalizada solo tiene sentido si pertenece al nivel de rol elegido.
+    if (!tiposUsuario.some((t) => t.id === tipoUsuarioId && t.nivelBase === r)) setTipoUsuarioId('');
+  };
 
   const handleSubmit = () => {
     if (!nombre.trim() || !login.trim()) return;
@@ -54,11 +71,14 @@ export default function UsuarioModal({ isOpen, onClose, actorRol, usuario }: Pro
       return;
     }
 
+    const etiqueta = esSuperusuarioProtegido ? usuario?.tipoUsuarioId : (tipoUsuarioId || undefined);
+
     if (esEdicion) {
       updateUsuario(usuario!.id, {
         nombre: nombre.trim(),
         usuario: login.trim(),
         rol,
+        tipoUsuarioId: etiqueta,
         ...(password.trim() ? { password: password.trim() } : {}),
       });
       pushActividad(`Se actualizó el usuario "${nombre.trim()}"`, 'blue');
@@ -70,8 +90,9 @@ export default function UsuarioModal({ isOpen, onClose, actorRol, usuario }: Pro
         usuario: login.trim(),
         password: password.trim(),
         rol,
+        tipoUsuarioId: etiqueta,
       });
-      pushActividad(`Se creó el usuario "${nombre.trim()}" (${rolUsuarioLabels[rol]})`, 'green');
+      pushActividad(`Se creó el usuario "${nombre.trim()}" (${tiposUsuario.find((t) => t.id === etiqueta)?.nombre ?? rolUsuarioLabels[rol]})`, 'green');
       toast(`Usuario "${nombre.trim()}" creado`);
     }
     onClose();
@@ -163,25 +184,50 @@ export default function UsuarioModal({ isOpen, onClose, actorRol, usuario }: Pro
                 />
               </div>
 
-              {rolesDisponibles.length > 1 && (
+              {esSuperusuarioProtegido ? (
                 <div>
                   <label className="block text-sm font-medium text-heading mb-1.5">Rol</label>
-                  <div className="flex rounded-lg border border-gray-200 overflow-hidden">
-                    {rolesDisponibles.map((r) => (
-                      <button
-                        key={r}
-                        onClick={() => setRol(r)}
-                        className={`flex-1 px-3 py-2.5 text-sm font-medium transition-colors duration-75 ${
-                          rol === r
-                            ? 'bg-brand-50 text-brand-700'
-                            : 'bg-white text-gray-500 hover:bg-gray-50'
-                        }`}
-                      >
-                        {rolUsuarioLabels[r]}
-                      </button>
-                    ))}
+                  <div className="px-3 py-2.5 rounded-lg border border-amber-200 bg-amber-50 text-sm text-amber-800">
+                    Superusuario — este rol no se puede reasignar desde aquí.
                   </div>
                 </div>
+              ) : rolesSeleccionables.length > 1 && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-heading mb-1.5">Rol</label>
+                    <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+                      {rolesSeleccionables.map((r) => (
+                        <button
+                          key={r}
+                          onClick={() => handleCambiarRol(r)}
+                          className={`flex-1 px-3 py-2.5 text-sm font-medium transition-colors duration-75 ${
+                            rol === r
+                              ? 'bg-brand-50 text-brand-700'
+                              : 'bg-white text-gray-500 hover:bg-gray-50'
+                          }`}
+                        >
+                          {rolUsuarioLabels[r]}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-heading mb-1.5">
+                      Etiqueta <span className="text-muted font-normal">(opcional)</span>
+                    </label>
+                    <select
+                      value={tipoUsuarioId}
+                      onChange={(e) => setTipoUsuarioId(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 bg-white"
+                    >
+                      <option value="">{rolUsuarioLabels[rol]} (genérico)</option>
+                      {tiposParaRol.map((t) => (
+                        <option key={t.id} value={t.id}>{t.nombre}</option>
+                      ))}
+                    </select>
+                  </div>
+                </>
               )}
 
               {error && <p className="text-sm text-red-600">{error}</p>}

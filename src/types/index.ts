@@ -207,6 +207,15 @@ export interface Ejemplo {
 
 export type RolUsuario = 'superusuario' | 'administrador' | 'cliente';
 
+// Etiqueta de rol personalizada (ej. "Soporte Técnico", "Docente") que el admin puede crear desde
+// "Gestionar roles" — hereda el nivel de permisos de Administrador o Cliente (nivelBase), no define
+// permisos propios. Superusuario no admite etiquetas personalizadas: es el único rol no-etiqueta.
+export interface TipoUsuario {
+  id: string;
+  nombre: string;
+  nivelBase: 'administrador' | 'cliente';
+}
+
 export type TemaPreferencia = 'claro' | 'oscuro' | 'sistema';
 
 export type EstadoUsuario = 'activo' | 'inactivo';
@@ -252,6 +261,9 @@ export interface Usuario {
   /** Permisos individuales asignados — si falta, se calculan por defecto según rol (y nivel de
    * plan si es cliente), ver permisosDefaultDe() en permisosCatalogo.ts. */
   permisos?: PermisoId[];
+  /** Etiqueta personalizada (ver TipoUsuario) que reemplaza el nombre del rol al mostrarlo — el
+   * control de acceso real sigue basado en `rol`, esto es solo la etiqueta visible. */
+  tipoUsuarioId?: string;
 }
 
 // Sesión activa — nunca guarda la contraseña

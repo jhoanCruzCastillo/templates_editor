@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import * as store from './store';
-import type { Sector, Plantilla, Ejemplo, ActividadReciente, ArchivoExcel, CatalogoExcelPlantilla, Usuario, FacturacionMock, SesionMentoria, PreguntaMentoria, CambioFicha, CampoCambio } from '../types';
+import type { Sector, Plantilla, Ejemplo, ActividadReciente, ArchivoExcel, CatalogoExcelPlantilla, Usuario, TipoUsuario, FacturacionMock, SesionMentoria, PreguntaMentoria, CambioFicha, CampoCambio } from '../types';
 
 interface AppState {
   sectores: Sector[];
@@ -10,6 +10,7 @@ interface AppState {
   excelCatalogos: Record<string, CatalogoExcelPlantilla>;
   excelEjemplos: Record<string, ArchivoExcel>;
   usuarios: Usuario[];
+  tiposUsuario: TipoUsuario[];
   facturacion: Record<string, FacturacionMock>;
   mentorias: SesionMentoria[];
   historialCambios: CambioFicha[];
@@ -46,6 +47,11 @@ interface AppState {
   updateUsuario: (id: string, data: Partial<Usuario>) => void;
   deleteUsuario: (id: string) => void;
 
+  // Tipos de usuario (etiquetas de rol personalizadas)
+  addTipoUsuario: (tipo: TipoUsuario) => void;
+  updateTipoUsuario: (id: string, data: Partial<TipoUsuario>) => void;
+  deleteTipoUsuario: (id: string) => void;
+
   // Facturación (datos de muestra)
   updateFacturacion: (usuarioId: string, data: Partial<FacturacionMock>) => void;
 
@@ -70,6 +76,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [excelCatalogos, setExcelCatalogos] = useState<Record<string, CatalogoExcelPlantilla>>(() => store.loadCatalogosExcel());
   const [excelEjemplos, setExcelEjemplos] = useState<Record<string, ArchivoExcel>>(() => store.loadExcelEjemplos());
   const [usuarios, setUsuarios] = useState<Usuario[]>(() => store.loadUsuarios());
+  const [tiposUsuario, setTiposUsuario] = useState<TipoUsuario[]>(() => store.loadTiposUsuario());
   const [facturacion, setFacturacion] = useState<Record<string, FacturacionMock>>(() => store.loadFacturacion());
   const [mentorias, setMentorias] = useState<SesionMentoria[]>(() => store.loadMentorias());
   const [historialCambios, setHistorialCambios] = useState<CambioFicha[]>(() => store.loadHistorialCambios());
@@ -338,6 +345,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  // --- Tipos de usuario (etiquetas de rol personalizadas) ---
+
+  const addTipoUsuario = useCallback((tipo: TipoUsuario) => {
+    setTiposUsuario((prev) => {
+      const next = [...prev, tipo];
+      store.saveTiposUsuario(next);
+      return next;
+    });
+  }, []);
+
+  const updateTipoUsuario = useCallback((id: string, data: Partial<TipoUsuario>) => {
+    setTiposUsuario((prev) => {
+      const next = prev.map((t) => (t.id === id ? { ...t, ...data } : t));
+      store.saveTiposUsuario(next);
+      return next;
+    });
+  }, []);
+
+  const deleteTipoUsuario = useCallback((id: string) => {
+    setTiposUsuario((prev) => {
+      const next = prev.filter((t) => t.id !== id);
+      store.saveTiposUsuario(next);
+      return next;
+    });
+    // Los usuarios que tenían esta etiqueta vuelven a mostrar el nombre genérico del rol.
+    setUsuarios((prev) => {
+      const next = prev.map((u) => (u.tipoUsuarioId === id ? { ...u, tipoUsuarioId: undefined } : u));
+      store.saveUsuarios(next);
+      return next;
+    });
+  }, []);
+
   // --- Facturación (datos de muestra) ---
 
   const updateFacturacion = useCallback((usuarioId: string, data: Partial<FacturacionMock>) => {
@@ -413,6 +452,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         excelCatalogos,
         excelEjemplos,
         usuarios,
+        tiposUsuario,
         facturacion,
         mentorias,
         historialCambios,
@@ -434,6 +474,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         addUsuario,
         updateUsuario,
         deleteUsuario,
+        addTipoUsuario,
+        updateTipoUsuario,
+        deleteTipoUsuario,
         updateFacturacion,
         inscribirseAMentoria,
         enviarPreguntaMentoria,

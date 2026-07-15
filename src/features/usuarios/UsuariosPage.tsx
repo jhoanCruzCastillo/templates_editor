@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faPen, faTrash, faShieldHalved } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faPen, faTrash, faShieldHalved, faTags } from '@fortawesome/free-solid-svg-icons';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../lib/auth';
-import { useUsuarios } from '../../lib/hooks';
+import { useUsuarios, useTiposUsuario } from '../../lib/hooks';
 import { useAppContext } from '../../lib/context';
 import { useToast } from '../../components/Toast';
 import ConfirmModal from '../../components/ConfirmModal';
@@ -12,6 +12,7 @@ import { rolesGestionablesPor } from '../../lib/permisos';
 import { numeroNivelDe } from '../../lib/planAcceso';
 import UsuarioModal from './UsuarioModal';
 import PermisosUsuarioModal from './PermisosUsuarioModal';
+import GestionarRolesModal from './GestionarRolesModal';
 import type { Usuario, RolUsuario } from '../../types';
 
 const rolBadge: Record<RolUsuario, string> = {
@@ -23,9 +24,11 @@ const rolBadge: Record<RolUsuario, string> = {
 export default function UsuariosPage() {
   const { sesion } = useAuth();
   const usuarios = useUsuarios();
+  const tiposUsuario = useTiposUsuario();
   const { facturacion, deleteUsuario, pushActividad } = useAppContext();
   const { toast } = useToast();
   const [showModal, setShowModal] = useState(false);
+  const [showRolesModal, setShowRolesModal] = useState(false);
   const [editTarget, setEditTarget] = useState<Usuario | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Usuario | null>(null);
   const [permisosTarget, setPermisosTarget] = useState<Usuario | null>(null);
@@ -70,16 +73,25 @@ export default function UsuariosPage() {
             </p>
           </div>
         </div>
-        <button
-          onClick={() => {
-            setEditTarget(null);
-            setShowModal(true);
-          }}
-          className="px-5 py-2.5 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 transition-colors flex items-center gap-2"
-        >
-          <FontAwesomeIcon icon={faPlus} className="w-3.5 h-3.5" />
-          Nuevo usuario
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowRolesModal(true)}
+            className="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2"
+          >
+            <FontAwesomeIcon icon={faTags} className="w-3.5 h-3.5" />
+            Gestionar roles
+          </button>
+          <button
+            onClick={() => {
+              setEditTarget(null);
+              setShowModal(true);
+            }}
+            className="px-5 py-2.5 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 transition-colors flex items-center gap-2"
+          >
+            <FontAwesomeIcon icon={faPlus} className="w-3.5 h-3.5" />
+            Nuevo usuario
+          </button>
+        </div>
       </motion.div>
 
       <motion.div
@@ -110,7 +122,7 @@ export default function UsuariosPage() {
                 <td className="px-4 py-4 text-sm text-gray-600 font-mono">{u.usuario}</td>
                 <td className="px-4 py-4">
                   <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${rolBadge[u.rol]}`}>
-                    {rolUsuarioLabels[u.rol]}
+                    {tiposUsuario.find((t) => t.id === u.tipoUsuarioId)?.nombre ?? rolUsuarioLabels[u.rol]}
                   </span>
                 </td>
                 <td className="px-6 py-4">
@@ -161,6 +173,8 @@ export default function UsuariosPage() {
         actorRol={actorRol}
         usuario={editTarget}
       />
+
+      <GestionarRolesModal isOpen={showRolesModal} onClose={() => setShowRolesModal(false)} />
 
       <PermisosUsuarioModal
         isOpen={!!permisosTarget}

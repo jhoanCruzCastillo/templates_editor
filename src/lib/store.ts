@@ -4,7 +4,7 @@ import { ejemplos as ejemplosSeed } from '../data/ejemplos';
 import { actividadReciente as actividadSeed } from '../data/actividad';
 import { usuarios as usuariosSeed } from '../data/usuarios';
 import { mentoriasSeed } from '../data/mentorias';
-import type { Sector, Plantilla, Ejemplo, ActividadReciente, Usuario, Sesion, CatalogoExcelPlantilla, ArchivoExcel, FacturacionMock, SesionMentoria, CambioFicha } from '../types';
+import type { Sector, Plantilla, Ejemplo, ActividadReciente, Usuario, TipoUsuario, Sesion, CatalogoExcelPlantilla, ArchivoExcel, FacturacionMock, SesionMentoria, CambioFicha } from '../types';
 import type { DocumentoJSON } from './schemaExport';
 
 const KEYS = {
@@ -18,6 +18,7 @@ const KEYS = {
   excelCatalogo: 'pf_excel_catalogo',
   excelEjemplos: 'pf_excel_ejemplos',
   usuarios: 'pf_usuarios',
+  tiposUsuario: 'pf_tipos_usuario',
   facturacion: 'pf_facturacion',
   mentorias: 'pf_mentorias',
   historialCambios: 'pf_historial_cambios',
@@ -176,6 +177,16 @@ export function loadUsuarios(): Usuario[] {
 
 export function saveUsuarios(data: Usuario[]): void {
   write(KEYS.usuarios, data);
+}
+
+// --- Tipos de usuario (etiquetas de rol personalizadas) ---
+
+export function loadTiposUsuario(): TipoUsuario[] {
+  return read<TipoUsuario[]>(KEYS.tiposUsuario, []);
+}
+
+export function saveTiposUsuario(data: TipoUsuario[]): void {
+  write(KEYS.tiposUsuario, data);
 }
 
 // --- Mentorías grupales ---

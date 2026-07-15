@@ -2,27 +2,41 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faXmark, faCheck, faFileCirclePlus } from '@fortawesome/free-solid-svg-icons';
-import { useSectores } from '../../lib/hooks';
+import { faXmark, faCheck, faFileCirclePlus, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
+import { useSectores, useEstadoEntrenamiento } from '../../lib/hooks';
 import { useAppContext } from '../../lib/context';
+import { useAuth } from '../../lib/auth';
 import { useToast } from '../../components/Toast';
 import { generateId } from '../../lib/store';
 import { instrumentoLabels } from '../../lib/icons';
+import { cuentaEfectivaDe } from '../../lib/permisos';
 import FichaOficialSelector from './FichaOficialSelector';
 import type { TipoInstrumento } from '../../types';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  /** Si se abre desde el catálogo "Fichas oficiales" con una plantilla ya elegida, se salta la selección de sector/tipo/ficha */
+  presetPlantillaId?: string;
 }
 
 const tipos: TipoInstrumento[] = ['formato', 'perfil', 'ficha_tecnica', 'ioarr'];
 
-export default function NuevaFichaClienteModal({ isOpen, onClose }: Props) {
+export default function NuevaFichaClienteModal({ isOpen, onClose, presetPlantillaId }: Props) {
   const sectores = useSectores();
-  const { plantillas, excelCatalogos, addEjemplo, setExcelEjemplo, pushActividad } = useAppContext();
+  const { plantillas, usuarios, ejemplos, excelCatalogos, addEjemplo, setExcelEjemplo, pushActividad } = useAppContext();
+  const { sesion } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { esNivel0, vencido, limiteFichas } = useEstadoEntrenamiento();
+
+  const cuentaId = sesion ? cuentaEfectivaDe(usuarios, sesion) : '';
+  const misFichasCount = useMemo(
+    () => ejemplos.filter((e) => e.propietarioId === cuentaId).length,
+    [ejemplos, cuentaId],
+  );
+  const limiteAlcanzado = misFichasCount >= limiteFichas;
+  const bloqueado = vencido || limiteAlcanzado;
 
   const [sectorId, setSectorId] = useState('');
   const [tipo, setTipo] = useState<TipoInstrumento>('ficha_tecnica');
@@ -39,21 +53,36 @@ export default function NuevaFichaClienteModal({ isOpen, onClose }: Props) {
       setCodigo('');
       setNombre('');
       setDescripcion('');
+      return;
     }
-  }, [isOpen]);
+    if (presetPlantillaId) {
+      const preset = plantillas.find((p) => p.id === presetPlantillaId);
+      if (preset) {
+        setSectorId(preset.sectorId);
+        setTipo(preset.instrumento);
+        setSelectedPlantillaId(preset.id);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, presetPlantillaId]);
 
-  // Al cambiar sector o tipo, la selección de ficha oficial ya no aplica
+  // Al cambiar sector o tipo, la selección de ficha oficial ya no aplica — salvo que la selección
+  // actual siga siendo válida para el nuevo sector/tipo (caso del preset aplicado más arriba).
   useEffect(() => {
-    setSelectedPlantillaId('');
+    setSelectedPlantillaId((prev) => {
+      const prevPlantilla = plantillas.find((p) => p.id === prev);
+      return prevPlantilla && prevPlantilla.sectorId === sectorId && prevPlantilla.instrumento === tipo ? prev : '';
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sectorId, tipo]);
 
   const plantillasCoincidentes = useMemo(
-    () => plantillas.filter((p) => p.sectorId === sectorId && p.instrumento === tipo),
-    [plantillas, sectorId, tipo],
+    () => plantillas.filter((p) => p.sectorId === sectorId && p.instrumento === tipo && (!esNivel0 || p.disponibleNivel0)),
+    [plantillas, sectorId, tipo, esNivel0],
   );
 
   const handleSubmit = () => {
-    if (!selectedPlantillaId || !nombre.trim()) return;
+    if (!selectedPlantillaId || !nombre.trim() || !sesion || bloqueado) return;
     const plantilla = plantillas.find((p) => p.id === selectedPlantillaId);
     if (!plantilla) return;
 
@@ -73,6 +102,8 @@ export default function NuevaFichaClienteModal({ isOpen, onClose }: Props) {
       plantillaId: plantilla.id,
       activo: false,
       valores: {},
+      propietarioId: cuentaEfectivaDe(usuarios, sesion),
+      creadoPorUsuarioId: sesion.usuarioId,
     });
     setExcelEjemplo(nuevoId, {
       id: generateId(),
@@ -124,6 +155,16 @@ export default function NuevaFichaClienteModal({ isOpen, onClose }: Props) {
             </div>
 
             <div className="px-6 pb-6 space-y-4">
+              {bloqueado && (
+                <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs">
+                  <FontAwesomeIcon icon={faTriangleExclamation} className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                  {vencido
+                    ? 'Tu plan de entrenamiento venció — ya no puedes crear nuevos ejercicios.'
+                    : esNivel0
+                      ? `Alcanzaste el límite de ${limiteFichas} ejercicios simultáneos de tu plan Pedagógico. Elimina uno desde "Mis fichas" para crear otro.`
+                      : `Alcanzaste el límite de ${limiteFichas} plantillas simultáneas de tu plan. Elimina una desde "Mis fichas" o compra "Plantilla adicional" en Facturación.`}
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-heading mb-1.5">
                   Sector <span className="text-red-500">*</span>
@@ -216,7 +257,7 @@ export default function NuevaFichaClienteModal({ isOpen, onClose }: Props) {
                   </button>
                   <button
                     onClick={handleSubmit}
-                    disabled={!selectedPlantillaId || !nombre.trim()}
+                    disabled={!selectedPlantillaId || !nombre.trim() || bloqueado}
                     className="px-5 py-2.5 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-75 flex items-center gap-2"
                   >
                     <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5" />

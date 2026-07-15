@@ -122,6 +122,9 @@ export interface Plantilla {
   /** Ruta pública (bajo /fichas_oficiales) del archivo Excel oficial que se asigna automáticamente
    * al catálogo de esta plantilla la primera vez que se carga la app — ver AppProvider en context.tsx */
   archivoDefaultUrl?: string;
+  /** true = forma parte del catálogo curado de "ejercicios de práctica" del plan Nivel 0
+   * (Pedagógico) — debe tener al menos un Ejemplo de referencia (solucionario) cargado por el admin */
+  disponibleNivel0?: boolean;
 }
 
 // Bloque de contenido de un apartado de Perfil
@@ -149,6 +152,8 @@ export interface Subseccion {
   codigo: string;
   nombre: string;
   campos: Campo[];
+  /** Guía de cómo llenar esta subsección, autorada por el admin — se muestra al cliente vía el botón "?" */
+  ayuda?: string;
 }
 
 export interface CapturaCampo {
@@ -164,6 +169,8 @@ export interface Campo {
   etiqueta: string;
   tipo: TipoCampo;
   editable: boolean;
+  /** El cliente debe llenarlo obligatoriamente — lo usa el validador del lado cliente */
+  requerido?: boolean;
   descripcion?: string;
   fuenteCatalogo?: string;
   cadena?: string[];
@@ -185,11 +192,24 @@ export interface Ejemplo {
   /** Solo relevante si la plantilla es IOARR: qué tipología(s) representa ESTE caso puntual
    * (a diferencia de Plantilla.tipologiasIoarr, que describe la cobertura del documento completo). */
   tipologiasIoarr?: TipologiaIoarr[];
+  /** usuarioId del cliente titular dueño de esta ficha — solo presente en fichas creadas por un
+   * cliente ("Mis fichas"). Los ejemplos que arma el admin como caso de referencia para la IA no
+   * llevan este campo. Un colaborador crea/ve fichas bajo el `cuentaClienteId` de su titular. */
+  propietarioId?: string;
+  /** usuarioId específico (titular o colaborador) que creó esta ficha — a diferencia de
+   * `propietarioId` (la cuenta), esto identifica a la persona dentro del equipo. Si falta (fichas
+   * creadas antes de que existieran colaboradores), se asume que la creó el titular. */
+  creadoPorUsuarioId?: string;
+  /** true = visible para todo el equipo de la cuenta, no solo para quien la creó. Solo el titular
+   * puede activarlo (ver puedeVerFicha en permisos.ts). */
+  compartida?: boolean;
 }
 
 export type RolUsuario = 'superusuario' | 'administrador' | 'cliente';
 
 export type TemaPreferencia = 'claro' | 'oscuro' | 'sistema';
+
+export type EstadoUsuario = 'activo' | 'inactivo';
 
 export interface Usuario {
   id: string;
@@ -199,6 +219,9 @@ export interface Usuario {
   rol: RolUsuario;
   apodo?: string;
   tema?: TemaPreferencia;
+  estado?: EstadoUsuario;
+  /** Solo presente en colaboradores creados como "usuario adicional" — apunta al `usuarioId` del cliente titular de la cuenta. */
+  cuentaClienteId?: string;
 }
 
 // Sesión activa — nunca guarda la contraseña
@@ -219,17 +242,57 @@ export interface FacturaMock {
   estado: EstadoFactura;
 }
 
+// Catálogo de planes por nivel (Nivel 0 Pedagógico, Nivel 1 Profesional, Nivel 2 Premium).
+export interface Plan {
+  id: string;
+  numeroNivel: number;
+  nombre: string;
+  precio: number;
+  periodicidad: string;
+  features: string[];
+  /** Cantidad base de fichas simultáneas permitidas (ejercicios en Nivel 0, proyectos reales en Nivel 1+),
+   * antes de sumar el add-on "Plantilla adicional". */
+  limiteFichasBase: number;
+  /** Cantidad de usuarios (titular + colaboradores) incluidos en el plan, antes de sumar el add-on
+   * "Usuario adicional". Nivel 0 y 1 solo incluyen al titular (1); Nivel 2 incluye hasta 3. */
+  limiteUsuariosBase: number;
+}
+
+// Servicio extra que se contrata por separado del plan (se paga aparte, cantidad variable).
+export interface AddOn {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  precio: number;
+  /** true si se cobra cada periodo de facturación (suma al total mensual del plan); false si es un cargo único (ej. una consultoría puntual). */
+  recurrente: boolean;
+  /** Números de nivel de plan que pueden contratar este add-on — si no está, aplica a cualquier nivel. */
+  nivelesDisponibles?: number[];
+}
+
+// Métodos de pago ofrecidos — tarjeta vía Stripe, billeteras locales (Yape/Plin) y pasarelas
+// peruanas (Mercado Pago/360Pay). Ver memoria de proyecto sobre por qué se eligió esta combinación.
+export type MetodoPago = 'tarjeta' | 'yape' | 'plin' | 'mercado_pago' | '360pay';
+
 // Datos de facturación de muestra — no hay pasarela de pago real ni backend;
 // esto solo alimenta la UI de Ajustes > Facturación con datos ilustrativos.
 export interface FacturacionMock {
+  planId: string;
   plan: string;
   precio: string;
   periodicidad: string;
   cancelada: boolean;
   fechaRenovacion: string;
+  /** ISO date — cuándo se activó el plan actual. Solo se usa para calcular vencimiento del Nivel 0 (4 semanas). */
+  fechaInicioPlan?: string;
+  metodoPago: MetodoPago;
   tarjetaMarca: string;
   tarjetaUltimos4: string;
+  /** Número asociado a la billetera — solo si metodoPago es 'yape' o 'plin' */
+  telefonoPago?: string;
   facturas: FacturaMock[];
+  /** Add-ons contratados: id del add-on → cantidad */
+  addons: Record<string, number>;
 }
 
 export interface ActividadReciente {
@@ -252,4 +315,19 @@ export interface CatalogoExcelPlantilla {
   archivos: ArchivoExcel[];
   /** Id del archivo actualmente asignado a la plantilla (se previsualiza en el editor) */
   asignadoId?: string;
+}
+
+// Sesión de mentoría grupal en vivo (ventaja del plan Nivel 1+) — prototipo sin integración real
+// de video ni calendario, ver src/data/mentorias.ts.
+export interface SesionMentoria {
+  id: string;
+  tema: string;
+  mentor: string;
+  /** ISO datetime de inicio */
+  fechaISO: string;
+  cuposTotales: number;
+  /** cuentaId (usuarioId del titular, ver cuentaEfectivaDe) de quienes se inscribieron */
+  inscritos: string[];
+  /** Enlace de la videollamada (Zoom, Google Meet, etc.) — de muestra, no lleva a una reunión real */
+  linkReunion: string;
 }

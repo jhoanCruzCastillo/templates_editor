@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import * as store from './store';
-import type { Sector, Plantilla, Ejemplo, ActividadReciente, ArchivoExcel, CatalogoExcelPlantilla, Usuario, FacturacionMock } from '../types';
+import type { Sector, Plantilla, Ejemplo, ActividadReciente, ArchivoExcel, CatalogoExcelPlantilla, Usuario, FacturacionMock, SesionMentoria } from '../types';
 
 interface AppState {
   sectores: Sector[];
@@ -11,6 +11,7 @@ interface AppState {
   excelEjemplos: Record<string, ArchivoExcel>;
   usuarios: Usuario[];
   facturacion: Record<string, FacturacionMock>;
+  mentorias: SesionMentoria[];
 
   // Sectores
   addSector: (sector: Sector) => void;
@@ -47,6 +48,9 @@ interface AppState {
   // Facturación (datos de muestra)
   updateFacturacion: (usuarioId: string, data: Partial<FacturacionMock>) => void;
 
+  // Mentorías grupales
+  inscribirseAMentoria: (sesionId: string, cuentaId: string) => void;
+
   // Métricas
   getMetricas: () => { totalSectores: number; totalPlantillas: number; totalEjemplos: number };
 }
@@ -62,6 +66,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [excelEjemplos, setExcelEjemplos] = useState<Record<string, ArchivoExcel>>(() => store.loadExcelEjemplos());
   const [usuarios, setUsuarios] = useState<Usuario[]>(() => store.loadUsuarios());
   const [facturacion, setFacturacion] = useState<Record<string, FacturacionMock>>(() => store.loadFacturacion());
+  const [mentorias, setMentorias] = useState<SesionMentoria[]>(() => store.loadMentorias());
 
   // --- Sectores ---
 
@@ -338,6 +343,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  // --- Mentorías grupales ---
+
+  const inscribirseAMentoria = useCallback((sesionId: string, cuentaId: string) => {
+    setMentorias((prev) => {
+      const next = prev.map((m) => {
+        if (m.id !== sesionId || m.inscritos.includes(cuentaId) || m.inscritos.length >= m.cuposTotales) return m;
+        return { ...m, inscritos: [...m.inscritos, cuentaId] };
+      });
+      store.saveMentorias(next);
+      return next;
+    });
+  }, []);
+
   // --- Métricas ---
 
   const getMetricas = useCallback(() => {
@@ -359,6 +377,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         excelEjemplos,
         usuarios,
         facturacion,
+        mentorias,
         addSector,
         updateSector,
         deleteSector,
@@ -378,6 +397,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         updateUsuario,
         deleteUsuario,
         updateFacturacion,
+        inscribirseAMentoria,
         getMetricas,
       }}
     >

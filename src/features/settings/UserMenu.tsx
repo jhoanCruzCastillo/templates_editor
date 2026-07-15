@@ -5,7 +5,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGear, faHeadset, faCircleInfo, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../../lib/auth';
+import { useAppContext } from '../../lib/context';
+import { useFacturacion } from '../../lib/hooks';
+import { cuentaEfectivaDe } from '../../lib/permisos';
 import { rolUsuarioLabels } from '../../lib/icons';
+import { planes } from '../../data/planes';
 import SimpleInfoModal from '../../components/SimpleInfoModal';
 import SettingsModal from './SettingsModal';
 import type { RolUsuario } from '../../types';
@@ -27,6 +31,10 @@ function iniciales(nombre: string): string {
 
 export default function UserMenu() {
   const { sesion, logout } = useAuth();
+  const { usuarios } = useAppContext();
+  const cuentaId = sesion?.rol === 'cliente' ? cuentaEfectivaDe(usuarios, sesion) : '';
+  const facturacion = useFacturacion(cuentaId);
+  const plan = planes.find((p) => p.id === facturacion.planId);
   const navigate = useNavigate();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [showAjustes, setShowAjustes] = useState(false);
@@ -113,7 +121,17 @@ export default function UserMenu() {
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-sm font-medium truncate text-white">{sesion.nombre}</div>
-          <div className={`text-[11px] ${rolColor[sesion.rol]}`}>{rolUsuarioLabels[sesion.rol]}</div>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className={`text-[11px] shrink-0 ${rolColor[sesion.rol]}`}>{rolUsuarioLabels[sesion.rol]}</span>
+            {sesion.rol === 'cliente' && plan && (
+              <span
+                className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/70 truncate"
+                title={`Plan Nivel ${plan.numeroNivel} — ${plan.nombre}`}
+              >
+                Nivel {plan.numeroNivel}
+              </span>
+            )}
+          </div>
         </div>
       </button>
 

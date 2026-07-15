@@ -1,6 +1,9 @@
 import { useMemo } from 'react';
 import { useAppContext } from './context';
+import { useAuth } from './auth';
 import { generarFacturacionDefault } from './store';
+import { cuentaEfectivaDe } from './permisos';
+import { esPlanEntrenamiento, entrenamientoVencido, diasRestantesEntrenamiento, limiteFichasSimultaneas, numeroNivelDe } from './planAcceso';
 
 export function useSectores() {
   const { sectores } = useAppContext();
@@ -15,6 +18,11 @@ export function useSector(id: string) {
 export function usePlantillasBySector(sectorId: string) {
   const { plantillas } = useAppContext();
   return useMemo(() => plantillas.filter((p) => p.sectorId === sectorId), [plantillas, sectorId]);
+}
+
+export function usePlantillas() {
+  const { plantillas } = useAppContext();
+  return plantillas;
 }
 
 export function usePlantilla(id: string) {
@@ -57,7 +65,29 @@ export function useFacturacion(usuarioId: string) {
   return useMemo(() => facturacion[usuarioId] ?? generarFacturacionDefault(), [facturacion, usuarioId]);
 }
 
+export function useMentorias() {
+  const { mentorias } = useAppContext();
+  return mentorias;
+}
+
 export function useMetricas() {
   const { getMetricas } = useAppContext();
   return useMemo(() => getMetricas(), [getMetricas]);
+}
+
+// Estado del plan del cliente/colaborador en sesión (nivel, vigencia del Nivel 0, cupo de fichas
+// simultáneas) — la facturación vive bajo la cuenta del titular, no de cada colaborador (ver
+// cuentaEfectivaDe).
+export function useEstadoEntrenamiento() {
+  const { usuarios } = useAppContext();
+  const { sesion } = useAuth();
+  const cuentaId = sesion ? cuentaEfectivaDe(usuarios, sesion) : '';
+  const facturacion = useFacturacion(cuentaId);
+  return useMemo(() => ({
+    numeroNivel: numeroNivelDe(facturacion.planId),
+    esNivel0: esPlanEntrenamiento(facturacion.planId),
+    vencido: entrenamientoVencido(facturacion),
+    diasRestantes: diasRestantesEntrenamiento(facturacion),
+    limiteFichas: limiteFichasSimultaneas(facturacion),
+  }), [facturacion]);
 }

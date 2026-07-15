@@ -12,6 +12,8 @@ import PlantillaEditPage from '../features/editor/PlantillaEditPage';
 import PlantillaPerfilPage from '../features/editor/PlantillaPerfilPage';
 import UsuariosPage from '../features/usuarios/UsuariosPage';
 import ClienteFichaEditPage from '../features/cliente/ClienteFichaEditPage';
+import FichasOficialesPage from '../features/cliente/FichasOficialesPage';
+import MentoriasPage from '../features/cliente/MentoriasPage';
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { sesion } = useAuth();
@@ -82,6 +84,14 @@ const router = createBrowserRouter([
       {
         path: 'mis-fichas/:ejemploId',
         element: <RequireCliente><ClienteFichaEditPage /></RequireCliente>,
+      },
+      {
+        path: 'fichas-oficiales',
+        element: <RequireCliente><FichasOficialesPage /></RequireCliente>,
+      },
+      {
+        path: 'mentorias',
+        element: <RequireCliente><MentoriasPage /></RequireCliente>,
       },
     ],
   },

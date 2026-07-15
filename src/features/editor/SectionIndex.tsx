@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGear } from '@fortawesome/free-solid-svg-icons';
+import { faGear, faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import type { Seccion } from '../../types';
 
 interface Props {
@@ -10,9 +10,11 @@ interface Props {
   onAddSection?: () => void;
   /** Si se pasa, aparece un ícono de engranaje para asignar la hoja de Excel de cada sección */
   onEditHoja?: (seccionId: string) => void;
+  /** Cantidad de campos pendientes/inválidos por sección — si se pasa, se muestra un indicador de avance (solo modo cliente) */
+  erroresPorSeccion?: Record<string, number>;
 }
 
-export default function SectionIndex({ secciones, activeSeccionId, onSeccionClick, showAddButton, onAddSection, onEditHoja }: Props) {
+export default function SectionIndex({ secciones, activeSeccionId, onSeccionClick, showAddButton, onAddSection, onEditHoja, erroresPorSeccion }: Props) {
   return (
     <div className="flex flex-col h-full">
       <h3 className="text-xs font-semibold uppercase tracking-widest text-muted mb-3 px-2">
@@ -41,6 +43,18 @@ export default function SectionIndex({ secciones, activeSeccionId, onSeccionClic
                 {seccion.numero}
               </span>
               <span className="truncate leading-tight flex-1">{seccion.nombre}</span>
+              {erroresPorSeccion && (
+                erroresPorSeccion[seccion.id] > 0 ? (
+                  <span
+                    title={`${erroresPorSeccion[seccion.id]} campo(s) pendiente(s)`}
+                    className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 shrink-0"
+                  >
+                    {erroresPorSeccion[seccion.id]}
+                  </span>
+                ) : (
+                  <FontAwesomeIcon icon={faCircleCheck} className="w-3.5 h-3.5 text-brand-500 shrink-0" title="Sección completa" />
+                )
+              )}
               {onEditHoja && (
                 <button
                   onClick={(e) => { e.stopPropagation(); onEditHoja(seccion.id); }}

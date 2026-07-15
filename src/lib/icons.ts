@@ -37,8 +37,13 @@ import {
   faUmbrellaBeach,
   faUserGear,
   type IconDefinition,
+  faCreditCard,
+  faMobileScreenButton,
+  faQrcode,
+  faCartShopping,
+  faMoneyBillTransfer,
 } from '@fortawesome/free-solid-svg-icons';
-import type { TipoCampo, TipoColumna, SubtipoTabla, TipoInstrumento, TipologiaIoarr, RolUsuario } from '../types';
+import type { TipoCampo, TipoColumna, SubtipoTabla, TipoInstrumento, TipologiaIoarr, RolUsuario, MetodoPago } from '../types';
 
 export const sectorIcons: Record<string, IconDefinition> = {
   faHospital,
@@ -186,6 +191,22 @@ export const subtipoTablaLabels: Record<SubtipoTabla, string> = {
   filas_dinamicas: 'Filas dinámicas',
   matriz_por_periodos: 'Columnas dinámicas',
   jerarquica: 'Jerárquica',
+};
+
+export const metodoPagoIcons: Record<MetodoPago, IconDefinition> = {
+  tarjeta: faCreditCard,
+  yape: faMobileScreenButton,
+  plin: faQrcode,
+  mercado_pago: faCartShopping,
+  '360pay': faMoneyBillTransfer,
+};
+
+export const metodoPagoLabels: Record<MetodoPago, string> = {
+  tarjeta: 'Tarjeta (Stripe)',
+  yape: 'Yape',
+  plin: 'Plin',
+  mercado_pago: 'Mercado Pago',
+  '360pay': '360Pay',
 };
 
 export {

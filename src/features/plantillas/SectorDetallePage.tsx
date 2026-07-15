@@ -7,7 +7,7 @@ import Breadcrumbs from '../../components/Breadcrumbs';
 import PlantillaTable from './PlantillaTable';
 import NuevaPlantillaModal from './NuevaPlantillaModal';
 import ImportarJsonModal from './ImportarJsonModal';
-import { useSector, usePlantillasBySector } from '../../lib/hooks';
+import { useSector, usePlantillasBySector, usePlantillas, useSectores } from '../../lib/hooks';
 import { useAppContext } from '../../lib/context';
 import { useAuth } from '../../lib/auth';
 import { useToast } from '../../components/Toast';
@@ -19,6 +19,8 @@ export default function SectorDetallePage() {
   const { sectorId } = useParams<{ sectorId: string }>();
   const sector = useSector(sectorId!);
   const plantillas = usePlantillasBySector(sectorId!);
+  const todasPlantillas = usePlantillas();
+  const todosSectores = useSectores();
   const { addPlantilla, pushActividad } = useAppContext();
   const { sesion } = useAuth();
   const esSuperusuario = sesion?.rol === 'superusuario';
@@ -133,7 +135,11 @@ export default function SectorDetallePage() {
         </div>
       </motion.div>
 
-      <PlantillaTable plantillas={plantillas} sectorId={sectorId!} />
+      <PlantillaTable
+        plantillas={plantillas}
+        sectorId={sectorId!}
+        todasFichasTecnicas={sector.tipoSector === 'General' ? { plantillas: todasPlantillas, sectores: todosSectores } : undefined}
+      />
 
       <NuevaPlantillaModal
         isOpen={showModal}

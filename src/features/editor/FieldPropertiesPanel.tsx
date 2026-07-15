@@ -160,6 +160,33 @@ export default function FieldPropertiesPanel({ campo, autoFocusEtiqueta, ejemplo
         </div>
       </div>
 
+      {/* Obligatoriedad — solo tiene sentido si el cliente lo va a llenar */}
+      {campo.editable && !isTable && (
+        <div>
+          <label className="block text-xs font-medium text-heading mb-1.5">
+            Obligatorio para el cliente
+          </label>
+          <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+            <button
+              onClick={() => update({ requerido: false })}
+              className={`flex-1 px-4 py-2 text-sm font-medium transition-colors duration-75 ${
+                !campo.requerido ? 'bg-brand-50 text-brand-600' : 'bg-white text-gray-400'
+              }`}
+            >
+              No
+            </button>
+            <button
+              onClick={() => update({ requerido: true })}
+              className={`flex-1 px-4 py-2 text-sm font-medium transition-colors duration-75 ${
+                campo.requerido ? 'bg-brand-50 text-brand-600' : 'bg-white text-gray-400'
+              }`}
+            >
+              Sí
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Descripción */}
       <div>
         <label className="block text-xs font-medium text-heading mb-1.5">Descripción / ayuda</label>

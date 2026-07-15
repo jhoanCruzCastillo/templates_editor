@@ -6,11 +6,16 @@ import { motion } from 'framer-motion';
 import { instrumentoLabels, tipologiaIoarrLabels } from '../../lib/icons';
 import InstrumentoTabs from './InstrumentoTabs';
 import ExcelCatalogModal from './ExcelCatalogModal';
-import type { Plantilla, TipoInstrumento, TipologiaIoarr } from '../../types';
+import FichasTecnicasAgrupadas from './FichasTecnicasAgrupadas';
+import PracticaToggle from './PracticaToggle';
+import type { Plantilla, Sector, TipoInstrumento, TipologiaIoarr } from '../../types';
 
 interface Props {
   plantillas: Plantilla[];
   sectorId: string;
+  /** Solo en el sector "Formatos Generales": lista completa de plantillas/sectores del sistema,
+   * para mostrar TODAS las fichas técnicas (agrupadas por sector) en vez de solo las de este sector. */
+  todasFichasTecnicas?: { plantillas: Plantilla[]; sectores: Sector[] };
 }
 
 const badgeClasses: Record<TipoInstrumento, string> = {
@@ -23,7 +28,7 @@ const badgeClasses: Record<TipoInstrumento, string> = {
 const tabOrder: TipoInstrumento[] = ['formato', 'ioarr', 'ficha_tecnica', 'perfil'];
 type FiltroTipologia = 'todas' | TipologiaIoarr;
 
-export default function PlantillaTable({ plantillas, sectorId }: Props) {
+export default function PlantillaTable({ plantillas, sectorId, todasFichasTecnicas }: Props) {
   const [excelPlantillaId, setExcelPlantillaId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TipoInstrumento>(
     () => tabOrder.find((t) => plantillas.some((p) => p.instrumento === t)) ?? 'formato',
@@ -50,7 +55,8 @@ export default function PlantillaTable({ plantillas, sectorId }: Props) {
       ? `/sectores/${sectorId}/plantilla/${p.id}/perfil`
       : `/sectores/${sectorId}/plantilla/${p.id}/editar`;
 
-  const excelPlantilla = plantillas.find((p) => p.id === excelPlantillaId) ?? null;
+  const vistaAgrupada = activeTab === 'ficha_tecnica' && todasFichasTecnicas;
+  const excelPlantilla = (vistaAgrupada ? todasFichasTecnicas.plantillas : plantillas).find((p) => p.id === excelPlantillaId) ?? null;
 
   return (
     <motion.div
@@ -80,6 +86,13 @@ export default function PlantillaTable({ plantillas, sectorId }: Props) {
         </div>
       )}
 
+      {vistaAgrupada ? (
+        <FichasTecnicasAgrupadas
+          plantillas={todasFichasTecnicas.plantillas}
+          sectores={todasFichasTecnicas.sectores}
+          onGestionarExcel={setExcelPlantillaId}
+        />
+      ) : (
       <table className="w-full">
         <thead>
           <tr className="border-b border-gray-100">
@@ -87,6 +100,7 @@ export default function PlantillaTable({ plantillas, sectorId }: Props) {
             <th className="text-left text-[11px] font-semibold uppercase tracking-wider text-muted px-4 py-4">Nombre</th>
             <th className="text-left text-[11px] font-semibold uppercase tracking-wider text-muted px-4 py-4">Secciones</th>
             <th className="text-left text-[11px] font-semibold uppercase tracking-wider text-muted px-4 py-4">Ejemplos</th>
+            <th className="text-left text-[11px] font-semibold uppercase tracking-wider text-muted px-4 py-4">Práctica</th>
             <th className="text-left text-[11px] font-semibold uppercase tracking-wider text-muted px-4 py-4">Actualizado</th>
             <th className="text-center text-[11px] font-semibold uppercase tracking-wider text-muted px-6 py-4">Acciones</th>
           </tr>
@@ -127,6 +141,9 @@ export default function PlantillaTable({ plantillas, sectorId }: Props) {
                     {p.cantidadEjemplos} ejemplos
                   </span>
                 </td>
+                <td className="px-4 py-4">
+                  <PracticaToggle plantilla={p} />
+                </td>
                 <td className="px-4 py-4 text-sm text-gray-500">{p.fechaActualizacion}</td>
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-center gap-2">
@@ -158,13 +175,14 @@ export default function PlantillaTable({ plantillas, sectorId }: Props) {
           })}
           {filtered.length === 0 && (
             <tr>
-              <td colSpan={6} className="px-6 py-8 text-center text-sm text-muted">
+              <td colSpan={7} className="px-6 py-8 text-center text-sm text-muted">
                 No hay plantillas en esta categoría.
               </td>
             </tr>
           )}
         </tbody>
       </table>
+      )}
 
       {excelPlantilla && (
         <ExcelCatalogModal

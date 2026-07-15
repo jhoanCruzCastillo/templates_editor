@@ -1,14 +1,22 @@
 import { NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHouse, faLayerGroup, faAngleLeft } from '@fortawesome/free-solid-svg-icons';
+import { faHouse, faLayerGroup, faAngleLeft, faFileCirclePlus, faChalkboardUser, faLock } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../lib/auth';
 import { faUserGear } from '../lib/icons';
 import { puedeAccederGestionUsuarios } from '../lib/permisos';
+import { puedeAccederMentorias } from '../lib/planAcceso';
+import { useEstadoEntrenamiento } from '../lib/hooks';
 import UserMenu from '../features/settings/UserMenu';
 
 const navItems = [
   { to: '/', label: 'Inicio', icon: faHouse },
   { to: '/sectores', label: 'Sectores', icon: faLayerGroup },
+];
+
+const clienteNavItems = [
+  { to: '/', label: 'Mis fichas', icon: faHouse },
+  { to: '/fichas-oficiales', label: 'Fichas oficiales', icon: faFileCirclePlus },
+  { to: '/mentorias', label: 'Mentorías', icon: faChalkboardUser },
 ];
 
 interface Props {
@@ -19,8 +27,10 @@ interface Props {
 export default function Sidebar({ hidden = false, onHide }: Props) {
   const { sesion } = useAuth();
   const esCliente = sesion?.rol === 'cliente';
+  const { numeroNivel } = useEstadoEntrenamiento();
+  const mentoriasBloqueadas = esCliente && !puedeAccederMentorias(numeroNivel);
 
-  const base = esCliente ? navItems.filter((item) => item.to !== '/sectores') : navItems;
+  const base = esCliente ? clienteNavItems : navItems;
   const items = sesion && puedeAccederGestionUsuarios(sesion.rol)
     ? [...base, { to: '/usuarios', label: 'Usuarios y roles', icon: faUserGear }]
     : base;
@@ -71,7 +81,14 @@ export default function Sidebar({ hidden = false, onHide }: Props) {
                 }
               >
                 <FontAwesomeIcon icon={item.icon} className="w-4 text-center" />
-                {item.label}
+                <span className="flex-1">{item.label}</span>
+                {item.to === '/mentorias' && mentoriasBloqueadas && (
+                  <FontAwesomeIcon
+                    icon={faLock}
+                    className="w-3 h-3 text-white/40"
+                    title="Disponible desde Nivel 1 — actualiza tu plan"
+                  />
+                )}
               </NavLink>
             </li>
           ))}

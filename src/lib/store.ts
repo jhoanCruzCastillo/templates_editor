@@ -3,7 +3,8 @@ import { plantillas as plantillasSeed } from '../data/plantillas';
 import { ejemplos as ejemplosSeed } from '../data/ejemplos';
 import { actividadReciente as actividadSeed } from '../data/actividad';
 import { usuarios as usuariosSeed } from '../data/usuarios';
-import type { Sector, Plantilla, Ejemplo, ActividadReciente, Usuario, Sesion, CatalogoExcelPlantilla, ArchivoExcel, FacturacionMock } from '../types';
+import { mentoriasSeed } from '../data/mentorias';
+import type { Sector, Plantilla, Ejemplo, ActividadReciente, Usuario, Sesion, CatalogoExcelPlantilla, ArchivoExcel, FacturacionMock, SesionMentoria } from '../types';
 import type { DocumentoJSON } from './schemaExport';
 
 const KEYS = {
@@ -18,6 +19,7 @@ const KEYS = {
   excelEjemplos: 'pf_excel_ejemplos',
   usuarios: 'pf_usuarios',
   facturacion: 'pf_facturacion',
+  mentorias: 'pf_mentorias',
 } as const;
 
 function read<T>(key: string, fallback: T): T {
@@ -55,9 +57,14 @@ function reseedReplacingKnown<T extends { id: string }>(key: string, seed: T[], 
   write(key, [...seed, ...preservados]);
 }
 
+// Ids de las fichas de demo del cliente "Juan Pérez" (usr-3) agregadas en v12 — se insertan si
+// faltan aunque `pf_ejemplos` ya exista, sin tocar ninguna ficha real creada por un usuario.
+const CLIENTE_DEMO_EJEMPLO_IDS = ['ej-demo-cliente-1', 'ej-demo-cliente-2', 'ej-demo-cliente-3', 'ej-demo-cliente-4'];
+
 // Versión NUMÉRICA del seed — antes se comparaba como string ('10' < '9' es true léxicamente),
 // lo que hubiera impedido reseedear correctamente al pasar de un dígito a dos.
-const SEED_VERSION = 11;
+// v14: se agrega el catálogo de sesiones de mentoría grupal (ventaja del plan Nivel 1+).
+const SEED_VERSION = 14;
 
 export function initStore() {
   // v10: sectores y plantillas alineados al catálogo real de fichas técnicas (ver memoria de
@@ -67,13 +74,23 @@ export function initStore() {
   // régimen (07-C, 07-D, 07-E) — las 4 tipologías son transversales/no excluyentes dentro de cada
   // documento, ver [[ioarr-tipologias-transversales]]. `Plantilla.tipologiaIoarr` (único) pasa a
   // `tipologiasIoarr` (array).
+  // v12: se agregan 4 fichas de demo (mock) del cliente "Juan Pérez" para poblar "Mis fichas".
+  // v13: plt-1 y plt-perfil-sal-1 se marcan `disponibleNivel0` (catálogo curado del plan Pedagógico).
   const ver = Number(localStorage.getItem(KEYS.initialized)) || 0;
   if (ver < SEED_VERSION) {
     reseedReplacingKnown(KEYS.sectores, sectoresSeed, SEED_IDS_V9.sectores);
     reseedReplacingKnown(KEYS.plantillas, plantillasSeed, SEED_IDS_V9.plantillas);
-    if (!localStorage.getItem(KEYS.ejemplos)) write(KEYS.ejemplos, ejemplosSeed);
+    if (!localStorage.getItem(KEYS.ejemplos)) {
+      write(KEYS.ejemplos, ejemplosSeed);
+    } else {
+      const existentes = read<Ejemplo[]>(KEYS.ejemplos, []);
+      const idsExistentes = new Set(existentes.map((e) => e.id));
+      const nuevas = ejemplosSeed.filter((e) => CLIENTE_DEMO_EJEMPLO_IDS.includes(e.id) && !idsExistentes.has(e.id));
+      if (nuevas.length) write(KEYS.ejemplos, [...existentes, ...nuevas]);
+    }
     if (!localStorage.getItem(KEYS.actividad)) write(KEYS.actividad, actividadSeed);
     if (!localStorage.getItem(KEYS.usuarios)) write(KEYS.usuarios, usuariosSeed);
+    if (!localStorage.getItem(KEYS.mentorias)) write(KEYS.mentorias, mentoriasSeed);
     localStorage.setItem(KEYS.initialized, String(SEED_VERSION));
   }
 }
@@ -160,10 +177,34 @@ export function saveUsuarios(data: Usuario[]): void {
   write(KEYS.usuarios, data);
 }
 
+// --- Mentorías grupales ---
+
+export function loadMentorias(): SesionMentoria[] {
+  const data = read<SesionMentoria[]>(KEYS.mentorias, mentoriasSeed);
+  // Compatibilidad con registros guardados antes de que existiera `linkReunion`.
+  for (const sesion of data) {
+    if (!sesion.linkReunion) {
+      sesion.linkReunion = mentoriasSeed.find((m) => m.id === sesion.id)?.linkReunion ?? 'https://zoom.us/j/8123456789';
+    }
+  }
+  return data;
+}
+
+export function saveMentorias(data: SesionMentoria[]): void {
+  write(KEYS.mentorias, data);
+}
+
 // --- Facturación (datos de muestra — sin pasarela de pago real) ---
 
 export function loadFacturacion(): Record<string, FacturacionMock> {
-  return read<Record<string, FacturacionMock>>(KEYS.facturacion, {});
+  const data = read<Record<string, FacturacionMock>>(KEYS.facturacion, {});
+  // Compatibilidad con registros guardados antes de que existieran `planId`/`addons`/`metodoPago`.
+  for (const registro of Object.values(data)) {
+    if (!registro.planId) registro.planId = 'nivel-1';
+    if (!registro.addons) registro.addons = {};
+    if (!registro.metodoPago) registro.metodoPago = 'tarjeta';
+  }
+  return data;
 }
 
 export function saveFacturacion(data: Record<string, FacturacionMock>): void {
@@ -180,17 +221,20 @@ export function generarFacturacionDefault(): FacturacionMock {
   facturaDosMeses.setMonth(facturaDosMeses.getMonth() - 2);
 
   return {
-    plan: 'Plan Pro',
-    precio: 'S/ 89',
+    planId: 'nivel-1',
+    plan: 'Nivel 1 — Profesional',
+    precio: '$150',
     periodicidad: 'Mensual',
     cancelada: false,
     fechaRenovacion: renovacion.toLocaleDateString('es-PE'),
+    metodoPago: 'tarjeta',
     tarjetaMarca: 'Visa',
     tarjetaUltimos4: '4242',
     facturas: [
-      { id: generateId(), fecha: facturaMesPasado.toLocaleDateString('es-PE'), total: 'S/ 89.00', estado: 'Pagado' },
-      { id: generateId(), fecha: facturaDosMeses.toLocaleDateString('es-PE'), total: 'S/ 89.00', estado: 'Pagado' },
+      { id: generateId(), fecha: facturaMesPasado.toLocaleDateString('es-PE'), total: '$150.00', estado: 'Pagado' },
+      { id: generateId(), fecha: facturaDosMeses.toLocaleDateString('es-PE'), total: '$150.00', estado: 'Pagado' },
     ],
+    addons: {},
   };
 }
 
@@ -199,7 +243,10 @@ export function generarFacturacionDefault(): FacturacionMock {
 export function findUsuario(usuario: string, password: string): Usuario | null {
   return (
     loadUsuarios().find(
-      (u) => u.usuario.toLowerCase() === usuario.trim().toLowerCase() && u.password === password,
+      (u) =>
+        u.usuario.toLowerCase() === usuario.trim().toLowerCase() &&
+        u.password === password &&
+        u.estado !== 'inactivo',
     ) ?? null
   );
 }

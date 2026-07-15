@@ -215,6 +215,18 @@ export default function PlantillaEditPage() {
     });
   }, []);
 
+  const handleSubseccionAyudaChange = useCallback((subseccionId: string, ayuda: string) => {
+    setEditData((prev) => {
+      if (!prev) return prev;
+      const next = structuredClone(prev);
+      for (const sec of next.secciones) {
+        const sub = sec.subsecciones.find((s) => s.id === subseccionId);
+        if (sub) { sub.ayuda = ayuda; break; }
+      }
+      return next;
+    });
+  }, []);
+
   const handleAddSubsection = useCallback((seccionId: string) => {
     setEditData((prev) => {
       if (!prev) return prev;
@@ -522,6 +534,7 @@ export default function PlantillaEditPage() {
                     onSectionNameChange={handleSectionNameChange}
                     onSectionHojaChange={handleSectionHojaChange}
                     onSubsectionNameChange={handleSubsectionNameChange}
+                    onSubseccionAyudaChange={handleSubseccionAyudaChange}
                     onAddSubsection={handleAddSubsection}
                     onDeleteSubsection={handleDeleteSubsection}
                     onDefaultValueChange={!showExamples ? handleDefaultValueChange : undefined}

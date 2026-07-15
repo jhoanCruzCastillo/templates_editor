@@ -1,14 +1,24 @@
+import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
-import type { Seccion, Campo, ConfigTabla } from '../../types';
+import { faPlus, faTrash, faCircleQuestion } from '@fortawesome/free-solid-svg-icons';
+import type { Seccion, Campo, ConfigTabla, Subseccion } from '../../types';
 import type { ResolucionToken } from '../../lib/formula';
 import FieldCard from './FieldCard';
+import AyudaSubseccionModal from './AyudaSubseccionModal';
 
 interface Props {
   seccion: Seccion;
   showExampleValues?: boolean;
   exampleValores?: Record<string, string>;
   onExampleValueChange?: (campoId: string, value: string) => void;
+  /** Mensajes de validación por identificador de campo (solo modo cliente) */
+  erroresValidacion?: Record<string, string>;
+  /** Valores de un ejemplo de referencia autorado por el admin, por identificador de campo (solo modo cliente) */
+  referenciaValores?: Record<string, string>;
+  /** true = el plan del cliente incluye la ayuda de IA para mejorar títulos/textos (Nivel 1+) */
+  permiteMejoraIA?: boolean;
+  /** Presente = el admin puede editar el texto de ayuda de cada subsección (tab Estructura) */
+  onSubseccionAyudaChange?: (subseccionId: string, ayuda: string) => void;
   selectedCampoId?: string | null;
   onCampoClick?: (campo: Campo) => void;
   onAddCampo?: (subseccionId: string, subseccionCodigo: string) => void;
@@ -36,6 +46,10 @@ export default function SectionContent({
   showExampleValues,
   exampleValores,
   onExampleValueChange,
+  erroresValidacion,
+  referenciaValores,
+  permiteMejoraIA,
+  onSubseccionAyudaChange,
   selectedCampoId,
   onCampoClick,
   onAddCampo,
@@ -55,6 +69,9 @@ export default function SectionContent({
   onInsertReferencia,
   resolverFormula,
 }: Props) {
+  const [ayudaAbiertaId, setAyudaAbiertaId] = useState<string | null>(null);
+  const subseccionAyuda = seccion.subsecciones.find((s) => s.id === ayudaAbiertaId) as Subseccion | undefined;
+
   return (
     <div data-section-id={seccion.id} className="mb-10">
       <div className="flex items-center justify-between mb-1">
@@ -103,6 +120,17 @@ export default function SectionContent({
                 {sub.nombre}
               </span>
             )}
+            <button
+              onClick={() => setAyudaAbiertaId(sub.id)}
+              title={onSubseccionAyudaChange ? 'Editar ayuda para llenar esta subsección' : 'Ver ayuda para llenar esta subsección'}
+              className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors shrink-0 ${
+                sub.ayuda?.trim()
+                  ? 'text-brand-500 hover:text-brand-700 hover:bg-brand-50'
+                  : 'text-gray-300 opacity-0 group-hover:opacity-100 hover:text-brand-500 hover:bg-brand-50'
+              }`}
+            >
+              <FontAwesomeIcon icon={faCircleQuestion} className="w-3.5 h-3.5" />
+            </button>
             {onDeleteSubsection && seccion.subsecciones.length > 1 && (
               <button
                 onClick={() => onDeleteSubsection(sub.id, seccion.id)}
@@ -123,6 +151,9 @@ export default function SectionContent({
                 showExampleValue={showExampleValues}
                 exampleValue={exampleValores?.[campo.identificador]}
                 onExampleValueChange={onExampleValueChange}
+                error={erroresValidacion?.[campo.identificador]}
+                referenciaValor={referenciaValores?.[campo.identificador]}
+                permiteMejoraIA={permiteMejoraIA}
                 showMenuButton={showMenuButton}
                 onDelete={onDeleteCampo ? () => onDeleteCampo(campo.id, sub.id) : undefined}
                 onDefaultValueChange={onDefaultValueChange ? (v) => onDefaultValueChange(campo.id, v) : undefined}
@@ -155,6 +186,15 @@ export default function SectionContent({
           <FontAwesomeIcon icon={faPlus} className="w-2.5 h-2.5" />
           Agregar subsección
         </button>
+      )}
+
+      {subseccionAyuda && (
+        <AyudaSubseccionModal
+          isOpen
+          onClose={() => setAyudaAbiertaId(null)}
+          subseccion={subseccionAyuda}
+          onSave={onSubseccionAyudaChange ? (texto) => onSubseccionAyudaChange(subseccionAyuda.id, texto) : undefined}
+        />
       )}
     </div>
   );

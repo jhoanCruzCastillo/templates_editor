@@ -12,6 +12,7 @@ export const plantillas: Plantilla[] = [
     cantidadEjemplos: 3,
     fechaActualizacion: '12/05/2026',
     archivoDefaultUrl: '/fichas_oficiales/general/Formato6A_directiva001_2019EF6301.xlsm',
+    disponibleNivel0: true,
     secciones: [
       {
         id: 'sec-01',
@@ -40,6 +41,7 @@ export const plantillas: Plantilla[] = [
                 etiqueta: 'Entidad',
                 tipo: 'texto_corto',
                 editable: true,
+                requerido: true,
                 descripcion: 'Entidad responsable del proyecto.',
                 valorEjemplo: 'Gobierno Regional de Cusco',
               },
@@ -49,6 +51,7 @@ export const plantillas: Plantilla[] = [
                 etiqueta: 'Nombre de la UF',
                 tipo: 'texto_corto',
                 editable: true,
+                requerido: true,
                 descripcion: 'Unidad Formuladora responsable.',
                 valorEjemplo: 'UF — Gerencia Regional de Educación Cusco',
               },
@@ -100,6 +103,7 @@ export const plantillas: Plantilla[] = [
                 etiqueta: 'Objeto de la intervención',
                 tipo: 'texto_corto',
                 editable: true,
+                requerido: true,
                 valorEjemplo: 'Servicio educativo de nivel inicial',
               },
               {
@@ -907,6 +911,7 @@ export const plantillas: Plantilla[] = [
     cantidadSecciones: 8,
     cantidadEjemplos: 1,
     fechaActualizacion: '05/07/2026',
+    disponibleNivel0: true,
     secciones: [
       // ── 1. RESUMEN EJECUTIVO ──
       {

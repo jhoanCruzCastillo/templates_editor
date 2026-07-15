@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faSave, faDownload, faFileExport, faEye, faCircleCheck, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faSave, faDownload, faFileExport, faEye, faCircleCheck, faTriangleExclamation, faClockRotateLeft } from '@fortawesome/free-solid-svg-icons';
 import type { Ejemplo, Plantilla } from '../../types';
 import type { ProgresoFicha } from '../../lib/valorValidation';
 
@@ -12,13 +12,15 @@ interface Props {
   progreso?: ProgresoFicha;
   /** true = plan de entrenamiento vencido — se ocultan las acciones de edición (Guardar/Insertar) */
   soloLectura?: boolean;
+  /** Si se define, muestra el botón "Historial" (solo Nivel 2) */
+  onHistorial?: () => void;
   onSave: () => void;
   onDownload: () => void;
   onInsert: () => void;
   onPreview: () => void;
 }
 
-export default function ClienteFichaTopBar({ plantilla, ejemplo, erroresCount = 0, progreso, soloLectura, onSave, onDownload, onInsert, onPreview }: Props) {
+export default function ClienteFichaTopBar({ plantilla, ejemplo, erroresCount = 0, progreso, soloLectura, onHistorial, onSave, onDownload, onInsert, onPreview }: Props) {
   const navigate = useNavigate();
   return (
     <div className="shrink-0 border-b border-gray-100 bg-white px-6 py-3">
@@ -59,6 +61,15 @@ export default function ClienteFichaTopBar({ plantilla, ejemplo, erroresCount = 
           )}
         </div>
         <div className="flex items-center gap-3 shrink-0">
+          {onHistorial && (
+            <button
+              onClick={onHistorial}
+              className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <FontAwesomeIcon icon={faClockRotateLeft} className="w-3.5 h-3.5" />
+              Historial
+            </button>
+          )}
           <button
             onClick={onDownload}
             className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2"

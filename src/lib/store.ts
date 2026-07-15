@@ -4,7 +4,7 @@ import { ejemplos as ejemplosSeed } from '../data/ejemplos';
 import { actividadReciente as actividadSeed } from '../data/actividad';
 import { usuarios as usuariosSeed } from '../data/usuarios';
 import { mentoriasSeed } from '../data/mentorias';
-import type { Sector, Plantilla, Ejemplo, ActividadReciente, Usuario, Sesion, CatalogoExcelPlantilla, ArchivoExcel, FacturacionMock, SesionMentoria } from '../types';
+import type { Sector, Plantilla, Ejemplo, ActividadReciente, Usuario, Sesion, CatalogoExcelPlantilla, ArchivoExcel, FacturacionMock, SesionMentoria, CambioFicha } from '../types';
 import type { DocumentoJSON } from './schemaExport';
 
 const KEYS = {
@@ -20,6 +20,7 @@ const KEYS = {
   usuarios: 'pf_usuarios',
   facturacion: 'pf_facturacion',
   mentorias: 'pf_mentorias',
+  historialCambios: 'pf_historial_cambios',
 } as const;
 
 function read<T>(key: string, fallback: T): T {
@@ -181,17 +182,32 @@ export function saveUsuarios(data: Usuario[]): void {
 
 export function loadMentorias(): SesionMentoria[] {
   const data = read<SesionMentoria[]>(KEYS.mentorias, mentoriasSeed);
-  // Compatibilidad con registros guardados antes de que existiera `linkReunion`.
-  for (const sesion of data) {
+  // Suma sesiones nuevas del seed (ej. la sesión pasada agregada para la grabación de muestra)
+  // que todavía no existían cuando se guardó este registro por primera vez.
+  const idsExistentes = new Set(data.map((m) => m.id));
+  const completas = [...data, ...mentoriasSeed.filter((m) => !idsExistentes.has(m.id))];
+  // Compatibilidad con registros guardados antes de que existieran `linkReunion`/`preguntas`.
+  for (const sesion of completas) {
     if (!sesion.linkReunion) {
       sesion.linkReunion = mentoriasSeed.find((m) => m.id === sesion.id)?.linkReunion ?? 'https://zoom.us/j/8123456789';
     }
+    if (!sesion.preguntas) sesion.preguntas = [];
   }
-  return data;
+  return completas;
 }
 
 export function saveMentorias(data: SesionMentoria[]): void {
   write(KEYS.mentorias, data);
+}
+
+// --- Histórico de cambios en fichas (ventaja del plan Nivel 2) ---
+
+export function loadHistorialCambios(): CambioFicha[] {
+  return read<CambioFicha[]>(KEYS.historialCambios, []);
+}
+
+export function saveHistorialCambios(data: CambioFicha[]): void {
+  write(KEYS.historialCambios, data);
 }
 
 // --- Facturación (datos de muestra — sin pasarela de pago real) ---

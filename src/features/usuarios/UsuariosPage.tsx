@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faPen, faTrash, faShieldHalved } from '@fortawesome/free-solid-svg-icons';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../lib/auth';
 import { useUsuarios } from '../../lib/hooks';
@@ -9,7 +9,9 @@ import { useToast } from '../../components/Toast';
 import ConfirmModal from '../../components/ConfirmModal';
 import { rolUsuarioLabels, faUserGear } from '../../lib/icons';
 import { rolesGestionablesPor } from '../../lib/permisos';
+import { numeroNivelDe } from '../../lib/planAcceso';
 import UsuarioModal from './UsuarioModal';
+import PermisosUsuarioModal from './PermisosUsuarioModal';
 import type { Usuario, RolUsuario } from '../../types';
 
 const rolBadge: Record<RolUsuario, string> = {
@@ -21,16 +23,23 @@ const rolBadge: Record<RolUsuario, string> = {
 export default function UsuariosPage() {
   const { sesion } = useAuth();
   const usuarios = useUsuarios();
-  const { deleteUsuario, pushActividad } = useAppContext();
+  const { facturacion, deleteUsuario, pushActividad } = useAppContext();
   const { toast } = useToast();
   const [showModal, setShowModal] = useState(false);
   const [editTarget, setEditTarget] = useState<Usuario | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Usuario | null>(null);
+  const [permisosTarget, setPermisosTarget] = useState<Usuario | null>(null);
 
   if (!sesion) return null;
   const actorRol = sesion.rol;
   const rolesVisibles = rolesGestionablesPor(actorRol);
   const lista = usuarios.filter((u) => rolesVisibles.includes(u.rol));
+
+  const numeroNivelDeUsuario = (u: Usuario) => {
+    if (u.rol !== 'cliente') return 0;
+    const cuentaId = u.cuentaClienteId ?? u.id;
+    return numeroNivelDe(facturacion[cuentaId]?.planId ?? 'nivel-1');
+  };
 
   const handleDelete = () => {
     if (!deleteTarget) return;
@@ -53,11 +62,11 @@ export default function UsuariosPage() {
             <FontAwesomeIcon icon={faUserGear} className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-heading leading-tight">Usuarios y roles</h1>
+            <h1 className="text-2xl font-bold text-heading leading-tight">Usuarios y permisos</h1>
             <p className="text-sm text-muted">
               {actorRol === 'superusuario'
-                ? 'Gestiona superusuarios, administradores y clientes'
-                : 'Gestiona los clientes del sistema'}
+                ? 'Gestiona superusuarios, administradores, clientes y sus permisos'
+                : 'Gestiona los clientes del sistema y sus permisos'}
             </p>
           </div>
         </div>
@@ -107,6 +116,13 @@ export default function UsuariosPage() {
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-center gap-2">
                     <button
+                      onClick={() => setPermisosTarget(u)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-brand-700 bg-brand-50 hover:bg-brand-100 transition-colors"
+                    >
+                      <FontAwesomeIcon icon={faShieldHalved} className="w-3 h-3" />
+                      Permisos
+                    </button>
+                    <button
                       onClick={() => {
                         setEditTarget(u);
                         setShowModal(true);
@@ -144,6 +160,13 @@ export default function UsuariosPage() {
         onClose={() => setShowModal(false)}
         actorRol={actorRol}
         usuario={editTarget}
+      />
+
+      <PermisosUsuarioModal
+        isOpen={!!permisosTarget}
+        onClose={() => setPermisosTarget(null)}
+        usuario={permisosTarget}
+        numeroNivel={permisosTarget ? numeroNivelDeUsuario(permisosTarget) : 0}
       />
 
       <ConfirmModal

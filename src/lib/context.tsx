@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import * as store from './store';
-import type { Sector, Plantilla, Ejemplo, ActividadReciente, ArchivoExcel, CatalogoExcelPlantilla, Usuario, FacturacionMock, SesionMentoria } from '../types';
+import type { Sector, Plantilla, Ejemplo, ActividadReciente, ArchivoExcel, CatalogoExcelPlantilla, Usuario, FacturacionMock, SesionMentoria, PreguntaMentoria, CambioFicha, CampoCambio } from '../types';
 
 interface AppState {
   sectores: Sector[];
@@ -12,6 +12,7 @@ interface AppState {
   usuarios: Usuario[];
   facturacion: Record<string, FacturacionMock>;
   mentorias: SesionMentoria[];
+  historialCambios: CambioFicha[];
 
   // Sectores
   addSector: (sector: Sector) => void;
@@ -50,6 +51,10 @@ interface AppState {
 
   // Mentorías grupales
   inscribirseAMentoria: (sesionId: string, cuentaId: string) => void;
+  enviarPreguntaMentoria: (sesionId: string, usuarioId: string, pregunta: string) => void;
+
+  // Histórico de cambios en fichas (Nivel 2)
+  registrarCambioFicha: (ejemploId: string, usuarioId: string, campos: CampoCambio[]) => void;
 
   // Métricas
   getMetricas: () => { totalSectores: number; totalPlantillas: number; totalEjemplos: number };
@@ -67,6 +72,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [usuarios, setUsuarios] = useState<Usuario[]>(() => store.loadUsuarios());
   const [facturacion, setFacturacion] = useState<Record<string, FacturacionMock>>(() => store.loadFacturacion());
   const [mentorias, setMentorias] = useState<SesionMentoria[]>(() => store.loadMentorias());
+  const [historialCambios, setHistorialCambios] = useState<CambioFicha[]>(() => store.loadHistorialCambios());
 
   // --- Sectores ---
 
@@ -356,6 +362,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  // Nueva pregunta de un asistente — la respuesta la deja el mentor por fuera del prototipo
+  // (queda "pendiente" hasta que alguien la edite manualmente en los datos de muestra).
+  const enviarPreguntaMentoria = useCallback((sesionId: string, usuarioId: string, pregunta: string) => {
+    setMentorias((prev) => {
+      const next = prev.map((m) => {
+        if (m.id !== sesionId) return m;
+        const nueva: PreguntaMentoria = {
+          id: store.generateId(),
+          usuarioId,
+          pregunta,
+          fechaPregunta: new Date().toISOString(),
+        };
+        return { ...m, preguntas: [...m.preguntas, nueva] };
+      });
+      store.saveMentorias(next);
+      return next;
+    });
+  }, []);
+
+  // --- Histórico de cambios en fichas (Nivel 2) ---
+
+  const registrarCambioFicha = useCallback((ejemploId: string, usuarioId: string, campos: CampoCambio[]) => {
+    if (campos.length === 0) return;
+    setHistorialCambios((prev) => {
+      const entry: CambioFicha = { id: store.generateId(), ejemploId, usuarioId, fecha: new Date().toISOString(), campos };
+      const next = [entry, ...prev].slice(0, 500);
+      store.saveHistorialCambios(next);
+      return next;
+    });
+  }, []);
+
   // --- Métricas ---
 
   const getMetricas = useCallback(() => {
@@ -378,6 +415,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         usuarios,
         facturacion,
         mentorias,
+        historialCambios,
         addSector,
         updateSector,
         deleteSector,
@@ -398,6 +436,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         deleteUsuario,
         updateFacturacion,
         inscribirseAMentoria,
+        enviarPreguntaMentoria,
+        registrarCambioFicha,
         getMetricas,
       }}
     >

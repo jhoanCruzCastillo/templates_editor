@@ -211,6 +211,33 @@ export type TemaPreferencia = 'claro' | 'oscuro' | 'sistema';
 
 export type EstadoUsuario = 'activo' | 'inactivo';
 
+// Catálogo de permisos individuales — el rol es solo una etiqueta visual; el control de acceso
+// real se basa (o se basará, ver permisosCatalogo.ts) en esta lista granular por usuario.
+// De momento (ver "Usuarios y permisos") es únicamente visual: no reemplaza todavía los chequeos
+// de rol/nivel de plan ya implementados en el resto de la app.
+export type PermisoId =
+  | 'sectores.ver'
+  | 'sectores.gestionar'
+  | 'plantillas.ver'
+  | 'plantillas.gestionar'
+  | 'plantillas.importar_json'
+  | 'estructura.editar'
+  | 'ejemplos.gestionar'
+  | 'excel.asignar'
+  | 'json.ver'
+  | 'usuarios.gestionar_clientes'
+  | 'usuarios.gestionar_administradores'
+  | 'usuarios.gestionar_superusuarios'
+  | 'fichas.crear'
+  | 'fichas.compartir'
+  | 'fichas.ver_historial'
+  | 'colaboradores.gestionar'
+  | 'mentorias.acceder'
+  | 'mentorias.preguntas_respuestas'
+  | 'ia.mejora_texto'
+  | 'ia.asesor'
+  | 'facturacion.gestionar';
+
 export interface Usuario {
   id: string;
   nombre: string;
@@ -222,6 +249,9 @@ export interface Usuario {
   estado?: EstadoUsuario;
   /** Solo presente en colaboradores creados como "usuario adicional" — apunta al `usuarioId` del cliente titular de la cuenta. */
   cuentaClienteId?: string;
+  /** Permisos individuales asignados — si falta, se calculan por defecto según rol (y nivel de
+   * plan si es cliente), ver permisosDefaultDe() en permisosCatalogo.ts. */
+  permisos?: PermisoId[];
 }
 
 // Sesión activa — nunca guarda la contraseña
@@ -330,4 +360,39 @@ export interface SesionMentoria {
   inscritos: string[];
   /** Enlace de la videollamada (Zoom, Google Meet, etc.) — de muestra, no lleva a una reunión real */
   linkReunion: string;
+  /** Enlace a la grabación — solo presente en sesiones que ya ocurrieron */
+  grabacionUrl?: string;
+  /** Preguntas y respuestas de esta sesión (ventaja exclusiva del plan Nivel 2) */
+  preguntas: PreguntaMentoria[];
+}
+
+export interface PreguntaMentoria {
+  id: string;
+  usuarioId: string;
+  pregunta: string;
+  /** ISO datetime */
+  fechaPregunta: string;
+  respuesta?: string;
+  /** ISO datetime */
+  fechaRespuesta?: string;
+}
+
+// Histórico de cambios en una ficha llenada (ventaja del plan Nivel 2) — ayuda a un equipo con
+// colaboradores a ver quién editó qué. Se registra una entrada por cada vez que se presiona
+// "Guardar" y hubo campos con valores distintos, no por cada tecla.
+export interface CampoCambio {
+  identificador: string;
+  etiqueta: string;
+  valorAnterior: string;
+  valorNuevo: string;
+}
+
+export interface CambioFicha {
+  id: string;
+  ejemploId: string;
+  /** usuarioId de quien guardó el cambio — puede ser el titular o un colaborador */
+  usuarioId: string;
+  /** ISO datetime */
+  fecha: string;
+  campos: CampoCambio[];
 }

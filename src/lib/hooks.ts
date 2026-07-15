@@ -70,6 +70,16 @@ export function useMentorias() {
   return mentorias;
 }
 
+export function useHistorialCambios() {
+  const { historialCambios } = useAppContext();
+  return historialCambios;
+}
+
+export function useHistorialFicha(ejemploId: string) {
+  const { historialCambios } = useAppContext();
+  return useMemo(() => historialCambios.filter((c) => c.ejemploId === ejemploId), [historialCambios, ejemploId]);
+}
+
 export function useMetricas() {
   const { getMetricas } = useAppContext();
   return useMemo(() => getMetricas(), [getMetricas]);

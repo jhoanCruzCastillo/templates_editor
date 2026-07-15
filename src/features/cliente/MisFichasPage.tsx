@@ -6,9 +6,11 @@ import { motion } from 'framer-motion';
 import { instrumentoIcons, instrumentoLabels } from '../../lib/icons';
 import { useAppContext } from '../../lib/context';
 import { useAuth } from '../../lib/auth';
-import { useSectores, useEstadoEntrenamiento } from '../../lib/hooks';
+import { useSectores, useEstadoEntrenamiento, useHistorialCambios } from '../../lib/hooks';
 import { cuentaEfectivaDe, puedeVerFicha } from '../../lib/permisos';
+import { puedeVerHistorial } from '../../lib/planAcceso';
 import { validarValoresPlantilla, calcularProgresoValores } from '../../lib/valorValidation';
+import { tiempoRelativo } from '../../lib/tiempoRelativo';
 import { useToast } from '../../components/Toast';
 import ConfirmModal from '../../components/ConfirmModal';
 import NuevaFichaClienteModal from './NuevaFichaClienteModal';
@@ -25,7 +27,9 @@ export default function MisFichasPage() {
   const { sesion } = useAuth();
   const { ejemplos, plantillas, usuarios, deleteEjemplo, updateEjemplo, pushActividad } = useAppContext();
   const sectores = useSectores();
-  const { esNivel0, vencido, diasRestantes, limiteFichas } = useEstadoEntrenamiento();
+  const { esNivel0, vencido, diasRestantes, limiteFichas, numeroNivel } = useEstadoEntrenamiento();
+  const historialCambios = useHistorialCambios();
+  const muestraHistorial = puedeVerHistorial(numeroNivel);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -153,6 +157,16 @@ export default function MisFichasPage() {
                 <p className="text-xs text-muted">
                   {sector?.nombre ?? '—'} · {instrumentoLabels[plantilla!.instrumento]}
                 </p>
+                {muestraHistorial && (() => {
+                  const ultimoCambio = historialCambios.find((c) => c.ejemploId === ejemplo.id);
+                  if (!ultimoCambio) return null;
+                  const autor = usuarios.find((u) => u.id === ultimoCambio.usuarioId);
+                  return (
+                    <p className="text-[11px] text-gray-400 mt-0.5">
+                      Última edición: {autor?.nombre ?? 'Usuario eliminado'} · {tiempoRelativo(ultimoCambio.fecha)}
+                    </p>
+                  );
+                })()}
               </div>
               {progreso && progreso.total > 0 && (
                 <div className="w-32 shrink-0">

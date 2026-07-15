@@ -10,14 +10,17 @@ import ExcelPreviewModal from '../editor/ExcelPreviewModal';
 import ConfirmModal from '../../components/ConfirmModal';
 import ClienteFichaTopBar from './ClienteFichaTopBar';
 import AsesorIAChat from './AsesorIAChat';
+import HistorialFichaModal from './HistorialFichaModal';
 import { useEjemplo, useEjemplos, usePlantilla, useExcelEjemplo, useEstadoEntrenamiento } from '../../lib/hooks';
 import { useAppContext } from '../../lib/context';
 import { useAuth } from '../../lib/auth';
 import { cuentaEfectivaDe, puedeVerFicha } from '../../lib/permisos';
+import { puedeVerHistorial } from '../../lib/planAcceso';
 import { useToast } from '../../components/Toast';
 import { saveDocumentoJSON } from '../../lib/store';
 import { buildDocumento } from '../../lib/schemaExport';
 import { insertarValoresEnExcel } from '../../lib/excelWriter';
+import { calcularCambios } from '../../lib/historialFicha';
 import { validarValoresPlantilla, calcularProgresoValores } from '../../lib/valorValidation';
 
 const MIN_LEFT = 180;
@@ -29,12 +32,14 @@ export default function ClienteFichaEditPage() {
   const plantilla = usePlantilla(ejemplo?.plantillaId ?? '');
   const archivoEjemplo = useExcelEjemplo(ejemploId!);
   const ejemplosPlantilla = useEjemplos(plantilla?.id ?? '');
-  const { usuarios, updateEjemplo, setExcelEjemplo, pushActividad } = useAppContext();
+  const { usuarios, updateEjemplo, setExcelEjemplo, pushActividad, registrarCambioFicha } = useAppContext();
   const { sesion } = useAuth();
   const { toast } = useToast();
   const { esNivel0, vencido, diasRestantes, numeroNivel } = useEstadoEntrenamiento();
   const soloLectura = esNivel0 && vencido;
   const permiteMejoraIA = numeroNivel >= 1;
+  const muestraHistorial = puedeVerHistorial(numeroNivel);
+  const [showHistorial, setShowHistorial] = useState(false);
 
   const cuentaId = sesion ? cuentaEfectivaDe(usuarios, sesion) : null;
   const esTitular = !!sesion && sesion.usuarioId === cuentaId;
@@ -109,13 +114,15 @@ export default function ClienteFichaEditPage() {
   }, []);
 
   const handleSave = useCallback(() => {
-    if (!plantilla || !ejemplo) return;
+    if (!plantilla || !ejemplo || !sesion) return;
+    const cambios = calcularCambios(plantilla, ejemplo.valores, editedValores);
     updateEjemplo(ejemplo.id, { valores: editedValores });
+    if (cambios.length > 0) registrarCambioFicha(ejemplo.id, sesion.usuarioId, cambios);
     const doc = buildDocumento(plantilla, 'ejemplo', { ...ejemplo, valores: editedValores });
     saveDocumentoJSON(`${plantilla.id}__ejemplo__${ejemplo.id}`, doc);
     pushActividad(`Guardaste avances en "${ejemplo.nombre}"`, 'blue');
     toast(`"${ejemplo.nombre}" guardada`);
-  }, [plantilla, ejemplo, editedValores, updateEjemplo, pushActividad, toast]);
+  }, [plantilla, ejemplo, sesion, editedValores, updateEjemplo, registrarCambioFicha, pushActividad, toast]);
 
   const handleDownload = useCallback(() => {
     if (!archivoEjemplo) { toast('Esta ficha no tiene una copia de Excel asociada', 'error'); return; }
@@ -186,6 +193,7 @@ export default function ClienteFichaEditPage() {
         erroresCount={erroresCount}
         progreso={progreso}
         soloLectura={soloLectura}
+        onHistorial={muestraHistorial ? () => setShowHistorial(true) : undefined}
         onSave={handleSave}
         onDownload={handleDownload}
         onInsert={() => setShowInsertConfirm(true)}
@@ -303,6 +311,12 @@ export default function ClienteFichaEditPage() {
         fileUrl={archivoEjemplo?.dataUrl ?? null}
         fileName={archivoEjemplo?.nombre}
         title={`${plantilla.codigo} — ${ejemplo.nombre}`}
+      />
+
+      <HistorialFichaModal
+        isOpen={showHistorial}
+        onClose={() => setShowHistorial(false)}
+        ejemploId={ejemplo.id}
       />
     </div>
   );

@@ -109,7 +109,12 @@ export default function MentoriasPage() {
       {tab === 'proximas' ? (
         <ProximasSesionesList mentorias={mentorias} cuentaId={cuentaId} />
       ) : (
-        <MisMentoriasList mentorias={mentorias} cuentaId={cuentaId} />
+        <MisMentoriasList
+          mentorias={mentorias}
+          cuentaId={cuentaId}
+          usuarioId={sesion?.usuarioId ?? ''}
+          numeroNivel={numeroNivel}
+        />
       )}
     </div>
   );

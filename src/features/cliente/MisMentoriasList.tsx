@@ -1,15 +1,21 @@
+import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarDays, faUserTie, faVideo, faDoorOpen } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarDays, faUserTie, faVideo, faDoorOpen, faCirclePlay, faComments } from '@fortawesome/free-solid-svg-icons';
+import { puedeVerPreguntasMentoria } from '../../lib/planAcceso';
+import GrabacionMentoriaModal from './GrabacionMentoriaModal';
+import PreguntasMentoriaModal from './PreguntasMentoriaModal';
 import type { SesionMentoria } from '../../types';
 
 interface Props {
   mentorias: SesionMentoria[];
   cuentaId: string;
+  usuarioId: string;
+  numeroNivel: number;
 }
 
 // Prototipo sin integración real de video — el botón "Entrar a la sesión" solo se habilita
 // dentro de esta ventana alrededor del inicio programado (el enlace en sí siempre se muestra,
-// como en una invitación real).
+// como en una invitación real). Pasada la ventana, se ofrece la grabación en su lugar.
 const VENTANA_ANTES_MIN = 15;
 const VENTANA_DESPUES_MIN = 120;
 
@@ -17,6 +23,11 @@ function puedeEntrar(fechaISO: string): boolean {
   const inicio = new Date(fechaISO).getTime();
   const ahora = Date.now();
   return ahora >= inicio - VENTANA_ANTES_MIN * 60_000 && ahora <= inicio + VENTANA_DESPUES_MIN * 60_000;
+}
+
+function yaPaso(fechaISO: string): boolean {
+  const inicio = new Date(fechaISO).getTime();
+  return Date.now() > inicio + VENTANA_DESPUES_MIN * 60_000;
 }
 
 function formatearFecha(iso: string): string {
@@ -29,7 +40,11 @@ function nombrePlataforma(link: string): string {
   return 'Videollamada';
 }
 
-export default function MisMentoriasList({ mentorias, cuentaId }: Props) {
+export default function MisMentoriasList({ mentorias, cuentaId, usuarioId, numeroNivel }: Props) {
+  const [grabacionAbierta, setGrabacionAbierta] = useState<SesionMentoria | null>(null);
+  const [preguntasAbiertas, setPreguntasAbiertas] = useState<SesionMentoria | null>(null);
+  const muestraPreguntas = puedeVerPreguntasMentoria(numeroNivel);
+
   const mias = [...mentorias]
     .filter((m) => m.inscritos.includes(cuentaId))
     .sort((a, b) => new Date(a.fechaISO).getTime() - new Date(b.fechaISO).getTime());
@@ -38,6 +53,7 @@ export default function MisMentoriasList({ mentorias, cuentaId }: Props) {
     <div className="bg-surface-card rounded-xl shadow-card overflow-hidden divide-y divide-gray-50">
       {mias.map((m) => {
         const habilitado = puedeEntrar(m.fechaISO);
+        const pasada = yaPaso(m.fechaISO);
         return (
           <div key={m.id} className="flex items-center gap-4 px-5 py-4">
             <div className="flex-1 min-w-0">
@@ -65,21 +81,48 @@ export default function MisMentoriasList({ mentorias, cuentaId }: Props) {
                 </a>
               </p>
             </div>
-            <a
-              href={habilitado ? m.linkReunion : undefined}
-              target="_blank"
-              rel="noopener noreferrer"
-              title={!habilitado ? 'Disponible desde 15 minutos antes de que empiece' : undefined}
-              aria-disabled={!habilitado}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-75 flex items-center gap-2 shrink-0 ${
-                habilitado
-                  ? 'bg-brand-600 text-white hover:bg-brand-700'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none'
-              }`}
-            >
-              <FontAwesomeIcon icon={faDoorOpen} className="w-3.5 h-3.5" />
-              Entrar a la sesión
-            </a>
+
+            {muestraPreguntas && (
+              <button
+                onClick={() => setPreguntasAbiertas(m)}
+                className="px-3 py-2 rounded-lg border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors duration-75 flex items-center gap-1.5 shrink-0"
+              >
+                <FontAwesomeIcon icon={faComments} className="w-3.5 h-3.5" />
+                Preguntas{m.preguntas.length > 0 && ` (${m.preguntas.length})`}
+              </button>
+            )}
+
+            {pasada ? (
+              m.grabacionUrl ? (
+                <button
+                  onClick={() => setGrabacionAbierta(m)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-75 flex items-center gap-2 shrink-0 bg-brand-600 text-white hover:bg-brand-700"
+                >
+                  <FontAwesomeIcon icon={faCirclePlay} className="w-3.5 h-3.5" />
+                  Ver grabación
+                </button>
+              ) : (
+                <span className="px-4 py-2 rounded-lg text-sm font-medium shrink-0 bg-gray-100 text-gray-400">
+                  Grabación no disponible
+                </span>
+              )
+            ) : (
+              <a
+                href={habilitado ? m.linkReunion : undefined}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={!habilitado ? 'Disponible desde 15 minutos antes de que empiece' : undefined}
+                aria-disabled={!habilitado}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-75 flex items-center gap-2 shrink-0 ${
+                  habilitado
+                    ? 'bg-brand-600 text-white hover:bg-brand-700'
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none'
+                }`}
+              >
+                <FontAwesomeIcon icon={faDoorOpen} className="w-3.5 h-3.5" />
+                Entrar a la sesión
+              </a>
+            )}
           </div>
         );
       })}
@@ -87,6 +130,23 @@ export default function MisMentoriasList({ mentorias, cuentaId }: Props) {
         <p className="px-5 py-8 text-center text-sm text-muted">
           Todavía no te has unido a ninguna mentoría.
         </p>
+      )}
+
+      {grabacionAbierta && (
+        <GrabacionMentoriaModal
+          isOpen={!!grabacionAbierta}
+          onClose={() => setGrabacionAbierta(null)}
+          tema={grabacionAbierta.tema}
+        />
+      )}
+
+      {preguntasAbiertas && (
+        <PreguntasMentoriaModal
+          isOpen={!!preguntasAbiertas}
+          onClose={() => setPreguntasAbiertas(null)}
+          sesion={mentorias.find((m) => m.id === preguntasAbiertas.id) ?? preguntasAbiertas}
+          usuarioId={usuarioId}
+        />
       )}
     </div>
   );

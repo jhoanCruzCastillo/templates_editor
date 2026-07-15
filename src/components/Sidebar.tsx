@@ -32,7 +32,7 @@ export default function Sidebar({ hidden = false, onHide }: Props) {
 
   const base = esCliente ? clienteNavItems : navItems;
   const items = sesion && puedeAccederGestionUsuarios(sesion.rol)
-    ? [...base, { to: '/usuarios', label: 'Usuarios y roles', icon: faUserGear }]
+    ? [...base, { to: '/usuarios', label: 'Usuarios y permisos', icon: faUserGear }]
     : base;
 
   return (
